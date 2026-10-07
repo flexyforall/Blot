@@ -1,0 +1,9 @@
+Laura: canvas 1312x1199
+Torso: placed, 138 inliers, scale 0.78, rot -0.2°
+Hands_Clasped: placed, 25 inliers, scale 0.91, rot -8.9°
+Hair_Back: placed, 20 inliers, scale 0.81, rot -1.0°
+Head: placed, 26 inliers, scale 0.84, rot -0.8°
+Cut from Full: ArmL, ArmR
+HandR_Open: alternative for Hands_Clasped, hidden
+HandR_Tapping: alternative for Hands_Clasped, hidden
+HandL_HairTouch: alternative for Hands_Clasped, hidden

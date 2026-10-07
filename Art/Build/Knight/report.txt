@@ -1,0 +1,8 @@
+Knight: canvas 1536x1024
+Torso: placed, 74 inliers, scale 0.94, rot -0.4°
+Gauntlets_Clasped: placed, 53 inliers, scale 1.11, rot +0.7°
+Helmet: placed, 22 inliers, scale 0.38, rot +1.1°
+Cut from Full: ArmL, ArmR
+GauntletR_Drum: alternative for Gauntlets_Clasped, hidden
+GauntletR_Flat: alternative for Gauntlets_Clasped, hidden
+GauntletL_Flat: alternative for Gauntlets_Clasped, hidden

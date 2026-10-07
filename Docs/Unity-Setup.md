@@ -49,7 +49,11 @@
 
 ## 5. Анимации персонажа
 
-1. Положите `Marco.psb` в `Assets/Art/Characters/`. В инспекторе импорта: Character Rig включён.
+1. Готовые `Marco.psd`, `Laura.psd`, `Knight.psd` уже лежат в `Assets/Art/Characters/`
+   (собраны скриптом `Tools/assemble_character.py`). Выберите файл, в инспекторе в выпадающем
+   списке импортёра выберите **PSD Importer** (для `.psd` Unity по умолчанию берёт обычный
+   Texture Importer), включите **Character Rig** и **Use Layer Grouping** выключите.
+   Скрытые слои (`HandL_Cyber_FingersUp` и т.п.) — запасные кисти для жестов.
 2. Откройте **Skinning Editor** и поставьте кости: торс, шея и голова, каждая рука
    (плечо, предплечье, кисть). Привяжите слои к костям (Auto Geometry → Auto Weights).
 3. Запасные кисти (`HandR_Scratch`, `HandL_Cyber_FingersUp`...) поставьте через
