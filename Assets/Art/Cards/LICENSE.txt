@@ -1,0 +1,5 @@
+Card faces (all files except Back.png): Vectorized Playing Cards 1.3,
+Copyright 2011 Chris Aguilar, licensed under the GNU LGPL v3 or later.
+http://code.google.com/p/vectorized-playing-cards/
+
+Back.png: original design for Bazaar Blot.

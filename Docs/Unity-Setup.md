@@ -105,3 +105,25 @@
   лицензия CC0). Spatial Blend 0, громкость около 0.4.
 - Карты: 3–4 варианта щелчка, скрипт сам меняет высоту тона.
 - Всё сведите через Audio Mixer: группы `Ambience`, `Cards`, `UI`.
+
+## 9. Готовые ассеты
+
+Всё ниже уже лежит в репозитории, генерировать в ChatGPT не нужно.
+
+| Путь | Что | Куда подключить |
+|---|---|---|
+| `Assets/Art/FX/Smoke.png` | клуб дыма | Particle System дыма сигары: Renderer → Material с этой текстурой (шейдер `Sprites/Default` или `Universal Render Pipeline/2D/Sprite-Unlit-Default`) |
+| `Assets/Art/FX/Sparkle.png` | искра-звёздочка | Particle System появления игрока (`appearSparkles`) |
+| `Assets/Art/FX/Ember.png` | уголёк | искры над камином |
+| `Assets/Art/FX/Glow.png` | мягкое свечение | огонёк сигары, ореол вокруг кибер-глаза (спрайт с аддитивным материалом) |
+| `Assets/Art/Cards/*.png` | 32 карты (7–туз) + `Back.png` | `CardDealer.faces` в порядке ♠ ♥ ♣ ♦, внутри масти 07, 08, 09, 10, Jack, Queen, King, Ace; `CardDealer.back` = `Back.png` |
+| `Assets/Audio/CardFlick_1..4.wav` | щелчок карты | `CardDealer.flicks` |
+| `Assets/Audio/CardShuffle.wav` | тасовка | проиграть в начале `CardDealer.Shuffle` |
+| `Assets/Audio/PlayerJoin.wav` | звон при входе игрока | в `SeatController.Join` |
+| `Assets/Audio/Fireplace_Loop.wav` | камин, 20 с, бесшовная петля | AudioSource на камине, Loop включён |
+
+Звуки синтезированы, они годятся для прототипа. Для релиза камин лучше заменить настоящей записью.
+Лицевые стороны карт — набор Vectorized Playing Cards (LGPL), см. `Assets/Art/Cards/LICENSE.txt`.
+
+Импорт карт: Texture Type = Sprite (2D and UI), Pixels Per Unit подберите так, чтобы карта
+на столе была нужного размера (для фона 2000 px шириной примерно 450).
