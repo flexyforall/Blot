@@ -37,16 +37,18 @@ body{background:var(--bg);color:var(--fg);font-family:var(--ui);display:flex;fle
 .phone .k4{bottom:-3px;left:24%;width:11%;height:4px}
 .island{position:absolute;left:1.4%;top:50%;transform:translateY(-50%);width:2.6%;height:27%;background:#000;border-radius:999px;pointer-events:none;z-index:5}
 .homebar{position:absolute;left:50%;bottom:2.2%;transform:translateX(-50%);width:28%;height:.9%;min-height:3px;background:rgba(255,255,255,.75);border-radius:999px;pointer-events:none;z-index:5}
-.topbar{position:absolute;left:5.5%;right:15%;top:3.2%;display:flex;align-items:center;gap:1em;pointer-events:none}
+.topbar{position:absolute;left:calc(4% + var(--m));right:15%;top:var(--m);display:flex;align-items:center;gap:1em;pointer-events:none}
 .topbar .ctrls{display:flex;gap:.4em;pointer-events:auto}
 .phase{font-family:var(--serif);font-size:1.05em;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:2em;padding:.3em 1em;white-space:nowrap}
 .phase b{color:var(--gold);font-weight:400}
-.stage{position:relative;width:100%;aspect-ratio:2000/923;border-radius:calc(var(--pw) * .05);overflow:hidden;background:#000;font-size:var(--u,12px)}
+.stage{--m:calc(var(--u,12px) * 2.2);position:relative;width:100%;aspect-ratio:2000/923;border-radius:calc(var(--pw) * .05);overflow:hidden;background:#000;font-size:var(--u,12px)}
 .stage .btn{font-size:.78em;padding:.4em .9em;background:var(--panel);backdrop-filter:blur(4px)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hud{position:absolute;inset:0;pointer-events:none}
 .plate{position:absolute;transform:translate(-50%,-50%) scale(.9);opacity:0;transition:opacity .4s, transform .5s cubic-bezier(.2,1.6,.4,1);display:flex;align-items:center;gap:.6em;background:var(--panel);border:1px solid var(--line);border-radius:3em;padding:.35em 1.1em .35em .35em;white-space:nowrap;backdrop-filter:blur(4px)}
 .plate.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.plate.at-bottom{top:auto!important;bottom:var(--m);transform:translate(-50%,0) scale(.9)}
+.plate.at-bottom.on{transform:translate(-50%,0) scale(1)}
 .plate .av{width:3.2em;height:3.2em;border-radius:50%;border:2px solid var(--gold);background:#2a1a10 center/cover;flex:none}
 .plate.them .av{border-color:var(--them)}
 .plate .nm{font-family:var(--serif);font-size:1.15em;line-height:1.1}
@@ -61,7 +63,10 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bubble{position:absolute;transform:translate(-50%,-100%) scale(.6);transform-origin:50% 100%;opacity:0;transition:opacity .25s, transform .35s cubic-bezier(.2,1.6,.4,1);background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:1.15em;padding:.55em .95em;border-radius:1em;white-space:nowrap;box-shadow:0 .4em 1.2em rgba(0,0,0,.45)}
 .bubble::after{content:"";position:absolute;left:50%;bottom:-.45em;width:.9em;height:.9em;background:var(--paper);transform:translateX(-50%) rotate(45deg)}
 .bubble.on{opacity:1;transform:translate(-50%,-100%) scale(1)}
-.score{position:absolute;right:4%;top:3.2%;display:flex;gap:1em;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:.8em;padding:.5em 1em;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
+.bubble.left{transform:translate(-100%,-50%) scale(.6);transform-origin:100% 50%}
+.bubble.left.on{transform:translate(-100%,-50%) scale(1)}
+.bubble.left::after{left:auto;right:-.45em;bottom:auto;top:50%;transform:translateY(-50%) rotate(45deg)}
+.score{position:absolute;right:var(--m);top:var(--m);display:flex;gap:1em;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:.8em;padding:.5em 1em;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
 .score.on{opacity:1}
 .score .t{display:flex;flex-direction:column;align-items:center;line-height:1.1}
 .score .t span{font-size:.75em;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
@@ -137,18 +142,18 @@ const SEATS = {
             acts: ['lookAround', 'drum', 'stretch'],
             video: { src: ['knight.webm', 'knight.mp4'], rect: [680, 563, 640, 360] } },
   left:   { name: 'Лаура', avatar: 'av_laura.webp', rating: 1975, team: 'them', crop: [130, 355, 380, 360], pivot: [330, 640], face: [300, 445, 66],
-            pile: [592, 525], pileRot: Math.PI / 2, plate: [300, 772], bubble: [330, 352], say: 'Добрый вечер, господа', greet: 'lean',
+            pile: [592, 525], pileRot: Math.PI / 2, plate: [300, 772], bubble: [330, 352], say: 'Добрый вечер, господа', lines: ['Мне сегодня везёт.', 'Дон, вы опять блефуете?', 'Не спешите, ковбой.'], greet: 'lean',
             parts: { head: { r: [200, 362, 195, 165], p: [355, 525] }, hands: { r: [410, 488, 80, 100], p: [400, 540] } },
             acts: ['tilt', 'tap', 'glance'],
             video: { src: ['laura.webm', 'laura.mp4'], rect: [0, 345, 676, 380] } },
   top:    { name: 'Дон Марко', avatar: 'av_marco.webp', rating: 2310, team: 'us', crop: [790, 15, 410, 290], pivot: [995, 300], face: [965, 100, 56],
-            pile: [1000, 383], pileRot: Math.PI, plate: [1335, 150], bubble: [700, 150], say: 'Добро пожаловать за мой стол', greet: 'nod',
+            pile: [1000, 383], pileRot: Math.PI, plate: [1335, 150], bubble: [835, 128], bubbleSide: 'left', say: 'Добро пожаловать за мой стол', lines: ['Ставки сделаны, господа.', 'Не торопитесь. Ночь длинная.', 'Карты не лгут. Люди — да.'], greet: 'nod',
             parts: { head: { r: [935, 8, 130, 155], p: [995, 165] }, cigar: { r: [875, 120, 125, 100], p: [890, 215] }, claw: { r: [980, 250, 100, 58], p: [1030, 300] } },
             acts: ['puff', 'puff', 'claw'],
             // AI video loop of this seat (Higgsfield, 16:9). Used instead of the cut-out when the file loads.
             video: { src: ['marco.webm', 'marco.mp4'], rect: [675, 0, 640, 360] } },
   right:  { name: 'Билли Ривз', avatar: 'av_billy.webp', rating: 1690, team: 'them', crop: [1525, 325, 420, 410], pivot: [1720, 650], face: [1790, 452, 85],
-            pile: [1408, 525], pileRot: -Math.PI / 2, plate: [1735, 785], bubble: [1730, 318], say: 'Хау! Сдавай, Марко', greet: 'tip',
+            pile: [1408, 525], pileRot: -Math.PI / 2, plate: [1735, 785], bubble: [1730, 318], say: 'Хау! Сдавай, Марко', lines: ['Ну что, сыграем по-крупному?', 'Эта взятка моя, ставлю шляпу.', 'Сдавай быстрее, Марко.'], greet: 'tip',
             parts: { hat: { r: [1690, 335, 205, 160], p: [1795, 445] }, hands: { r: [1540, 520, 100, 105], p: [1600, 600] } },
             acts: ['scratch', 'hat', 'scratch', 'lean'],
             video: { src: ['billy.webm', 'billy.mp4'], rect: [1289, 330, 711, 400] } },
@@ -164,13 +169,7 @@ for (const id in SEATS) {
   s.vid = v;
   const [, , rw, rh] = s.video.rect, k = 2;
   s.vidCanvas = document.createElement('canvas'); s.vidCanvas.width = rw * k; s.vidCanvas.height = rh * k;
-  const m = document.createElement('canvas'); m.width = rw * k; m.height = rh * k;
-  const g = m.getContext('2d');
-  g.translate(m.width / 2, m.height / 2); g.scale(m.width / 2, m.height / 2);
-  const gr = g.createRadialGradient(0, 0, 0, 0, 0, 1);
-  gr.addColorStop(0, '#000'); gr.addColorStop(.72, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)');
-  g.fillStyle = gr; g.fillRect(-1, -1, 2, 2);
-  s.vidMask = m;
+  s.vidMask = new Image(); s.vidMask.src = 'mask_' + s.video.src[0].split('.')[0] + '.png';   // character silhouette, soft edge
 }
 const JOIN_ORDER = ['bottom', 'left', 'top', 'right'];
 const DEAL_ORDER = ['left', 'bottom', 'right', 'top'];   // counter-clockwise, starting to the dealer's right
@@ -352,7 +351,8 @@ for (const id in SEATS) {
   s.plateEl.className = 'plate ' + s.team;
   s.plateEl.innerHTML = `<div class="av"></div><div><div class="nm">${s.name}<span class="deal">СДАЁТ</span></div><div class="st"><span class="dot"></span><span class="tx"></span></div></div>`;
   pct(...s.plate, s.plateEl); hud.appendChild(s.plateEl);
-  s.bubbleEl = document.createElement('div'); s.bubbleEl.className = 'bubble'; s.bubbleEl.textContent = s.say;
+  s.bubbleEl = document.createElement('div'); s.bubbleEl.className = 'bubble' + (s.bubbleSide ? ' ' + s.bubbleSide : ''); s.bubbleEl.textContent = s.say;
+  if (id === 'bottom') s.plateEl.classList.add('at-bottom');
   pct(...s.bubble, s.bubbleEl); hud.appendChild(s.bubbleEl);
 }
 function plateState(s, st) {
@@ -370,6 +370,19 @@ new ResizeObserver(() => {
 
 // ---------- Scene state ----------
 const S = { black: 1, amb: .55, lamps: 0, table: .35 };
+const CHAT_EVERY = 15;   // seconds between table-talk lines
+let chat = { on: false, next: 0, lastSeat: null };
+function talk() {
+  const ids = Object.keys(SEATS).filter(id => SEATS[id].lines && SEATS[id].idle && id !== chat.lastSeat);
+  if (!ids.length) return;
+  const s = SEATS[ids[Math.random() * ids.length | 0]];
+  const pool = s.lines.filter(l => l !== s.lastLine);
+  s.lastLine = pool[Math.random() * pool.length | 0];
+  chat.lastSeat = Object.keys(SEATS).find(id => SEATS[id] === s);
+  s.bubbleEl.textContent = s.lastLine;
+  s.bubbleEl.classList.add('on');
+  setTimeout(() => s.bubbleEl.classList.remove('on'), 3200);
+}
 let cards = [], particles = [];
 const shade = document.createElement('canvas'); shade.width = W / 4; shade.height = Math.ceil(H / 4);
 const sh = shade.getContext('2d');
@@ -378,6 +391,7 @@ function resetPose(s) {
   for (const k in s.parts) Object.assign(s.parts[k], { rot: 0, dx: 0, dy: 0 });
 }
 function resetState() {
+  chat = { on: false, next: 0, lastSeat: null };
   Object.assign(S, { black: 1, amb: .55, lamps: 0, table: .35 });
   for (const id in SEATS) { const s = SEATS[id]; Object.assign(s, { light: 0, idle: false, ring: 0, next: 0 }); resetPose(s); }
   cards = []; particles = [];
@@ -453,6 +467,7 @@ async function join(id, my) {
   sparkle(s.face[0], s.face[1]);
   s.sc = .95; await tween(s, { sc: 1.03 }, .22); if (my !== run) return;
   await tween(s, { sc: 1 }, .18); if (my !== run) return;
+  s.bubbleEl.textContent = s.say;
   s.bubbleEl.classList.add('on');
   if (id === 'top') smoke(CIGAR_TIP[0], CIGAR_TIP[1], 8);
   await anim(1.4, p => { if (!s.vidReady) GREET[s.greet](s, p); }); if (my !== run) return;
@@ -485,6 +500,7 @@ async function play() {
   await wait(1.4); if (!ok()) return;
 
   setPhase('Все за столом');
+  chat.on = true; chat.next = clock + CHAT_EVERY;
   tween(S, { amb: .14, lamps: 1 }, 1.4);
   document.getElementById('score').classList.add('on');
   await wait(.9); if (!ok()) return;
@@ -573,8 +589,8 @@ function drawSeat(s) {
     const [rx, ry, rw, rh] = s.video.rect, vc = s.vidCanvas, g = vc.getContext('2d');
     g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, vc.width, vc.height);
     g.drawImage(s.vid, 0, 0, vc.width, vc.height);
-    g.globalCompositeOperation = 'destination-in'; g.drawImage(s.vidMask, 0, 0);
-    ctx.save(); ctx.globalAlpha = Math.min(1, s.light * 1.15);
+    g.globalCompositeOperation = 'destination-in'; g.drawImage(s.vidMask, 0, 0, vc.width, vc.height);
+    ctx.save(); ctx.globalAlpha = Math.min(1, s.light);
     ctx.drawImage(vc, rx, ry, rw, rh); ctx.restore();
     return;
   }
@@ -667,6 +683,7 @@ function frame(now) {
     }
   }
 
+  if (chat.on && clock > chat.next) { talk(); chat.next = clock + CHAT_EVERY; }
   if (S.black > 0) { ctx.fillStyle = `rgba(0,0,0,${S.black})`; ctx.fillRect(0, 0, W, H); }
   requestAnimationFrame(frame);
 }
