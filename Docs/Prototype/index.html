@@ -143,7 +143,8 @@ const PACKETS = [3, 2, 3];
 const CIGAR_TIP = [957, 180], MOUTH = [990, 147], CYBER_EYE = [1010, 100];
 
 // ---------- Assets ----------
-const img = new Image(); img.src = 'scene.webp';
+const img = new Image(); img.src = 'scene.webp';      // characters are cut from this
+const room = new Image(); room.src = 'room.webp';     // same room with empty chairs
 const atlas = new Image(); atlas.src = 'cards.webp';   // classic standard deck, 7–A, 240×336 cells
 let cardBack, cardFaces = {};
 
@@ -333,7 +334,7 @@ new ResizeObserver(() => {
 }).observe(stage);
 
 // ---------- Scene state ----------
-const S = { black: 1, amb: .8, lamps: 0, table: .35 };
+const S = { black: 1, amb: .55, lamps: 0, table: .35 };
 let cards = [], particles = [];
 const shade = document.createElement('canvas'); shade.width = W / 4; shade.height = Math.ceil(H / 4);
 const sh = shade.getContext('2d');
@@ -342,7 +343,7 @@ function resetPose(s) {
   for (const k in s.parts) Object.assign(s.parts[k], { rot: 0, dx: 0, dy: 0 });
 }
 function resetState() {
-  Object.assign(S, { black: 1, amb: .8, lamps: 0, table: .35 });
+  Object.assign(S, { black: 1, amb: .55, lamps: 0, table: .35 });
   for (const id in SEATS) { const s = SEATS[id]; Object.assign(s, { light: 0, idle: false, ring: 0, next: 0 }); resetPose(s); }
   cards = []; particles = [];
   for (const id in SEATS) { plateState(SEATS[id], null); SEATS[id].bubbleEl.classList.remove('on'); }
@@ -412,7 +413,7 @@ async function join(id, my) {
   await wait(.55); if (my !== run) return;
   chime(); plateState(s, 'seated');
   s.ring = 0; tween(s, { ring: 1 }, .9, { ease: ease.lin });
-  tween(s, { light: 1 }, .7);
+  tween(s, { light: 1 }, .55);
   sparkle(s.face[0], s.face[1]);
   s.sc = .95; await tween(s, { sc: 1.03 }, .22); if (my !== run) return;
   await tween(s, { sc: 1 }, .18); if (my !== run) return;
@@ -531,7 +532,9 @@ function drawSeat(s) {
   const [cx, cy] = s.crop, [px, py] = s.pivot;
   let sc = s.sc;
   if (s.idle) sc *= 1 + .005 * Math.sin(clock * 1.7 + px);
+  if (s.light <= 0) return;
   ctx.save();
+  ctx.globalAlpha = Math.min(1, s.light * 1.15);
   ctx.translate(px + s.dx, py + s.dy); ctx.rotate(s.rot); ctx.scale(sc, sc); ctx.translate(-px, -py);
   ctx.drawImage(s.sprite, cx, cy);
   for (const k in s.parts) {
@@ -548,7 +551,7 @@ function frame(now) {
   stepTweens(dt);
   ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
   ctx.clearRect(0, 0, W, H);
-  if (img.complete && img.naturalWidth) ctx.drawImage(img, 0, 0, W, H);
+  if (room.complete && room.naturalWidth) ctx.drawImage(room, 0, 0, W, H);
 
   for (const id in SEATS) {
     const s = SEATS[id];
@@ -630,7 +633,7 @@ function glow(x, y, r, col) {
 
 // ---------- Boot ----------
 async function boot() {
-  await Promise.all([img.decode().catch(() => {}), atlas.decode().catch(() => {})]);
+  await Promise.all([img.decode().catch(() => {}), room.decode().catch(() => {}), atlas.decode().catch(() => {})]);
   for (const id in SEATS) {
     const s = SEATS[id];
     s.sprite = feathered(s.crop);
