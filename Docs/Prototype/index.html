@@ -131,12 +131,32 @@ const SEATS = {
   top:    { name: 'Дон Марко', rating: 2310, team: 'us', crop: [790, 15, 410, 290], pivot: [995, 300], face: [965, 100, 56],
             pile: [1000, 383], pileRot: Math.PI, plate: [1335, 150], bubble: [700, 150], say: 'Добро пожаловать за мой стол', greet: 'nod',
             parts: { head: { r: [935, 8, 130, 155], p: [995, 165] }, cigar: { r: [875, 120, 125, 100], p: [890, 215] }, claw: { r: [980, 250, 100, 58], p: [1030, 300] } },
-            acts: ['puff', 'puff', 'claw'] },
+            acts: ['puff', 'puff', 'claw'],
+            // AI video loop of this seat (Higgsfield, 16:9). Used instead of the cut-out when the file loads.
+            video: { src: 'marco.mp4', rect: [675, 0, 640, 360] } },
   right:  { name: 'Билли Ривз', rating: 1690, team: 'them', crop: [1525, 325, 420, 410], pivot: [1720, 650], face: [1790, 452, 85],
             pile: [1408, 525], pileRot: -Math.PI / 2, plate: [1735, 785], bubble: [1730, 318], say: 'Хау! Сдавай, Марко', greet: 'tip',
             parts: { hat: { r: [1690, 335, 205, 160], p: [1795, 445] }, hands: { r: [1540, 520, 100, 105], p: [1600, 600] } },
             acts: ['scratch', 'hat', 'scratch', 'lean'] },
 };
+// Seat videos: drawn through a soft oval mask so they blend into the empty room.
+for (const id in SEATS) {
+  const s = SEATS[id];
+  if (!s.video) continue;
+  const v = document.createElement('video');
+  Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto', src: s.video.src });
+  v.addEventListener('canplay', () => { s.vidReady = true; }, { once: true });
+  s.vid = v;
+  const [, , rw, rh] = s.video.rect, k = 2;
+  s.vidCanvas = document.createElement('canvas'); s.vidCanvas.width = rw * k; s.vidCanvas.height = rh * k;
+  const m = document.createElement('canvas'); m.width = rw * k; m.height = rh * k;
+  const g = m.getContext('2d');
+  g.translate(m.width / 2, m.height / 2); g.scale(m.width / 2, m.height / 2);
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+  gr.addColorStop(0, '#000'); gr.addColorStop(.72, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(-1, -1, 2, 2);
+  s.vidMask = m;
+}
 const JOIN_ORDER = ['bottom', 'left', 'top', 'right'];
 const DEAL_ORDER = ['left', 'bottom', 'right', 'top'];   // counter-clockwise, starting to the dealer's right
 const PACKETS = [3, 2, 3];
@@ -412,6 +432,7 @@ async function join(id, my) {
   plateState(s, 'connecting');
   await wait(.55); if (my !== run) return;
   chime(); plateState(s, 'seated');
+  if (s.vid) { try { s.vid.currentTime = 0; s.vid.play().catch(() => {}); } catch (e) {} }
   s.ring = 0; tween(s, { ring: 1 }, .9, { ease: ease.lin });
   tween(s, { light: 1 }, .55);
   sparkle(s.face[0], s.face[1]);
@@ -419,7 +440,7 @@ async function join(id, my) {
   await tween(s, { sc: 1 }, .18); if (my !== run) return;
   s.bubbleEl.classList.add('on');
   if (id === 'top') smoke(CIGAR_TIP[0], CIGAR_TIP[1], 8);
-  await anim(1.4, p => GREET[s.greet](s, p)); if (my !== run) return;
+  await anim(1.4, p => { if (!s.vidReady) GREET[s.greet](s, p); }); if (my !== run) return;
   resetPose(s); s.idle = true; s.next = clock + 1.5 + Math.random() * 3;
   setTimeout(() => s.bubbleEl.classList.remove('on'), 900 / speed);
 }
@@ -533,6 +554,15 @@ function drawSeat(s) {
   let sc = s.sc;
   if (s.idle) sc *= 1 + .005 * Math.sin(clock * 1.7 + px);
   if (s.light <= 0) return;
+  if (s.vidReady) {
+    const [rx, ry, rw, rh] = s.video.rect, vc = s.vidCanvas, g = vc.getContext('2d');
+    g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, vc.width, vc.height);
+    g.drawImage(s.vid, 0, 0, vc.width, vc.height);
+    g.globalCompositeOperation = 'destination-in'; g.drawImage(s.vidMask, 0, 0);
+    ctx.save(); ctx.globalAlpha = Math.min(1, s.light * 1.15);
+    ctx.drawImage(vc, rx, ry, rw, rh); ctx.restore();
+    return;
+  }
   ctx.save();
   ctx.globalAlpha = Math.min(1, s.light * 1.15);
   ctx.translate(px + s.dx, py + s.dy); ctx.rotate(s.rot); ctx.scale(sc, sc); ctx.translate(-px, -py);
@@ -555,7 +585,7 @@ function frame(now) {
 
   for (const id in SEATS) {
     const s = SEATS[id];
-    if (s.idle && !s.busy && clock > s.next && s.acts) act(s, s.acts[Math.random() * s.acts.length | 0]);
+    if (s.idle && !s.busy && !s.vidReady && clock > s.next && s.acts) act(s, s.acts[Math.random() * s.acts.length | 0]);
     if (s.sprite) drawSeat(s);
   }
 
@@ -593,7 +623,7 @@ function frame(now) {
     }
   }
   const top = SEATS.top;
-  if (top.light > 0) {
+  if (top.light > 0 && !top.vidReady) {
     const c = top.parts.cigar, ex = CIGAR_TIP[0] + c.dx, ey = CIGAR_TIP[1] + c.dy;
     glow(ex, ey, 10 + 18 * top.glow, `rgba(255,${120 + 40 * top.glow},40,${.35 + .55 * top.glow + .08 * Math.sin(clock * 13)})`);
     const h = top.parts.head;
@@ -603,7 +633,7 @@ function frame(now) {
 
   cards.sort((a, b) => a.z - b.z).forEach(c => c.draw());
 
-  if (top.idle && clock > nextSmoke) { const c = top.parts.cigar; smoke(CIGAR_TIP[0] + c.dx, CIGAR_TIP[1] + c.dy, 3); nextSmoke = clock + 1.2 + Math.random(); }
+  if (top.idle && !top.vidReady && clock > nextSmoke) { const c = top.parts.cigar; smoke(CIGAR_TIP[0] + c.dx, CIGAR_TIP[1] + c.dy, 3); nextSmoke = clock + 1.2 + Math.random(); }
   const ds = dt / 1000;
   particles = particles.filter(p => (p.life += ds) < p.max);
   for (const p of particles) {
