@@ -133,7 +133,7 @@ const SEATS = {
             parts: { head: { r: [935, 8, 130, 155], p: [995, 165] }, cigar: { r: [875, 120, 125, 100], p: [890, 215] }, claw: { r: [980, 250, 100, 58], p: [1030, 300] } },
             acts: ['puff', 'puff', 'claw'],
             // AI video loop of this seat (Higgsfield, 16:9). Used instead of the cut-out when the file loads.
-            video: { src: 'marco.mp4', rect: [675, 0, 640, 360] } },
+            video: { src: ['marco.webm', 'marco.mp4'], rect: [675, 0, 640, 360] } },
   right:  { name: 'Билли Ривз', rating: 1690, team: 'them', crop: [1525, 325, 420, 410], pivot: [1720, 650], face: [1790, 452, 85],
             pile: [1408, 525], pileRot: -Math.PI / 2, plate: [1735, 785], bubble: [1730, 318], say: 'Хау! Сдавай, Марко', greet: 'tip',
             parts: { hat: { r: [1690, 335, 205, 160], p: [1795, 445] }, hands: { r: [1540, 520, 100, 105], p: [1600, 600] } },
@@ -144,7 +144,8 @@ for (const id in SEATS) {
   const s = SEATS[id];
   if (!s.video) continue;
   const v = document.createElement('video');
-  Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto', src: s.video.src });
+  Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto' });
+  v.src = s.video.src.find(f => v.canPlayType(f.endsWith('.webm') ? 'video/webm; codecs="vp9"' : 'video/mp4')) || s.video.src[1];
   v.addEventListener('canplay', () => { s.vidReady = true; }, { once: true });
   s.vid = v;
   const [, , rw, rh] = s.video.rect, k = 2;
