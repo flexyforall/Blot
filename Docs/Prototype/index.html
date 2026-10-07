@@ -163,7 +163,8 @@ for (const id in SEATS) {
   const s = SEATS[id];
   if (!s.video) continue;
   const v = document.createElement('video');
-  Object.assign(v, { muted: true, loop: true, playsInline: true, preload: 'auto' });
+  Object.assign(v, { muted: true, loop: false, playsInline: true, preload: 'auto' });
+  v.addEventListener('ended', () => { s.moving = false; try { v.currentTime = 0; } catch (e) {} });
   v.src = s.video.src.find(f => v.canPlayType(f.endsWith('.webm') ? 'video/webm; codecs="vp9"' : 'video/mp4')) || s.video.src[1];
   v.addEventListener('canplay', () => { s.vidReady = true; }, { once: true });
   s.vid = v;
@@ -372,6 +373,20 @@ new ResizeObserver(() => {
 const S = { black: 1, amb: .55, lamps: 0, table: .35 };
 const CHAT_EVERY = 15;   // seconds between table-talk lines
 let chat = { on: false, next: 0, lastSeat: null };
+const MOVE_EVERY = 15;   // seconds between one character's gesture and the next one's
+let moves = { on: false, next: 0, last: null };
+function moveSomeone() {
+  const ids = Object.keys(SEATS).filter(id => SEATS[id].idle && !SEATS[id].moving && !SEATS[id].busy && id !== moves.last);
+  if (!ids.length) return;
+  const id = ids[Math.random() * ids.length | 0], s = SEATS[id];
+  moves.last = id;
+  if (s.vidReady) {
+    s.moving = true;
+    try { s.vid.currentTime = 0; s.vid.play().catch(() => { s.moving = false; }); } catch (e) { s.moving = false; }
+  } else if (s.acts) {
+    act(s, s.acts[Math.random() * s.acts.length | 0]);
+  }
+}
 function talk() {
   const ids = Object.keys(SEATS).filter(id => SEATS[id].lines && SEATS[id].idle && id !== chat.lastSeat);
   if (!ids.length) return;
@@ -392,6 +407,8 @@ function resetPose(s) {
 }
 function resetState() {
   chat = { on: false, next: 0, lastSeat: null };
+  moves = { on: false, next: 0, last: null };
+  for (const id in SEATS) { const s = SEATS[id]; s.moving = false; if (s.vid) { try { s.vid.pause(); s.vid.currentTime = 0; } catch (e) {} } }
   Object.assign(S, { black: 1, amb: .55, lamps: 0, table: .35 });
   for (const id in SEATS) { const s = SEATS[id]; Object.assign(s, { light: 0, idle: false, ring: 0, next: 0 }); resetPose(s); }
   cards = []; particles = [];
@@ -461,7 +478,7 @@ async function join(id, my) {
   plateState(s, 'connecting');
   await wait(.55); if (my !== run) return;
   chime(); plateState(s, 'seated');
-  if (s.vid) { try { s.vid.currentTime = 0; s.vid.play().catch(() => {}); } catch (e) {} }
+  if (s.vid) { try { s.vid.pause(); s.vid.currentTime = 0; } catch (e) {} }
   s.ring = 0; tween(s, { ring: 1 }, .9, { ease: ease.lin });
   tween(s, { light: 1 }, .55);
   sparkle(s.face[0], s.face[1]);
@@ -500,7 +517,8 @@ async function play() {
   await wait(1.4); if (!ok()) return;
 
   setPhase('Все за столом');
-  chat.on = true; chat.next = clock + CHAT_EVERY;
+  moves.on = true; moves.next = clock + 4;
+  chat.on = true; chat.next = clock + 4 + CHAT_EVERY / 2;
   tween(S, { amb: .14, lamps: 1 }, 1.4);
   document.getElementById('score').classList.add('on');
   await wait(.9); if (!ok()) return;
@@ -616,7 +634,6 @@ function frame(now) {
 
   for (const id in SEATS) {
     const s = SEATS[id];
-    if (s.idle && !s.busy && !s.vidReady && clock > s.next && s.acts) act(s, s.acts[Math.random() * s.acts.length | 0]);
     if (s.sprite) drawSeat(s);
   }
 
@@ -683,6 +700,7 @@ function frame(now) {
     }
   }
 
+  if (moves.on && clock > moves.next) { moveSomeone(); moves.next = clock + MOVE_EVERY; }
   if (chat.on && clock > chat.next) { talk(); chat.next = clock + CHAT_EVERY; }
   if (S.black > 0) { ctx.fillStyle = `rgba(0,0,0,${S.black})`; ctx.fillRect(0, 0, W, H); }
   requestAnimationFrame(frame);
