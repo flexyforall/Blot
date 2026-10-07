@@ -23,18 +23,26 @@
 }
 html,body{height:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--ui);display:flex;flex-direction:column;overflow:hidden}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px;padding-inline:16px;flex-wrap:wrap}
-.brand{font-family:var(--display);font-size:18px;letter-spacing:.06em;color:var(--gold-soft);white-space:nowrap}
-.brand small{font-family:var(--ui);font-size:12px;letter-spacing:.02em;color:var(--muted);margin-left:10px}
-.phase{font-family:var(--serif);font-size:15px;color:var(--fg);min-width:0;text-align:center;flex:1}
-.phase b{color:var(--gold);font-weight:400}
-.ctrls{display:flex;gap:8px;flex-wrap:wrap}
 .btn{font:600 12px var(--ui);letter-spacing:.04em;color:var(--fg);background:transparent;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer}
 .btn:hover{border-color:var(--gold);color:var(--gold-soft)}
 .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .btn[aria-pressed="true"]{background:rgba(217,164,65,.16);border-color:var(--gold)}
-.wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding-inline:16px;padding-block:0 12px}
-.stage{position:relative;width:min(100%, calc((100dvh - 80px) * 2000 / 923));aspect-ratio:2000/923;max-width:100%;border-radius:10px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6);font-size:var(--u,12px)}
+.wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding-inline:16px;padding-block:16px;background:radial-gradient(ellipse at 50% 40%, #2a1a12, var(--bg) 70%)}
+/* iPhone in landscape: the screen is 19.5:9, the same shape as the 2000×923 scene */
+.phone{--pw:min(100vw - 32px, calc((100dvh - 40px) * 2.105));position:relative;width:var(--pw);padding:calc(var(--pw) * .0125);border-radius:calc(var(--pw) * .062);background:linear-gradient(145deg,#3b3a3f,#141416 45%,#2b2a2e);box-shadow:0 0 0 calc(var(--pw) * .0016) #6c6a70, inset 0 0 0 calc(var(--pw) * .0035) #050505, 0 30px 80px rgba(0,0,0,.7)}
+.phone .key{position:absolute;background:#2c2b30;border-radius:2px}
+.phone .k1{top:-3px;left:16%;width:5%;height:4px}
+.phone .k2{top:-3px;left:23%;width:7%;height:4px}
+.phone .k3{top:-3px;left:31.5%;width:7%;height:4px}
+.phone .k4{bottom:-3px;left:24%;width:11%;height:4px}
+.island{position:absolute;left:1.4%;top:50%;transform:translateY(-50%);width:2.6%;height:27%;background:#000;border-radius:999px;pointer-events:none;z-index:5}
+.homebar{position:absolute;left:50%;bottom:2.2%;transform:translateX(-50%);width:28%;height:.9%;min-height:3px;background:rgba(255,255,255,.75);border-radius:999px;pointer-events:none;z-index:5}
+.topbar{position:absolute;left:5.5%;right:15%;top:3.2%;display:flex;align-items:center;gap:1em;pointer-events:none}
+.topbar .ctrls{display:flex;gap:.4em;pointer-events:auto}
+.phase{font-family:var(--serif);font-size:1.05em;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:2em;padding:.3em 1em;white-space:nowrap}
+.phase b{color:var(--gold);font-weight:400}
+.stage{position:relative;width:100%;aspect-ratio:2000/923;border-radius:calc(var(--pw) * .05);overflow:hidden;background:#000;font-size:var(--u,12px)}
+.stage .btn{font-size:.78em;padding:.4em .9em;background:var(--panel);backdrop-filter:blur(4px)}
 canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .hud{position:absolute;inset:0;pointer-events:none}
 .plate{position:absolute;transform:translate(-50%,-50%) scale(.9);opacity:0;transition:opacity .4s, transform .5s cubic-bezier(.2,1.6,.4,1);display:flex;align-items:center;gap:.6em;background:var(--panel);border:1px solid var(--line);border-radius:3em;padding:.35em 1.1em .35em .35em;white-space:nowrap;backdrop-filter:blur(4px)}
@@ -53,7 +61,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .bubble{position:absolute;transform:translate(-50%,-100%) scale(.6);transform-origin:50% 100%;opacity:0;transition:opacity .25s, transform .35s cubic-bezier(.2,1.6,.4,1);background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:1.15em;padding:.55em .95em;border-radius:1em;white-space:nowrap;box-shadow:0 .4em 1.2em rgba(0,0,0,.45)}
 .bubble::after{content:"";position:absolute;left:50%;bottom:-.45em;width:.9em;height:.9em;background:var(--paper);transform:translateX(-50%) rotate(45deg)}
 .bubble.on{opacity:1;transform:translate(-50%,-100%) scale(1)}
-.score{position:absolute;right:1.4em;top:1.2em;display:flex;gap:1em;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:.8em;padding:.5em 1em;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
+.score{position:absolute;right:4%;top:3.2%;display:flex;gap:1em;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:.8em;padding:.5em 1em;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .6s}
 .score.on{opacity:1}
 .score .t{display:flex;flex-direction:column;align-items:center;line-height:1.1}
 .score .t span{font-size:.75em;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
@@ -74,22 +82,22 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .open:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
 .rotate{display:none;text-align:center;color:var(--muted);font-size:13px;padding-inline:16px;padding-block:0 12px}
 @media (orientation:portrait) and (max-width:700px){.rotate{display:block}}
-@media (max-width:640px){.brand small{display:none}.phase{order:3;flex-basis:100%}}
 </style>
 
-<div class="bar">
-  <div class="brand">Bazaar Blot<small>Салон у камина · ставка 500</small></div>
-  <div class="phase" id="phase" aria-live="polite">Стол закрыт</div>
-  <div class="ctrls">
-    <button class="btn" id="spd" type="button">Скорость 1×</button>
-    <button class="btn" id="snd" type="button" aria-pressed="true">Звук вкл</button>
-    <button class="btn" id="again" type="button">Заново</button>
-  </div>
-</div>
 <div class="wrap">
+  <div class="phone" aria-label="iPhone, горизонтально">
+  <span class="key k1"></span><span class="key k2"></span><span class="key k3"></span><span class="key k4"></span>
   <div class="stage" id="stage">
     <canvas id="cv"></canvas>
     <div class="hud" id="hud">
+      <div class="topbar">
+        <div class="ctrls">
+          <button class="btn" id="spd" type="button">1×</button>
+          <button class="btn" id="snd" type="button" aria-pressed="true">Звук</button>
+          <button class="btn" id="again" type="button">Заново</button>
+        </div>
+        <div class="phase" id="phase" aria-live="polite">Стол закрыт</div>
+      </div>
       <div class="score" id="score">
         <div class="t"><span>Мы</span><b>0</b></div><i>:</i>
         <div class="t them"><span>Они</span><b>0</b></div>
@@ -105,6 +113,9 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       <p>Салон у камина · 4 игрока · 2 на 2</p>
       <button class="open" id="open" type="button">Открыть стол</button>
     </div>
+    <div class="island"></div>
+    <div class="homebar"></div>
+  </div>
   </div>
 </div>
 <div class="rotate">Поверните телефон горизонтально, чтобы увидеть стол крупнее.</div>
@@ -691,11 +702,11 @@ document.getElementById('again2').addEventListener('click', start);
 const speeds = [1, .5, 2];
 document.getElementById('spd').addEventListener('click', e => {
   speed = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
-  e.currentTarget.textContent = `Скорость ${String(speed).replace('.', ',')}×`;
+  e.currentTarget.textContent = `${String(speed).replace('.', ',')}×`;
 });
 document.getElementById('snd').addEventListener('click', e => {
   soundOn = !soundOn; e.currentTarget.setAttribute('aria-pressed', soundOn);
-  e.currentTarget.textContent = soundOn ? 'Звук вкл' : 'Звук выкл';
+  e.currentTarget.textContent = soundOn ? 'Звук' : 'Без звука';
   if (master) master.gain.value = soundOn ? 1 : 0;
 });
 </script>
