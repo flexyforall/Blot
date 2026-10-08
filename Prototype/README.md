@@ -34,7 +34,7 @@ Plain HTML, CSS and JS, no build step. Open `index.html` in a browser.
    - the round is scored by the rules and a summary shows the points; the score top right
      adds up until a team reaches 301 ("Play again" starts a new game).
    The HUD follows Figma (Mansion Table Example, node `1886:1866`): plates with an avatar
-   (a placeholder for now), the nickname and a level badge (orange, blue for the right player),
+   (HasmikG and GarikAv have their portraits, Vazgen1972 the cowboy placeholder), the nickname and a level badge (orange, blue for the right player),
    with thin white top/bottom lines (each shows as that player sits down), a bid chip next to
    each bidder (only the contract stays after the bidding), last trick top left, score top
    right, and 48px semi-transparent buttons along the bottom: chat and reactions on the left, info on the
