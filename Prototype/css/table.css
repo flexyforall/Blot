@@ -112,12 +112,15 @@
 
 /* ---- bottom bar (Figma 1893:716): chat and reactions on the left, info on the right.
    40x40 buttons on the glass/depth-stroke background, 12px apart. */
-.tb-bottom { position: absolute; left: 24px; right: 24px; bottom: 24px; height: 40px; display: flex; gap: 12px; }
+.tb-bottom { position: absolute; left: 24px; right: 24px; bottom: 24px; height: 48px; display: flex; align-items: flex-start; gap: 12px; }
 /* the bar spans the full width over your cards: only its buttons and popovers take taps */
 .tb-ui > .tb-bottom { pointer-events: none; }
 .tb-bottom > * { pointer-events: auto; }
 .table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; }
 .tb-btn--info { margin-left: auto; }
+/* chat and reactions are 48px in the design: the 40px button scaled 1.2x */
+.table .tb-btn--lg { width: 48px; height: 48px; border-radius: 9.6px; }
+.tb-btn_in { position: absolute; left: 4px; top: 4px; width: 40px; height: 40px; transform: scale(1.2); }
 .tb-btn_bg { position: absolute; inset: 0; width: 40px; height: 40px; }
 .tb-btn_icon { position: absolute; filter: brightness(1.15) drop-shadow(0 0 2px #000) drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 .table .tb-btn:active { transform: scale(.94); }
@@ -173,11 +176,11 @@
 /* ---- player nameplates: dark fade, rank badge, nickname and level */
 .tb-plate {
   position: absolute;
-  height: 42px;
+  height: 50px;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   padding: 7px 11px 7px 9px;   /* Figma 6/10/8 inside a 1px stroke */
   border-radius: 4px;
   /* thin white lines along the top and bottom (the stroke fades out at the ends) over the dark fade */
@@ -187,11 +190,24 @@
     linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .5) 25%, #000 50%, rgba(0, 0, 0, .5) 75%, rgba(0, 0, 0, 0) 100%);
   pointer-events: none;
 }
-.tb-plate--left { left: 72px; top: 247px; }
-.tb-plate--top { left: 376px; top: 82px; }
-.tb-plate--right { left: 660px; top: 247px; }
-.tb-plate img { width: 28.8px; height: 28.8px; margin: -2.4px; flex: none; clip-path: inset(2.4px); }   /* art at 120%, cropped to its 24px slot */
-.tb-plate p { display: flex; flex-direction: column; white-space: nowrap; }
+.tb-plate--left { left: 80px; top: 232px; }
+.tb-plate--top { left: 371px; top: 82px; }
+.tb-plate--right { left: 658.5px; top: 232px; }
+.tb-plate_avatar { width: 36px; height: 36px; flex: none; object-fit: cover; }
+.tb-plate p { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; white-space: nowrap; }
+/* level badge (44x17): the uploaded orange / blue textured plates behind the text */
+.tb-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 17px;
+  min-width: 41px;
+  box-sizing: border-box;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: url("../assets/table/ui/level-orange.png") center / 100% 100% no-repeat;
+}
+.tb-plate--blue .tb-badge { background-image: url("../assets/table/ui/level-blue.png"); }
 .tb-plate b { font-weight: 700; font-size: 12px; line-height: 16px; color: #fff; text-shadow: 0 1px 4px #000; }
 /* level: white-to-orange gradient (blue for the right player, as in Figma) with a soft glow.
    The glow is a text-shadow on a transparent base, the gradient a copy on top (Safari drops
@@ -204,7 +220,7 @@
   font-size: 10px;
   line-height: 12px;
   color: transparent;
-  text-shadow: 0 0 6px var(--lvl-glow), 0 8px 4px rgba(0, 0, 0, .6);
+  text-shadow: 0 0 6px var(--lvl-glow), 0 8px 4px rgba(0, 0, 0, .6), 0 2px 4px rgba(0, 0, 0, .5);
   animation: tb-lvl-glow 3s ease-in-out infinite alternate;
 }
 .tb-lvl::after {
@@ -216,7 +232,7 @@
   -webkit-background-clip: text;
   background-clip: text;
 }
-@keyframes tb-lvl-glow { from { text-shadow: 0 0 3px var(--lvl-glow), 0 8px 4px rgba(0, 0, 0, .6); } }
+@keyframes tb-lvl-glow { from { text-shadow: 0 0 3px var(--lvl-glow), 0 8px 4px rgba(0, 0, 0, .6), 0 2px 4px rgba(0, 0, 0, .5); } }
 
 /* whose turn it is: thin blue lines light up along the top and bottom edge of the nameplate,
    fading out at the ends like the plate itself */

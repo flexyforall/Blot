@@ -33,11 +33,12 @@ Plain HTML, CSS and JS, no build step. Open `index.html` in a browser.
      play are darkened, tap a card to play it. The last trick shows top left;
    - the round is scored by the rules and a summary shows the points; the score top right
      adds up until a team reaches 301 ("Play again" starts a new game).
-   The HUD follows Figma (Mansion Table Example, node `1886:1866`): nicknames with rank badge
-   and level in bold on plates with thin white top/bottom lines (each shows as that player sits
-   down), a bid chip next to each bidder (only the contract stays after the bidding), last trick
-   top left, score top right, and 40px buttons along the bottom: chat and reactions on the left,
-   info on the right; all 24px from the screen edges. Everything except the nicknames comes in
+   The HUD follows Figma (Mansion Table Example, node `1886:1866`): plates with an avatar
+   (a placeholder for now), the nickname and a level badge (orange, blue for the right player),
+   with thin white top/bottom lines (each shows as that player sits down), a bid chip next to
+   each bidder (only the contract stays after the bidding), last trick top left, score top
+   right, and along the bottom 48px chat and reactions buttons on the left and the 40px info
+   button on the right; all 24px from the screen edges. Everything except the nicknames comes in
    once the first hand has been dealt. Chat sends a quick phrase, reactions an emoji. The
    design has no settings button any more; Escape goes back to the stage select (prototype
    shortcut). Info does nothing yet.

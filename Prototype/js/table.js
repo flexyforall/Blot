@@ -21,7 +21,11 @@
     var h = Math.round(w * r.height / r.width);
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
   }
-  function resized() { requestAnimationFrame(sizeCanvas); }
+  // Resize once the zoom gesture has settled, not on every step of it: each new size means new
+  // card pictures, and rebuilding them dozens of times during a pinch ran Safari out of canvas
+  // memory, which blanks canvases (the black screen when zooming the mockup).
+  var resizeTimer = 0;
+  function resized() { clearTimeout(resizeTimer); resizeTimer = setTimeout(sizeCanvas, 180); }
   window.addEventListener('resize', resized);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', resized);
 
@@ -133,14 +137,34 @@
     else g.drawImage(src, x, y, CW * res, CH * res);
     return c;
   }
+  // Each card keeps only its last few sizes; the canvases of dropped sizes are emptied so the
+  // browser gets the memory back straight away.
+  var KEEP_FACE = 2, KEEP_BACK = 8;   // one back serves every card, so it keeps more sizes
+  function remember(cache, res, c, keep) {
+    if (!cache.order) cache.order = [];
+    cache[res] = c;
+    var i = cache.order.indexOf(res);
+    if (i >= 0) cache.order.splice(i, 1);
+    cache.order.push(res);
+    while (cache.order.length > keep) {
+      var old = cache.order.shift();
+      if (cache[old]) { cache[old].width = 0; cache[old].height = 0; }
+      delete cache[old];
+    }
+    return c;
+  }
   function faceAt(key, k) {
     var cache = faceCache[key] || (faceCache[key] = {}), res = bucket(k);
     if (!cache[res]) {
       var art = faceArt[key];
-      cache[res] = renderFace(art, res, false);
+      remember(cache, res, renderFace(art, res, false), KEEP_FACE);
       if (window.createImageBitmap) {
         createImageBitmap(art, { resizeWidth: Math.round(CW * res), resizeHeight: Math.round(CH * res), resizeQuality: 'high' })
-          .then(function (bmp) { cache[res] = renderFace(bmp, res, true); if (bmp.close) bmp.close(); })
+          .then(function (bmp) {
+            var quick = cache[res];
+            if (quick) { cache[res] = renderFace(bmp, res, true); quick.width = 0; quick.height = 0; }   // still wanted
+            if (bmp.close) bmp.close();
+          })
           .catch(function () {});
       }
     }
@@ -148,7 +172,7 @@
   }
   function backAt(k) {
     var res = bucket(k);
-    return backCache[res] || (backCache[res] = makeBack(res));
+    return backCache[res] || remember(backCache, res, makeBack(res), KEEP_BACK);
   }
   // Red back in the classic "rider" spirit: white border, fine red filigree field, central medallion.
   function makeBack(res) {
@@ -186,6 +210,7 @@
     var sx = Math.abs(Math.cos(this.flip * Math.PI)) || .001;
     var k = this.sc * cv.width / W;
     var im = this.flip > .5 ? faceAt(this.rank + this.suit.s, k) : backAt(k);
+    if (!im || !im.width) return;
     ctx.save(); ctx.globalAlpha = this.alpha;
     ctx.translate(this.x, this.y); ctx.rotate(this.rot); ctx.translate(0, -this.lift);
     ctx.scale(this.sc * sx, this.sc);
