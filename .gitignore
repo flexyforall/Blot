@@ -17,3 +17,7 @@
 .vs/
 .idea/
 .DS_Store
+
+# Blender backups, packed prototype
+*.blend1
+Prototype.zip
