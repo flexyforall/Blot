@@ -142,6 +142,8 @@
         : 'No bids yet';
       function render() {
         q('[data-bid-value]').textContent = kaput ? 'Kaput' : value;
+        q('[data-bid-value]').classList.toggle('is-off', kaput);
+        bidEl.querySelectorAll('[data-bid-label]').forEach(function (l) { l.textContent = kaput ? 'Kaput' : value; });
         q('[data-bid-minus]').disabled = kaput || value <= min;
         q('[data-bid-plus]').disabled = kaput || value >= R.MAX_BID;
         q('[data-bid-kaput]').setAttribute('aria-pressed', String(kaput));
@@ -309,22 +311,27 @@
     var cards = { us: R.stockPoints(stock.us, trump), them: R.stockPoints(stock.them, trump) };
     cards[lastTrick] += 10;
     var line = NAMES[contract.seat] + ' bid ' + bidHtml(contract) +
-      (contract.sur ? ' · Sur' : contract.contra ? ' · Contra' : '') + ' — ' +
-      (res.made ? '<b class="is-made">made</b>' : '<b class="is-down">went under</b>') +
+      (contract.sur ? ' · Sur' : contract.contra ? ' · Contra' : '') + ' ' +
+      (res.made ? '<b class="tb-result_tag is-made">Made</b>' : '<b class="tb-result_tag is-down">Went under</b>') +
       (res.kaput ? ' · Kaput!' : '');
-    var extras = [];
-    if (comboWin.team && comboWin.points) extras.push((comboWin.team === 'us' ? 'Us' : 'Them') + ': combinations +' + comboWin.points);
-    if (blot) extras.push((blot === 'us' ? 'Us' : 'Them') + ': blot-rebot +2');
     var over = game.score.us >= R.GAME_TARGET || game.score.them >= R.GAME_TARGET;
     var winner = game.score.us === game.score.them ? null : game.score.us > game.score.them ? 'us' : 'them';
     var html =
       '<p class="tb-result_title">' + (over && winner ? (winner === 'us' ? 'You win!' : 'They win') : 'Round ' + game.round) + '</p>' +
       '<p class="tb-result_line">' + line + '</p>' +
-      '<table class="tb-result_table"><tr><th></th><th>Us</th><th>Them</th></tr>' +
-      '<tr><td>Card points</td><td>' + cards.us + '</td><td>' + cards.them + '</td></tr>' +
-      '<tr><td>This round</td><td>+' + res.us + '</td><td>+' + res.them + '</td></tr>' +
-      '<tr class="is-total"><td>Score</td><td>' + game.score.us + '</td><td>' + game.score.them + '</td></tr></table>' +
-      (extras.length ? '<p class="tb-result_note">' + extras.join(' · ') + '</p>' : '');
+      '<div class="tb-result_sides">' + sideHtml('us', 'Us') + sideHtml('them', 'Them') + '</div>';
+    // one tile per side: the total out of 301, this round's points, and what they came from
+    // (card points, combinations, blot-rebot); the side that took the round is highlighted
+    function sideHtml(t, name) {
+      var win = over && winner ? winner === t : res[t] > res[t === 'us' ? 'them' : 'us'];
+      var from = ['Cards ' + cards[t]];
+      if (comboWin.team === t && comboWin.points) from.push('Combos +' + comboWin.points);
+      if (blot === t) from.push('Blot +2');
+      return '<div class="tb-result_side' + (win ? ' is-win' : '') + '"><span>' + name + '</span>' +
+        '<b>' + game.score[t] + '<small>/' + R.GAME_TARGET + '</small></b>' +
+        '<p>' + (res[t] ? '<em>+' + res[t] + '</em>' : '+0') + ' this round</p>' +
+        '<p class="tb-result_from">' + from.join(' · ') + '</p></div>';
+    }
     if (window.BlotGame.autoplay) { log.push({ round: game.round, contract: contract, res: res, score: { us: game.score.us, them: game.score.them } }); await view.wait(.2); }
     else { await showResult(html, over && winner ? 'Play again' : 'Next round'); if (!alive()) return; }
     await view.clear();
