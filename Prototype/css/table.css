@@ -118,7 +118,7 @@
 .tb-bottom > * { pointer-events: auto; }
 .table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; }
 .tb-btn--info { margin-left: auto; }
-/* chat and reactions are 48px in the design: the 40px button scaled 1.2x */
+/* the bottom buttons are 48px: the 40px Figma button scaled 1.2x */
 .table .tb-btn--lg { width: 48px; height: 48px; border-radius: 9.6px; }
 .tb-btn_in { position: absolute; left: 4px; top: 4px; width: 40px; height: 40px; transform: scale(1.2); }
 .tb-btn_bg { position: absolute; inset: 0; width: 40px; height: 40px; }
@@ -212,16 +212,15 @@
 /* level: white-to-orange gradient (blue for the right player, as in Figma) with a soft glow.
    The glow is a text-shadow on a transparent base, the gradient a copy on top (Safari drops
    shadows under background-clip:text). */
-.tb-plate { --lvl: #e07c46; --lvl-glow: rgba(255, 140, 70, .75); }
-.tb-plate--blue { --lvl: #89caff; --lvl-glow: rgba(110, 190, 255, .8); }
+.tb-plate { --lvl: #e07c46; }
+.tb-plate--blue { --lvl: #89caff; }
 .tb-lvl {
   position: relative;
   font-weight: 700;
   font-size: 10px;
   line-height: 12px;
   color: transparent;
-  text-shadow: 0 0 6px var(--lvl-glow), 0 8px 4px rgba(0, 0, 0, .6), 0 2px 4px rgba(0, 0, 0, .5);
-  animation: tb-lvl-glow 3s ease-in-out infinite alternate;
+  text-shadow: 0 8px 4px rgba(0, 0, 0, .6), 0 2px 4px rgba(0, 0, 0, .5);
 }
 .tb-lvl::after {
   content: attr(data-text);
@@ -232,7 +231,6 @@
   -webkit-background-clip: text;
   background-clip: text;
 }
-@keyframes tb-lvl-glow { from { text-shadow: 0 0 3px var(--lvl-glow), 0 8px 4px rgba(0, 0, 0, .6), 0 2px 4px rgba(0, 0, 0, .5); } }
 
 /* whose turn it is: thin blue lines light up along the top and bottom edge of the nameplate,
    fading out at the ends like the plate itself */
@@ -377,7 +375,7 @@
 @keyframes tb-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .tb-score .tb-panel_bg, .tb-score_shine::before, .tb-score_shine::after, .tb-lvl { animation: none; }
+  .tb-score .tb-panel_bg, .tb-score_shine::before, .tb-score_shine::after { animation: none; }
   .tb-trick, .tb-score, .tb-bottom { opacity: 1; animation: none !important; }
   .tb-plate { transition: none; }
 }
