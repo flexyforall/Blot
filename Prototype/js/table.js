@@ -11,15 +11,19 @@
   // The canvas has as many pixels as the screen shows it with (up to 3x on an iPhone), so
   // nothing is stretched; it is resized when the window or the device frame scale changes.
   cv.width = 1704; cv.height = 786;
+  // Browser zoom shows up in devicePixelRatio, pinch zoom in visualViewport.scale.
   function sizeCanvas() {
     var r = cv.getBoundingClientRect();
     if (!r.width) return;
-    var dpr = Math.min(3, window.devicePixelRatio || 1);
-    var w = Math.max(852, Math.min(2556, Math.round(r.width * dpr)));
+    var zoom = (window.visualViewport && window.visualViewport.scale) || 1;
+    var px = Math.min(4, (window.devicePixelRatio || 1) * zoom);
+    var w = Math.max(852, Math.min(852 * 4, Math.round(r.width * px)));
     var h = Math.round(w * r.height / r.width);
     if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
   }
-  window.addEventListener('resize', function () { requestAnimationFrame(sizeCanvas); });
+  function resized() { requestAnimationFrame(sizeCanvas); }
+  window.addEventListener('resize', resized);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', resized);
 
   // ---------- Seats (scene coordinates) ----------
   // Teams: bottom + top vs left + right.
@@ -68,7 +72,7 @@
   // ---------- Assets ----------
   var img = new Image(); img.src = A + 'scene.webp';    // characters are cut from this
   var room = new Image(); room.src = A + 'room.webp';   // the same room with empty chairs
-  var cardBack, cardFaces = {};
+  // card pictures: see faceAt / backAt
 
   function feathered(r, core) {
     core = core == null ? .68 : core;
@@ -86,12 +90,14 @@
 
   // ---------- Cards ----------
   // The deck: one transparent PNG per card in assets/table/cards/play/ (cut by tools/cut_cards.py),
-  // 300x420, so a card is 78 x 109.2 scene units.
+  // 450x630, so a card is 78 x 109.2 scene units.
   var CW = 78, CH = 109.2, PAD = 10, CR = 3;   // CR: corner radius, as on the card art
-  // Every card picture is cached at several scales; drawing picks the smallest one that is at
-  // least as large as the card on screen, so a card is never shrunk much in one step
-  // (that is what made the faces look crunchy).
-  var LEVELS = [1, 1.5, 2, 3, 4];
+  // Card pictures are cached per on-screen size (in steps of 1/4 device pixel per scene unit),
+  // so the table draws them at almost exactly 1:1. Each size is made in one step straight from
+  // the card PNG with the browser's best resampling (createImageBitmap 'high'); until that is
+  // ready a quicker drawImage copy stands in. One big shrink of a cached card (what we had
+  // before) is what made the faces look soft and crunchy.
+  function bucket(k) { return Math.max(.75, Math.min(6, Math.ceil(k * 4 - .05) / 4)); }
   var RANKS = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
   var SUITS = [{ s: '♠', l: 'S' }, { s: '♥', l: 'H' }, { s: '♣', l: 'C' }, { s: '♦', l: 'D' }];
   var faceArt = {};
@@ -116,28 +122,33 @@
     return c;
   }
   // A face is the card art itself; its drop shadow follows the art's own rounded shape.
-  // The largest level is drawn from the PNG, each smaller one from the level above it
-  // (never more than 1.5x down per step).
-  function makeFace(rank, suit) {
-    var levels = [], prev = null;
-    for (var i = LEVELS.length - 1; i >= 0; i--) {
-      var c = levelCanvas(LEVELS[i]), g = c.getContext('2d');
-      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
-      if (!prev) {
-        g.scale(c.res, c.res); g.translate(PAD, PAD);
-        // canvas shadows are in pixels, not scene units: 2 x .67 units, as before
-        g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 2 * c.res; g.shadowOffsetY = .67 * c.res;
-        g.drawImage(faceArt[rank + suit.s], 0, 0, CW, CH);
-      } else {
-        g.drawImage(prev, 0, 0, c.width, c.height);
-      }
-      levels.unshift(c); prev = c;
-    }
-    return levels;
+  var faceCache = {}, backCache = {};
+  function renderFace(src, res, exact) {
+    var c = levelCanvas(res), g = c.getContext('2d');
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    // canvas shadows are in pixels, not scene units: 2 x .67 units
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 2 * res; g.shadowOffsetY = .67 * res;
+    var x = PAD * res, y = PAD * res;
+    if (exact) g.drawImage(src, Math.round(x), Math.round(y));
+    else g.drawImage(src, x, y, CW * res, CH * res);
+    return c;
   }
-  function pickLevel(levels, scale) {
-    for (var i = 0; i < levels.length; i++) if (levels[i].res >= scale) return levels[i];
-    return levels[levels.length - 1];
+  function faceAt(key, k) {
+    var cache = faceCache[key] || (faceCache[key] = {}), res = bucket(k);
+    if (!cache[res]) {
+      var art = faceArt[key];
+      cache[res] = renderFace(art, res, false);
+      if (window.createImageBitmap) {
+        createImageBitmap(art, { resizeWidth: Math.round(CW * res), resizeHeight: Math.round(CH * res), resizeQuality: 'high' })
+          .then(function (bmp) { cache[res] = renderFace(bmp, res, true); if (bmp.close) bmp.close(); })
+          .catch(function () {});
+      }
+    }
+    return cache[res];
+  }
+  function backAt(k) {
+    var res = bucket(k);
+    return backCache[res] || (backCache[res] = makeBack(res));
   }
   // Red back in the classic "rider" spirit: white border, fine red filigree field, central medallion.
   function makeBack(res) {
@@ -173,7 +184,8 @@
   }
   Card.prototype.draw = function () {
     var sx = Math.abs(Math.cos(this.flip * Math.PI)) || .001;
-    var im = pickLevel(this.flip > .5 ? cardFaces[this.rank + this.suit.s] : cardBack, this.sc * cv.width / W);
+    var k = this.sc * cv.width / W;
+    var im = this.flip > .5 ? faceAt(this.rank + this.suit.s, k) : backAt(k);
     ctx.save(); ctx.globalAlpha = this.alpha;
     ctx.translate(this.x, this.y); ctx.rotate(this.rot); ctx.translate(0, -this.lift);
     ctx.scale(this.sc * sx, this.sc);
@@ -708,8 +720,7 @@
       s.sprite = feathered(s.crop);
       for (var k in s.parts) s.parts[k].sprite = feathered(s.parts[k].r, .5);
     });
-    cardBack = LEVELS.map(function (res) { return makeBack(res); });
-    SUITS.forEach(function (su) { RANKS.forEach(function (r) { cardFaces[r + su.s] = makeFace(r, su); }); });
+    faceCache = {}; backCache = {};
   });
 
   // The Play button is the user gesture that unlocks Web Audio for the table sounds.

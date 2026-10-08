@@ -8,7 +8,7 @@ so the background cannot be keyed out by colour. Instead the alpha is the exact 
 a rounded rectangle along the outer edge of the outline (measured: outline centred on
 x 3.00..1055.84, y 1.93..1481.06, corner radius 40.25), anti-aliased by signed distance.
 The colour pixels are left untouched and the result is written as lossless PNG over the
-originals. A 300x420 PNG of each Blot card (7..A) goes to assets/table/cards/play/ for the
+originals. A 450x630 PNG of each Blot card (7..A) goes to assets/table/cards/play/ for the
 game. Running it again on already cut cards gives the same result.
 """
 import os
@@ -21,7 +21,7 @@ OUT = os.path.join(DIR, 'play')
 L, R, T, B, RADIUS = 3.00, 1055.84, 1.93, 1481.06, 40.25   # outline centre, in pixel indices
 GROW = .6                      # cut just outside the middle of the outline: its outer anti-aliased
                                # pixel was blended with the light background and shows as a pale rim
-PLAY_SIZE = (300, 420)
+PLAY_SIZE = (450, 630)
 RANKS = {'A': 'A', '7': '7', '8': '8', '9': '9', '10': '10', 'J': 'J', 'Q': 'Q', 'K': 'K'}
 SUITS = {'Clubs': 'C', 'Diamonds': 'D', 'Hearts': 'H', 'Spades': 'S'}
 

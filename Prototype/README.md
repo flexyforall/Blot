@@ -89,7 +89,7 @@ assets/table/ui/           table HUD: panel backgrounds (rendered from the uploa
 assets/table/              salon art (2000x923: room with empty chairs, full scene),
                            seat video loops (WebM + MP4, 960x540) and their masks
 assets/table/cards/        the deck: 52 uploaded cards cut out of their background (lossless
-                           RGBA PNG, 1060x1484); play/ has the 32 Blot cards at 300x420 for the game
+                           RGBA PNG, 1060x1484); play/ has the 32 Blot cards at 450x630 for the game
 assets/fonts/              Poppins 600 and 800 italic
 assets/sounds/             lobby music loop and UI sounds (MP3)
 tools/make_sounds.py       synthesises the lobby music and UI sounds
