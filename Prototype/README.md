@@ -37,7 +37,7 @@ Plain HTML, CSS and JS, no build step. Open `index.html` in a browser.
    (a placeholder for now), the nickname and a level badge (orange, blue for the right player),
    with thin white top/bottom lines (each shows as that player sits down), a bid chip next to
    each bidder (only the contract stays after the bidding), last trick top left, score top
-   right, and 48px buttons along the bottom: chat and reactions on the left, info on the
+   right, and 48px semi-transparent buttons along the bottom: chat and reactions on the left, info on the
    right; all 24px from the screen edges. Everything except the nicknames comes in
    once the first hand has been dealt. Chat sends a quick phrase, reactions an emoji. The
    design has no settings button any more; Escape goes back to the stage select (prototype

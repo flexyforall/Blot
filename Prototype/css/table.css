@@ -110,21 +110,20 @@
 }
 .tb-score_divider { position: relative; width: 1px; height: 30px; background: rgba(255, 255, 255, .2); }
 
-/* ---- bottom bar (Figma 1893:716): chat and reactions on the left, info on the right.
-   40x40 buttons on the glass/depth-stroke background, 12px apart. */
+/* ---- bottom bar (Figma 1893:716): chat and reactions on the left, info on the right. */
 .tb-bottom { position: absolute; left: 24px; right: 24px; bottom: 24px; height: 48px; display: flex; align-items: flex-start; gap: 12px; }
 /* the bar spans the full width over your cards: only its buttons and popovers take taps */
 .tb-ui > .tb-bottom { pointer-events: none; }
 .tb-bottom > * { pointer-events: auto; }
-.table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; }
+/* plain semi-transparent boxes */
+.table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; background: rgba(0, 0, 0, .5); transition: background-color .15s ease; }
 .tb-btn--info { margin-left: auto; }
 /* the bottom buttons are 48px: the 40px Figma button scaled 1.2x */
 .table .tb-btn--lg { width: 48px; height: 48px; border-radius: 9.6px; }
 .tb-btn_in { position: absolute; left: 4px; top: 4px; width: 40px; height: 40px; transform: scale(1.2); }
-.tb-btn_bg { position: absolute; inset: 0; width: 40px; height: 40px; }
 .tb-btn_icon { position: absolute; filter: brightness(1.15) drop-shadow(0 0 2px #000) drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 .table .tb-btn:active { transform: scale(.94); }
-.tb-btn[aria-expanded="true"] .tb-btn_bg { filter: brightness(1.6); }
+.table .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, .75); }
 /* reactions: the laughing face, 26x26 */
 .tb-btn_face { position: absolute; left: 7px; top: 7px; width: 26px; height: 26px; filter: drop-shadow(0 1px 4px #000); }
 .tb-btn_face img { width: 26px; height: 26px; }
