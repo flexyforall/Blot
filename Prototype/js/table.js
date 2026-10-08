@@ -8,8 +8,18 @@
   var screen = document.querySelector('[data-screen-id="table"]');
   var cv = screen.querySelector('canvas'), ctx = cv.getContext('2d');
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // fixed 2x backing store of the 852x393 screen; the device frame is scaled with CSS
+  // The canvas has as many pixels as the screen shows it with (up to 3x on an iPhone), so
+  // nothing is stretched; it is resized when the window or the device frame scale changes.
   cv.width = 1704; cv.height = 786;
+  function sizeCanvas() {
+    var r = cv.getBoundingClientRect();
+    if (!r.width) return;
+    var dpr = Math.min(3, window.devicePixelRatio || 1);
+    var w = Math.max(852, Math.min(2556, Math.round(r.width * dpr)));
+    var h = Math.round(w * r.height / r.width);
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  }
+  window.addEventListener('resize', function () { requestAnimationFrame(sizeCanvas); });
 
   // ---------- Seats (scene coordinates) ----------
   // Teams: bottom + top vs left + right.
@@ -77,7 +87,11 @@
   // ---------- Cards ----------
   // The deck: one transparent PNG per card in assets/table/cards/play/ (cut by tools/cut_cards.py),
   // 300x420, so a card is 78 x 109.2 scene units.
-  var CW = 78, CH = 109.2, RES = 3, PAD = 10, CR = 3;   // CR: corner radius, as on the card art
+  var CW = 78, CH = 109.2, PAD = 10, CR = 3;   // CR: corner radius, as on the card art
+  // Every card picture is cached at several scales; drawing picks the smallest one that is at
+  // least as large as the card on screen, so a card is never shrunk much in one step
+  // (that is what made the faces look crunchy).
+  var LEVELS = [1, 1.5, 2, 3, 4];
   var RANKS = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
   var SUITS = [{ s: '♠', l: 'S' }, { s: '♥', l: 'H' }, { s: '♣', l: 'C' }, { s: '♦', l: 'D' }];
   var faceArt = {};
@@ -85,11 +99,16 @@
     RANKS.forEach(function (r) { var im = new Image(); im.src = A + 'cards/play/' + r + su.l + '.png'; faceArt[r + su.s] = im; });
   });
   function rr(g, x, y, w, h, r) { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); }
-  function cardCanvas(paint) {
+  function levelCanvas(res) {
     var c = document.createElement('canvas');
-    c.width = (CW + PAD * 2) * RES; c.height = (CH + PAD * 2) * RES;
-    var g = c.getContext('2d'); g.scale(RES, RES); g.translate(PAD, PAD);
-    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 6; g.shadowOffsetY = 2;
+    c.width = Math.round((CW + PAD * 2) * res); c.height = Math.round((CH + PAD * 2) * res);
+    c.res = res;
+    return c;
+  }
+  function cardCanvas(paint, res) {
+    var c = levelCanvas(res);
+    var g = c.getContext('2d'); g.scale(res, res); g.translate(PAD, PAD);
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 2 * res; g.shadowOffsetY = .67 * res;
     rr(g, 0, 0, CW, CH, CR); g.fillStyle = '#f6ecdc'; g.fill();
     g.shadowColor = 'transparent';
     g.save(); rr(g, 0, 0, CW, CH, CR); g.clip(); paint(g); g.restore();
@@ -97,17 +116,31 @@
     return c;
   }
   // A face is the card art itself; its drop shadow follows the art's own rounded shape.
+  // The largest level is drawn from the PNG, each smaller one from the level above it
+  // (never more than 1.5x down per step).
   function makeFace(rank, suit) {
-    var c = document.createElement('canvas');
-    c.width = (CW + PAD * 2) * RES; c.height = (CH + PAD * 2) * RES;
-    var g = c.getContext('2d'); g.scale(RES, RES); g.translate(PAD, PAD);
-    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 6; g.shadowOffsetY = 2;
-    g.imageSmoothingQuality = 'high';
-    g.drawImage(faceArt[rank + suit.s], 0, 0, CW, CH);
-    return c;
+    var levels = [], prev = null;
+    for (var i = LEVELS.length - 1; i >= 0; i--) {
+      var c = levelCanvas(LEVELS[i]), g = c.getContext('2d');
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      if (!prev) {
+        g.scale(c.res, c.res); g.translate(PAD, PAD);
+        // canvas shadows are in pixels, not scene units: 2 x .67 units, as before
+        g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 2 * c.res; g.shadowOffsetY = .67 * c.res;
+        g.drawImage(faceArt[rank + suit.s], 0, 0, CW, CH);
+      } else {
+        g.drawImage(prev, 0, 0, c.width, c.height);
+      }
+      levels.unshift(c); prev = c;
+    }
+    return levels;
+  }
+  function pickLevel(levels, scale) {
+    for (var i = 0; i < levels.length; i++) if (levels[i].res >= scale) return levels[i];
+    return levels[levels.length - 1];
   }
   // Red back in the classic "rider" spirit: white border, fine red filigree field, central medallion.
-  function makeBack() {
+  function makeBack(res) {
     return cardCanvas(function (g) {
       var m = 4.5, red = '#b5121f', x, y, i;
       g.fillStyle = red; rr(g, m, m, CW - m * 2, CH - m * 2, 2.5); g.fill();
@@ -131,7 +164,7 @@
       [[m + 9, m + 9], [CW - m - 9, m + 9], [m + 9, CH - m - 9], [CW - m - 9, CH - m - 9]].forEach(function (p) {
         g.beginPath(); g.arc(p[0], p[1], 4, 0, Math.PI * 2); g.strokeStyle = '#fdfbf6'; g.lineWidth = .7; g.stroke();
       });
-    });
+    }, res);
   }
   function Card(rank, suit) {
     this.rank = rank; this.suit = suit;
@@ -139,13 +172,13 @@
     this.dim = 0; this.base = 0;   // dim: darkened (not playable now); base: resting lift
   }
   Card.prototype.draw = function () {
-    var im = this.flip > .5 ? cardFaces[this.rank + this.suit.s] : cardBack;
     var sx = Math.abs(Math.cos(this.flip * Math.PI)) || .001;
+    var im = pickLevel(this.flip > .5 ? cardFaces[this.rank + this.suit.s] : cardBack, this.sc * cv.width / W);
     ctx.save(); ctx.globalAlpha = this.alpha;
     ctx.translate(this.x, this.y); ctx.rotate(this.rot); ctx.translate(0, -this.lift);
     ctx.scale(this.sc * sx, this.sc);
     ctx.drawImage(im, -(CW / 2 + PAD), -(CH / 2 + PAD), CW + PAD * 2, CH + PAD * 2);
-    if (this.dim > 0) { rr(ctx, -CW / 2, -CH / 2, CW, CH, 5); ctx.fillStyle = 'rgba(0,0,0,' + .5 * this.dim + ')'; ctx.fill(); }
+    if (this.dim > 0) { rr(ctx, -CW / 2, -CH / 2, CW, CH, CR); ctx.fillStyle = 'rgba(0,0,0,' + .5 * this.dim + ')'; ctx.fill(); }
     ctx.restore();
   };
 
@@ -597,6 +630,7 @@
     var dt = Math.min(50, now - (last || now)); last = now; clock += dt / 1000;
     stepTweens(dt);
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
     if (room.complete && room.naturalWidth) ctx.drawImage(room, 0, 0, W, H);
@@ -674,7 +708,7 @@
       s.sprite = feathered(s.crop);
       for (var k in s.parts) s.parts[k].sprite = feathered(s.parts[k].r, .5);
     });
-    cardBack = makeBack();
+    cardBack = LEVELS.map(function (res) { return makeBack(res); });
     SUITS.forEach(function (su) { RANKS.forEach(function (r) { cardFaces[r + su.s] = makeFace(r, su); }); });
   });
 
@@ -690,6 +724,7 @@
   document.addEventListener('screen:show', function (e) {
     if (e.detail === 'table') {
       active = true; last = 0;
+      sizeCanvas();
       resetState();
       cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
       audio(); startFire();
