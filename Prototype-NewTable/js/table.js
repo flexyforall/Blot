@@ -36,18 +36,19 @@
   // Teams: bottom + top vs left + right. Figma positions in screen px, turned into scene units below;
   // the side players sit 24 px further in than in the mockup, so the left one clears the iPhone's
   // island (the screen's left 48 px in landscape) and the layout stays symmetric.
-  // rect: the character art (right is GarikAv, mirrored so he looks at the table);
+  // rect: the character art (right is GarikAv, mirrored so he looks at the table; you are the robot
+  // too for now, right of your hand with your nameplate under it, like the others);
   // fan: where the player's cards are held: the pivot just off the screen edge and the direction
   // the cards point (degrees, 0 = up), as the mockup's card fans; face: where won tricks go;
   // deck: where the deck starts when this player deals.
   var SEATS = {
-    bottom: { face: [426, 400], deck: [426, 300], deckRot: 0 },
+    bottom: { art: 'vazgen', rect: [645, 253, 81, 97], face: [686, 300], deck: [426, 300], deckRot: 0 },
     left:   { art: 'georgi', rect: [62, 139, 81, 97], fan: { p: [9, 211.4], a: 83.94 }, face: [102, 187], deck: [164, 196], deckRot: Math.PI / 2 },
     top:    { art: 'vazgen', rect: [385, 18, 81, 97], fan: { p: [424, -15], a: 180 }, face: [426, 66], deck: [426, 128], deckRot: Math.PI },
     right:  { art: 'garik', rect: [706, 134, 93, 97], flip: true, fan: { p: [843, 212.4], a: -83.94 }, face: [752, 182], deck: [688, 196], deckRot: -Math.PI / 2 }
   };
   var IDS = Object.keys(SEATS);
-  var JOIN_ORDER = ['bottom', 'left', 'top', 'right'];
+  var JOIN_ORDER = ['left', 'top', 'right', 'bottom'];   // you sit down last
   function px(p) { return [p[0] * F, p[1] * F]; }
   IDS.forEach(function (id, n) {
     var s = SEATS[id];

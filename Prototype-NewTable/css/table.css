@@ -24,16 +24,20 @@
 
 /* ---- 40px icon buttons (settings, chat, reactions, info): the uploaded button art
    (dark navy, inner shadow, light rim) with the Figma icon on top */
-.table .tb-icon { width: 40px; height: 40px; flex: none; background: url("../assets/table/hud/button.webp") 0 0 / 40px 40px no-repeat; transition: transform .12s ease, filter .15s ease; }
+.table .tb-icon { width: 44px; height: 44px; flex: none; background: url("../assets/table/hud/button.webp") 0 0 / 44px 44px no-repeat; transition: transform .12s ease, filter .15s ease; }
+/* the buttons are 44px (Figma 40) and the icon in them a little larger still: the Figma 40px
+   button's icon layer, scaled 1.15 about the centre */
+.tb-icon_in { position: absolute; left: 2px; top: 2px; width: 40px; height: 40px; transform: scale(1.15); }
 .tb-icon img { position: absolute; filter: drop-shadow(0 0 2px #000) drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 .table .tb-icon:active { transform: scale(.94); }
 .table .tb-icon[aria-expanded="true"] { filter: brightness(1.35); }
-.table .tb-icon--gear { position: absolute; left: 20px; top: 20px; }
+/* 32px in from the rounded left and right screen edges (Figma 20) */
+.table .tb-icon--gear { position: absolute; left: 32px; top: 20px; }
 
 /* ---- last trick: 120x50 outlined box right of the gear, four small cards (23.7x33, 3px apart) */
 .tb-trick {
   position: absolute;
-  left: 72px;
+  left: 84px;
   top: 20px;
   width: 120px;
   height: 50px;
@@ -57,7 +61,7 @@
 /* ---- score: 141x50 outlined box, top right */
 .tb-score {
   position: absolute;
-  right: 20px;
+  right: 32px;
   top: 20px;
   min-width: 141px;   /* grows to the left for three-digit scores */
   height: 50px;
@@ -102,7 +106,7 @@
 .tb-plate--left { left: 51px; top: 228px; }
 .tb-plate--top { left: 374px; top: 106px; }
 .tb-plate--right { left: 697px; top: 226px; }
-.tb-plate--bottom { left: 372px; top: 344px; }
+.tb-plate--bottom { left: 634px; top: 342px; }   /* under your avatar, right of your hand */
 /* nickname: Poppins SemiBold 12, white to 80% white with a 1px shadow (two copies, as the score) */
 .tb-plate span {
   position: absolute;
@@ -163,11 +167,11 @@
   animation: tb-chip .3s cubic-bezier(.34, 1.56, .64, 1);
 }
 .tb-chip[hidden] { display: none; }
-/* next to each character's head (Figma 104/160.8 for the left one, +24 px like the side players), and right of your nameplate */
+/* next to each character's head (Figma 104/160.8 for the left one, +24 px like the side players) */
 .tb-chip--left { left: 128px; top: 160.8px; }
 .tb-chip--top { left: 451px; top: 39.8px; }
 .tb-chip--right { right: 128px; top: 159.8px; }
-.tb-chip--bottom { left: 484px; top: 349px; }
+.tb-chip--bottom { left: 711px; top: 274.8px; }
 .tb-chip i { width: 16.8px; height: 16.8px; font-size: 7.5px; line-height: 16.8px; }
 .tb-chip small { font-size: 11px; color: #ffd66b; }
 .tb-chip.is-pass { font-size: 12px; padding-left: 8px; color: rgba(255, 255, 255, .7); }
@@ -176,8 +180,8 @@
 .tb-suit { color: #fff; }
 .tb-suit.is-red { color: #ff5a5a; }
 
-/* ---- bottom bar: chat and reactions on the left, info on the right, 20px from the edges */
-.tb-bottom { position: absolute; left: 20px; right: 20px; bottom: 21px; height: 40px; display: flex; align-items: flex-start; gap: 12px; }
+/* ---- bottom bar: chat and reactions on the left, info on the right, 32px in from the sides */
+.tb-bottom { position: absolute; left: 32px; right: 32px; bottom: 19px; height: 44px; display: flex; align-items: flex-start; gap: 8px; }
 /* the bar spans the full width over your cards: only its buttons and popovers take taps */
 .tb-ui > .tb-bottom { pointer-events: none; }
 .tb-bottom > * { pointer-events: auto; }
@@ -200,7 +204,7 @@
 }
 .tb-pop[hidden] { display: none; }
 /* the chat list starts right of the island (the screen's left 48px are under it in landscape) */
-.tb-pop--chat { left: 28px; flex-direction: column; min-width: 128px; }
+.tb-pop--chat { left: 16px; flex-direction: column; min-width: 128px; }
 .tb-pop--react { left: 52px; }
 .table .tb-pop--chat button { padding: 7px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; line-height: 18px; text-align: left; color: rgba(255, 255, 255, .95); white-space: nowrap; }
 .table .tb-pop--chat button:hover, .table .tb-pop--chat button:active { background: rgba(255, 255, 255, .05); }
