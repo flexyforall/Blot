@@ -5,7 +5,7 @@
 (function () {
   var R = window.BlotRules;
   var screen = document.querySelector('[data-screen-id="table"]');
-  var NAMES = { bottom: 'You', left: 'HasmikG', top: 'GarikAv', right: 'Vazgen1972' };
+  var NAMES = { bottom: 'You', left: 'Georgi2001', top: 'Vazgen1972', right: 'GarikAv' };
   var SUIT_SIGN = { C: '♣', D: '♦', H: '♥', S: '♠', NT: 'NT' };
   var RED = { D: true, H: true };
   var COMBO_NAME = { terz: 'Terz', fifty: '50', hundred: '100', four: 'Four' };

@@ -1,10 +1,13 @@
-// Game table: the fireside salon from the "Prototype" scene. The four players take their seats
-// one by one, then js/game.js runs the game through the `view` API below (deal, play a card,
-// take a trick...). Opened by the Play button on the stage select.
-// Everything is drawn on one canvas in scene coordinates of the 2000x923 art.
+// Game table, new layout (Figma "Table - In Play", node 1868:456): a dark cloth with an
+// ornamental frame, three characters holding their cards fanned in from the screen edges, your
+// hand at the bottom. The players take their seats one by one, then js/game.js runs the game
+// through the `view` API below (deal, play a card, take a trick...). Opened by the Play button
+// on the stage select.
+// The characters and every card are drawn on one canvas in scene coordinates: 2000x923, the
+// 852x393 screen times F. The background and the HUD are HTML (css/table.css).
 (function () {
   var A = 'assets/table/';
-  var W = 2000, H = 923;
+  var W = 2000, H = 923, F = W / 852;
   var screen = document.querySelector('[data-screen-id="table"]');
   var cv = screen.querySelector('canvas'), ctx = cv.getContext('2d');
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -29,68 +32,38 @@
   window.addEventListener('resize', resized);
   if (window.visualViewport) window.visualViewport.addEventListener('resize', resized);
 
-  // ---------- Seats (scene coordinates) ----------
-  // Teams: bottom + top vs left + right.
-  // parts: body pieces cut from the art that move on their own (rect + pivot), used until the seat's video loads.
+  // ---------- Seats ----------
+  // Teams: bottom + top vs left + right. Figma positions in screen px, turned into scene units below;
+  // the side players sit 24 px further in than in the mockup, so the left one clears the iPhone's
+  // island (the screen's left 48 px in landscape) and the layout stays symmetric.
+  // rect: the character art (right is GarikAv, mirrored so he looks at the table);
+  // fan: where the player's cards are held: the pivot just off the screen edge and the direction
+  // the cards point (degrees, 0 = up), as the mockup's card fans; face: where won tricks go;
+  // deck: where the deck starts when this player deals.
   var SEATS = {
-    bottom: { crop: [770, 725, 460, 198], pivot: [1000, 923], face: [1000, 860, 70],
-              pile: [1000, 668], pileRot: 0, greet: 'bow',
-              parts: { helm: { r: [925, 790, 150, 133], p: [1000, 905] }, hands: { r: [930, 735, 140, 62], p: [1000, 790] } },
-              acts: ['lookAround', 'drum', 'stretch'],
-              video: { src: ['knight.webm', 'knight.mp4'], rect: [680, 563, 640, 360] } },
-    left:   { crop: [130, 355, 380, 360], pivot: [330, 640], face: [300, 445, 66],
-              pile: [572, 525], pileRot: Math.PI / 2, greet: 'lean',
-              parts: { head: { r: [200, 362, 195, 165], p: [355, 525] }, hands: { r: [410, 488, 80, 100], p: [400, 540] } },
-              acts: ['tilt', 'tap', 'glance'],
-              video: { src: ['laura.webm', 'laura.mp4'], rect: [0, 345, 676, 380] } },
-    top:    { crop: [790, 15, 410, 290], pivot: [995, 300], face: [965, 100, 56],
-              pile: [1000, 350], pileRot: Math.PI, greet: 'nod',
-              parts: { head: { r: [935, 8, 130, 155], p: [995, 165] }, cigar: { r: [875, 120, 125, 100], p: [890, 215] }, claw: { r: [980, 250, 100, 58], p: [1030, 300] } },
-              acts: ['puff', 'puff', 'claw'],
-              video: { src: ['marco.webm', 'marco.mp4'], rect: [675, 0, 640, 360] } },
-    right:  { crop: [1525, 325, 420, 410], pivot: [1720, 650], face: [1790, 452, 85],
-              pile: [1428, 525], pileRot: -Math.PI / 2, greet: 'tip',
-              parts: { hat: { r: [1690, 335, 205, 160], p: [1795, 445] }, hands: { r: [1540, 520, 100, 105], p: [1600, 600] } },
-              acts: ['scratch', 'hat', 'scratch', 'lean'],
-              video: { src: ['billy.webm', 'billy.mp4'], rect: [1289, 330, 711, 400] } }
+    bottom: { face: [426, 400], deck: [426, 300], deckRot: 0 },
+    left:   { art: 'georgi', rect: [62, 139, 81, 97], fan: { p: [9, 211.4], a: 83.94 }, face: [102, 187], deck: [164, 196], deckRot: Math.PI / 2 },
+    top:    { art: 'vazgen', rect: [385, 18, 81, 97], fan: { p: [424, -15], a: 180 }, face: [426, 66], deck: [426, 128], deckRot: Math.PI },
+    right:  { art: 'garik', rect: [706, 134, 93, 97], flip: true, fan: { p: [843, 212.4], a: -83.94 }, face: [752, 182], deck: [688, 196], deckRot: -Math.PI / 2 }
   };
   var IDS = Object.keys(SEATS);
   var JOIN_ORDER = ['bottom', 'left', 'top', 'right'];
-  var CIGAR_TIP = [957, 180], MOUTH = [990, 147], CYBER_EYE = [1010, 100];
-
-  // Seat videos (short AI loops), drawn through a soft silhouette mask so they blend into the empty room.
-  IDS.forEach(function (id) {
-    var s = SEATS[id], v = document.createElement('video');
-    v.muted = true; v.loop = false; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
-    v.addEventListener('ended', function () { s.moving = false; try { v.currentTime = 0; } catch (e) {} });
-    var webm = v.canPlayType('video/webm; codecs="vp9"');
-    v.src = A + (webm ? s.video.src[0] : s.video.src[1]);
-    v.addEventListener('canplay', function () { s.vidReady = true; }, { once: true });
-    s.vid = v;
-    s.vidCanvas = document.createElement('canvas');
-    s.vidCanvas.width = s.video.rect[2]; s.vidCanvas.height = s.video.rect[3];
-    s.vidMask = new Image(); s.vidMask.src = A + 'mask_' + id2name(id) + '.png';
+  function px(p) { return [p[0] * F, p[1] * F]; }
+  IDS.forEach(function (id, n) {
+    var s = SEATS[id];
+    s.face = px(s.face); s.deck = px(s.deck); s.phase = n * 1.7;
+    if (s.rect) {
+      s.rect = s.rect.map(function (v) { return v * F; });
+      s.image = new Image(); s.image.src = A + 'players/' + s.art + '.webp';
+    }
+    if (s.fan) s.fan.p = px(s.fan.p);
   });
-  function id2name(id) { return SEATS[id].video.src[0].split('.')[0]; }
-
-  // ---------- Assets ----------
-  var img = new Image(); img.src = A + 'scene.webp';    // characters are cut from this
-  var room = new Image(); room.src = A + 'room.webp';   // the same room with empty chairs
-  // card pictures: see faceAt / backAt
-
-  function feathered(r, core) {
-    core = core == null ? .68 : core;
-    var cw = r[2], ch = r[3];
-    var c = document.createElement('canvas'); c.width = cw; c.height = ch;
-    var g = c.getContext('2d');
-    g.drawImage(img, r[0], r[1], cw, ch, 0, 0, cw, ch);
-    g.globalCompositeOperation = 'destination-in';
-    g.translate(cw / 2, ch / 2); g.scale(cw / 2, ch / 2);
-    var gr = g.createRadialGradient(0, 0, 0, 0, 0, 1);
-    gr.addColorStop(0, '#000'); gr.addColorStop(core, '#000'); gr.addColorStop(1, 'rgba(0,0,0,0)');
-    g.fillStyle = gr; g.fillRect(-1, -1, 2, 2);
-    return c;
-  }
+  // the middle of the table (the ornamental frame) and where each player's card lands in a trick
+  var MID = [1000, 460];
+  var TRICK_SPOT = { bottom: [1000, 505, -.04], top: [1000, 415, .04], left: [930, 462, -.14], right: [1070, 458, .14] };
+  var TRICK_SC = 1.53;                 // the mockup's played card: 51 px wide
+  var FAN_R = 32 * F, FAN_STEP = 9.14, FAN_SC = 1.265;   // the fans: 42 px cards, 64 degrees for 8 cards
+  var HAND_SC = 1.7;                   // your cards: 57 px wide, as in the mockup
 
   // ---------- Cards ----------
   // The deck: one transparent PNG per card in assets/table/cards/play/ (cut by tools/cut_cards.py),
@@ -174,11 +147,12 @@
     var res = bucket(k);
     return backCache[res] || remember(backCache, res, makeBack(res), KEEP_BACK);
   }
-  // Red back in the classic "rider" spirit: white border, fine red filigree field, central medallion.
+  // Blue back in the classic "rider" spirit: white border, fine filigree field, central medallion
+  // (the deck's own back, in the blue of the mockup's card fans).
   function makeBack(res) {
     return cardCanvas(function (g) {
-      var m = 4.5, red = '#b5121f', x, y, i;
-      g.fillStyle = red; rr(g, m, m, CW - m * 2, CH - m * 2, 2.5); g.fill();
+      var m = 4.5, blue = '#25499e', x, y, i;
+      g.fillStyle = blue; rr(g, m, m, CW - m * 2, CH - m * 2, 2.5); g.fill();
       g.save(); g.clip();
       g.strokeStyle = 'rgba(255,240,235,.75)'; g.lineWidth = .35;
       for (y = m + 3; y < CH; y += 6) for (x = m + 3; x < CW; x += 6) {
@@ -188,7 +162,7 @@
       g.restore();
       g.strokeStyle = '#fdfbf6'; g.lineWidth = 1; rr(g, m + 2, m + 2, CW - m * 2 - 4, CH - m * 2 - 4, 2); g.stroke();
       g.save(); g.translate(CW / 2, CH / 2);
-      g.fillStyle = red; g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.fill();
+      g.fillStyle = blue; g.beginPath(); g.arc(0, 0, 15, 0, Math.PI * 2); g.fill();
       g.strokeStyle = '#fdfbf6'; g.lineWidth = 1.1; g.stroke();
       for (i = 0; i < 12; i++) {
         g.rotate(Math.PI / 6);
@@ -248,8 +222,8 @@
     }
   }
 
-  // ---------- Sound: card flicks, seat chime, fireplace (synthesised, Web Audio) ----------
-  var ac = null, master = null, fireOn = false;
+  // ---------- Sound: card flicks and the seat chime (synthesised, Web Audio) ----------
+  var ac = null, master = null;
   function isMuted() { return !!(window.BlotSound && window.BlotSound.muted()); }
   function audio() {
     if (!ac) {
@@ -282,72 +256,16 @@
       o.connect(g).connect(master); o.start(t + i * .09); o.stop(t + i * .09 + 1);
     });
   }
-  var fireGain = null;
-  function startFire() {
-    if (!ac) return;
-    if (fireOn) { fireGain.gain.setTargetAtTime(1, ac.currentTime, .4); return; }
-    fireOn = true;
-    fireGain = ac.createGain(); fireGain.gain.value = 0; fireGain.connect(master);
-    fireGain.gain.setTargetAtTime(1, ac.currentTime, .6);
-    // low roar: looped brown noise through a low-pass
-    var bed = ac.createBufferSource();
-    bed.buffer = noiseBuf(4, function (w, k, last) { return (last + .02 * w) / 1.02; });
-    bed.loop = true;
-    var lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 380;
-    var bg = ac.createGain(); bg.gain.value = 1.6;
-    bed.connect(lp).connect(bg).connect(fireGain); bed.start();
-    // crackles: short random pops, sometimes in little bursts
-    function pop(t, big) {
-      var s = ac.createBufferSource(); s.buffer = noiseBuf(big ? .03 : .008, function (w, k) { return w * Math.pow(1 - k, 4); });
-      var f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = big ? 900 + Math.random() * 1200 : 2000 + Math.random() * 4000; f.Q.value = 1.4;
-      var g = ac.createGain(); g.gain.value = big ? .16 + Math.random() * .12 : .03 + Math.random() * .08;
-      s.connect(f).connect(g).connect(fireGain); s.start(t);
-    }
-    (function loop() {
-      if (active) {
-        var t = ac.currentTime + .05, n = Math.random() < .25 ? 2 + (Math.random() * 4 | 0) : 1;
-        for (var i = 0; i < n; i++) pop(t + i * (.015 + Math.random() * .04), Math.random() < .12);
-      }
-      setTimeout(loop, 70 + Math.random() * 380);
-    })();
-  }
-  function stopFire() { if (fireGain) fireGain.gain.setTargetAtTime(0, ac.currentTime, .3); }
-
   // ---------- Scene state ----------
-  var S = { black: 1, amb: .55, lamps: 0, table: .35 };
-  var MOVE_EVERY = 15;   // seconds between one character's gesture and the next one's
-  var moves = { on: false, next: 0, last: null };
-  var cards = [], particles = [], clock = 0, nextSmoke = 2;
-  var shade = document.createElement('canvas'); shade.width = W / 4; shade.height = Math.ceil(H / 4);
-  var sh = shade.getContext('2d');
+  var S = { black: 1 };
+  var cards = [], particles = [], clock = 0;
 
-  function moveSomeone() {
-    // Don Marco is not in the rotation: he smokes all the time (see smokeForever)
-    var ids = IDS.filter(function (id) { var s = SEATS[id]; return id !== 'top' && s.idle && !s.moving && !s.busy && id !== moves.last; });
-    if (!ids.length) return;
-    var id = ids[Math.random() * ids.length | 0], s = SEATS[id];
-    moves.last = id;
-    if (s.vidReady) {
-      s.moving = true;
-      try { s.vid.currentTime = 0; s.vid.play().catch(function () { s.moving = false; }); } catch (e) { s.moving = false; }
-    } else if (s.acts) {
-      act(s, s.acts[Math.random() * s.acts.length | 0]);
-    }
-  }
-  function resetPose(s) {
-    s.rot = 0; s.sc = 1; s.dx = 0; s.dy = 0; s.busy = false; s.glow = 0;
-    for (var k in s.parts) { var p = s.parts[k]; p.rot = 0; p.dx = 0; p.dy = 0; }
-  }
   function resetState() {
-    moves = { on: false, next: 0, last: null };
     IDS.forEach(function (id) {
       var s = SEATS[id];
-      s.moving = false;
-      try { s.vid.pause(); s.vid.currentTime = 0; } catch (e) {}
-      s.light = 0; s.idle = false; s.ring = 0; s.next = 0;
-      resetPose(s);
+      s.alpha = 0; s.pop = 1; s.ring = 0; s.idle = false;
     });
-    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35;
+    S.black = 1;
     cards = []; particles = []; hover = null; humanWait = null;
     screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.remove('is-turn'); });
   }
@@ -355,90 +273,24 @@
     n = reduced ? 8 : (n || 26);
     for (var i = 0; i < n; i++) {
       var a = Math.random() * Math.PI * 2, v = 60 + Math.random() * 160;
-      particles.push({ k: 'spark', x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: .6 + Math.random() * .6, r: 1.5 + Math.random() * 2.5 });
+      particles.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0, max: .6 + Math.random() * .6, r: 1.5 + Math.random() * 2.5 });
     }
   }
-  function smoke(x, y, n, big) {
-    for (var i = 0; i < n; i++) particles.push({
-      k: 'smoke', x: x + Math.random() * (big ? 16 : 8) - (big ? 8 : 4), y: y + (big ? Math.random() * 10 - 5 : 0), life: -i * (big ? .09 : .2), max: big ? 3.2 : 2.6,
-      vx: big ? -30 - Math.random() * 40 : -6 + Math.random() * 16, vy: big ? -20 - Math.random() * 30 : -16 - Math.random() * 12,
-      r: big ? 7 + Math.random() * 6 : 5 + Math.random() * 5, a: big ? .13 : .22
-    });
-  }
 
-  // ---------- Choreography ----------
-  function bell(p) { return Math.sin(Math.PI * p); }
-  var GREET = {
-    bow:  function (s, p) { var b = bell(p); s.sc = 1 - .035 * b; s.dy = -9 * b; s.parts.helm.rot = .06 * Math.sin(2 * Math.PI * p); },
-    lean: function (s, p) { var b = bell(p); s.dx = 12 * b; s.parts.head.rot = -.12 * b; },
-    nod:  function (s, p) { var b = bell(p); s.parts.head.dy = 7 * Math.sin(2 * Math.PI * p) * (1 - p) + 5 * b; s.sc = 1 + .012 * b; },
-    tip:  function (s, p) { var b = bell(p); s.parts.hat.rot = -.18 * b; s.parts.hat.dx = 10 * b; s.parts.hat.dy = -8 * b; }
-  };
-  // Idle gestures of the cut-out fallback (when a seat video is not available).
-  var ACTS = {
-    puff: { d: 4.2, f: function (s, p) {                   // mafia: hand to mouth, ember glows, exhale
-      var up = p < .2 ? p / .2 : p < .55 ? 1 : p < .7 ? 1 - (p - .55) / .15 : 0, e = ease.inOut(up), c = s.parts.cigar;
-      c.dx = 9 * e; c.dy = -7 * e; c.rot = .05 * e;
-      s.parts.head.rot = -.05 * e; s.parts.head.dy = -3 * e;
-      s.glow = p > .2 && p < .55 ? Math.min(1, (p - .2) / .1) : Math.max(0, s.glow - .03);
-      if (!s._ex && p > .6) { s._ex = true; smoke(MOUTH[0], MOUTH[1], 12, true); }
-      if (p > .95) s._ex = false;
-    } },
-    claw: { d: 1.8, f: function (s, p) { s.parts.claw.dy = p < .8 ? -6 * Math.abs(Math.sin(p * Math.PI * 5)) : 0; } },
-    scratch: { d: 2.2, f: function (s, p) {                // cowboy: hand up to the beard, rubs, back down
-      var h = s.parts.hands, up = p < .2 ? p / .2 : p < .8 ? 1 : 1 - (p - .8) / .2, e = ease.inOut(up);
-      h.dx = 8 * e; h.dy = -10 * e; h.rot = -.06 * e;
-      if (p > .2 && p < .8) { h.dx += 3 * Math.sin(p * 70); h.dy += 2 * Math.cos(p * 70); }
-      s.parts.hat.rot = .06 * e; s.parts.hat.dy = -3 * e; s.rot = -.012 * e;
-    } },
-    hat: { d: 1.6, f: function (s, p) { var b = bell(p), h = s.parts.hat; h.rot = .12 * b; h.dy = -6 * b; h.dx = -4 * b; } },
-    lean: { d: 2.4, f: function (s, p) { var b = bell(p); s.dx = -10 * b; s.rot = -.025 * b; } },
-    tilt: { d: 2.2, f: function (s, p) { var b = bell(p); s.parts.head.rot = .14 * b; s.parts.head.dx = 4 * b; } },
-    glance: { d: 2.6, f: function (s, p) { var k = p < .5 ? bell(p * 2) : -bell((p - .5) * 2); s.parts.head.rot = .1 * k; } },
-    tap: { d: 1.8, f: function (s, p) { s.parts.hands.dy = -5 * Math.max(0, Math.sin(p * Math.PI * 8)); } },
-    lookAround: { d: 3, f: function (s, p) { var k = p < .5 ? bell(p * 2) : -bell((p - .5) * 2); s.parts.helm.rot = .16 * k; } },
-    drum: { d: 1.6, f: function (s, p) { s.parts.hands.dy = -4 * Math.max(0, Math.sin(p * Math.PI * 10)); s.parts.hands.rot = .03 * Math.sin(p * Math.PI * 10); } },
-    stretch: { d: 2.4, f: function (s, p) { var b = bell(p); s.sc = 1 + .03 * b; s.parts.helm.dy = -6 * b; } }
-  };
-  function act(s, name) {
-    var a = ACTS[name]; s.busy = true;
-    anim(a.d, function (p) { a.f(s, p); }).then(function () { resetPose(s); });
-  }
-
+  // ---------- Seating: each player fades in with a little pop, a chime and a spark ring ----------
   function join(id, my) {
     var s = SEATS[id];
     chime();
     var plate = screen.querySelector('[data-plate="' + id + '"]');
     if (plate) plate.classList.add('is-on');
+    if (!s.rect) return Promise.resolve();
     s.ring = 0; tween(s, { ring: 1 }, .9, { ease: ease.lin });
-    tween(s, { light: 1 }, .55);
     sparkle(s.face[0], s.face[1]);
-    s.sc = .95;
-    return tween(s, { sc: 1.03 }, .22)
-      .then(function () { return my === run && tween(s, { sc: 1 }, .18); })
-      .then(function () {
-        if (my !== run) return;
-        if (id === 'top') smoke(CIGAR_TIP[0], CIGAR_TIP[1], 8);
-        return anim(1.4, function (p) { if (!s.vidReady) GREET[s.greet](s, p); });
-      })
-      .then(function () {
-        if (my !== run) return;
-        resetPose(s); s.idle = true;
-        if (id === 'top') smokeForever(s, my);
-      });
-  }
-
-  // Don Marco never stops smoking: his video (a seamless 10 s loop of him drawing on the cigar)
-  // plays on repeat; without the video the cut-out keeps puffing, with smoke and the glowing tip.
-  function smokeForever(s, my) {
-    if (my !== run || !active) return;
-    if (s.vidReady) {
-      s.moving = true; s.vid.loop = true;
-      if (s.vid.paused) s.vid.play().catch(function () {});
-      return;
-    }
-    if (!s.busy) act(s, 'puff');
-    setTimeout(function () { smokeForever(s, my); }, 2600);
+    s.pop = .9;
+    tween(s, { alpha: 1 }, .4);
+    return tween(s, { pop: 1.04 }, .22)
+      .then(function () { return my === run && tween(s, { pop: 1 }, .18); })
+      .then(function () { if (my === run) s.idle = true; });
   }
 
   async function play() {
@@ -448,17 +300,11 @@
 
     tween(S, { black: 0 }, 1.2);
     await wait(.6); if (!ok()) return;
-
     for (var j = 0; j < JOIN_ORDER.length; j++) {
       join(JOIN_ORDER[j], my);
       await wait(1.3); if (!ok()) return;
     }
-    await wait(1.2); if (!ok()) return;
-
-    // everyone is seated: the lamps come up over the table
-    moves.on = true; moves.next = clock + 6;
-    tween(S, { amb: .14, lamps: 1 }, 1.4);
-    await wait(.9); if (!ok()) return;
+    await wait(.8); if (!ok()) return;
 
     // from here the game controller (js/game.js) runs the deals, bidding and tricks
     if (window.BlotGame) window.BlotGame.start(view);
@@ -467,18 +313,20 @@
   // ---------- View API for the game controller ----------
   // Everything is in scene coordinates. Each call returns when its animation is done.
   var SUIT_OF = { S: SUITS[0], H: SUITS[1], C: SUITS[2], D: SUITS[3] };
-  var DECK_FROM = { top: [1005, 290, Math.PI], bottom: [1000, 760, 0], left: [470, 512, Math.PI / 2], right: [1530, 512, -Math.PI / 2] };
-  // the trick is laid in the middle of the table, each card nudged towards whoever played it
-  var TRICK_SPOT = { bottom: [1000, 548, -.04], top: [1000, 478, .04], left: [948, 513, -.12], right: [1052, 513, .12] };
   var byId = {}, humanWait = null, trickZ = 500;
 
+  // An opponent's cards: fanned around the pivot at the screen edge, behind the character.
+  // Your cards wait in a small pile until layoutHand spreads them.
   function pileAt(id, i, n) {
-    var s = SEATS[id], o = (i - (n - 1) / 2) * 15, horiz = id === 'top' || id === 'bottom';
-    return { x: s.pile[0] + (horiz ? o : 0), y: s.pile[1] + (horiz ? 0 : o), rot: s.pileRot + (i - (n - 1) / 2) * .03 };
+    var k = i - (n - 1) / 2;
+    if (id === 'bottom') return { x: 1000 + k * 15, y: 700, rot: k * .03, sc: 1.2 };
+    var f = SEATS[id].fan, a = (f.a + k * FAN_STEP) * Math.PI / 180;
+    return { x: f.p[0] + Math.sin(a) * FAN_R, y: f.p[1] - Math.cos(a) * FAN_R, rot: a, sc: FAN_SC };
   }
-  function fanAt(i, n) {
-    var a = (i - (n - 1) / 2) * .058, R0 = 1100;
-    return { x: 1000 + Math.sin(a) * R0, y: 850 + R0 * (1 - Math.cos(a)), rot: a };
+  // your hand: an arc like the mockup's, 37 px apart, 6 degrees between cards
+  function handAt(i, n) {
+    var k = i - (n - 1) / 2, a = k * .105;
+    return { x: 1000 + k * 87, y: 730 + 915 * (1 - Math.cos(a)), rot: a };
   }
 
   var view = {
@@ -489,29 +337,29 @@
     // deck: engine cards in deck order; sequence: [{seat, card}] from BlotRules.deal
     deal: async function (tok, deck, sequence, dealer) {
       cards = []; byId = {}; hover = null; trickZ = 500;
-      var from = DECK_FROM[dealer];
+      var from = SEATS[dealer], rot0 = from.deckRot;
       deck.forEach(function (ec, i) {
         var c = new Card(ec.rank, SUIT_OF[ec.suit]);
         c.id = ec.id; byId[ec.id] = c;
-        c.x = from[0]; c.y = from[1]; c.rot = from[2] + .2; c.z = i; c.sc = .75;
+        c.x = from.deck[0]; c.y = from.deck[1]; c.rot = rot0 + .2; c.z = i; c.sc = .75;
         cards.push(c);
       });
       await Promise.all(cards.map(function (c, i) {
-        return tween(c, { x: 1000, y: 512 - i * .35, rot: from[2], alpha: 1, sc: 1 }, .6, { delay: .2, ease: ease.inOut });
+        return tween(c, { x: MID[0], y: MID[1] - i * .35, rot: rot0, alpha: 1, sc: 1.1 }, .6, { delay: .2, ease: ease.inOut });
       })); if (!view.alive(tok)) return;
       flick(.3);
       var stack = cards.slice();
       for (var rep = 0; rep < 2; rep++) {
         var L = stack.slice(0, 16), R = stack.slice(16);
         await Promise.all(stack.map(function (c, i) {
-          return tween(c, { x: 1000 + (i < 16 ? -62 : 62), rot: from[2] + (i < 16 ? -.1 : .1) }, .28, { ease: ease.inOut });
+          return tween(c, { x: MID[0] + (i < 16 ? -70 : 70), rot: rot0 + (i < 16 ? -.1 : .1) }, .28, { ease: ease.inOut });
         })); if (!view.alive(tok)) return;
         var mixed = [];
         for (var i = 0; i < 16; i++) { if (Math.random() < .5) mixed.push(L[i], R[i]); else mixed.push(R[i], L[i]); }
         stack = mixed;
         await Promise.all(stack.map(function (c, k) {
           c.z = k;
-          return tween(c, { x: 1000, y: 512 - k * .35, rot: from[2] }, .16, { delay: k * .018, fn: function (p) { if (p === 1 && k % 3 === 0) flick(.12); } });
+          return tween(c, { x: MID[0], y: MID[1] - k * .35, rot: rot0 }, .16, { delay: k * .018, fn: function (p) { if (p === 1 && k % 3 === 0) flick(.12); } });
         })); if (!view.alive(tok)) return;
         await wait(.15); if (!view.alive(tok)) return;
       }
@@ -519,8 +367,9 @@
       for (var q = 0; q < sequence.length; q++) {
         var st = sequence[q], c = byId[st.card.id], t = pileAt(st.seat, count[st.seat]++, 8);
         c.z = zTop++;
+        c.behind = st.seat !== 'bottom';   // into the player's hands, behind the character
         flick();
-        tween(c, { x: t.x, y: t.y, rot: t.rot }, .34);
+        tween(c, { x: t.x, y: t.y, rot: t.rot, sc: t.sc }, .34);
         await wait(.075); if (!view.alive(tok)) return;
         if (sequence[q + 1] && sequence[q + 1].seat !== st.seat) { await wait(.12); if (!view.alive(tok)) return; }
       }
@@ -529,14 +378,14 @@
     // your hand: fanned at the bottom, face up, in the given order
     layoutHand: function (ids) {
       ids.forEach(function (id, i) {
-        var c = byId[id], t = fanAt(i, ids.length), first = !c.mine;
+        var c = byId[id], t = handAt(i, ids.length), first = !c.mine;
         c.z = 300 + i; c.mine = true;
-        tween(c, { x: t.x, y: t.y, rot: t.rot, sc: 1.7 }, first ? .5 : .3, { delay: first ? i * .04 : 0, ease: ease.inOut });
+        tween(c, { x: t.x, y: t.y, rot: t.rot, sc: HAND_SC }, first ? .5 : .3, { delay: first ? i * .04 : 0, ease: ease.inOut });
         if (c.flip < 1) tween(c, { flip: 1 }, .35, { delay: .45 + i * .06, ease: ease.inOut, fn: function (p) { if (p === 1) flick(.1); } });
       });
       return wait(.9);
     },
-    // an opponent's face-down cards, re-spaced after a card leaves
+    // an opponent's fan, closed up after a card leaves
     layoutPile: function (seat, ids) {
       ids.forEach(function (id, i) { var t = pileAt(seat, i, ids.length); tween(byId[id], { x: t.x, y: t.y, rot: t.rot }, .25); });
     },
@@ -551,12 +400,12 @@
     },
     playCard: function (seat, id) {
       var c = byId[id], t = TRICK_SPOT[seat];
-      c.mine = false; c.base = 0; c.z = trickZ++;
+      c.mine = false; c.base = 0; c.z = trickZ++; c.behind = false;
       if (c === hover) hover = null;
       flick(.25);
       tween(c, { dim: 0, lift: 0 }, .15);
       tween(c, { flip: 1 }, .3, { ease: ease.inOut });
-      return tween(c, { x: t[0], y: t[1], rot: t[2], sc: 1.15 }, .4, { ease: ease.out });
+      return tween(c, { x: t[0], y: t[1], rot: t[2], sc: TRICK_SC }, .4, { ease: ease.out });
     },
     // the trick slides to the winner and is gone
     collect: async function (seat, ids) {
@@ -570,13 +419,13 @@
       await Promise.all(cards.map(function (c) { return tween(c, { alpha: 0, sc: c.sc * .8 }, .3); }));
       cards = []; byId = {}; hover = null;
     },
-    // whoever has to act gets their nameplate lit; null for nobody
+    // whoever has to act gets their nameplate lit, with the turn timer; null for nobody
     turn: function (seat) {
       screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.toggle('is-turn', el.getAttribute('data-plate') === seat); });
     },
     say: function (seat, text, kind) { bubble(seat, text, kind); },
     chime: function () { chime(); },
-    // the HUD (last trick, score, buttons) comes in once the first hand has been dealt
+    // the HUD (settings, last trick, score, buttons) comes in once the first hand has been dealt
     showHud: function () {
       if (screen.classList.contains('tb-enter')) return;
       screen.classList.add('tb-enter');
@@ -610,7 +459,7 @@
     for (var i = 0; i < byZ.length; i++) {
       var c = byZ[i];
       if (!c.mine || c.flip < 1) continue;
-      var dx = x - c.x, dy = y - c.y, ca = Math.cos(-c.rot), sa = Math.sin(-c.rot);
+      var dx = x - c.x, dy = y - c.y + c.lift, ca = Math.cos(-c.rot), sa = Math.sin(-c.rot);
       var lx = dx * ca - dy * sa, ly = dx * sa + dy * ca;
       if (Math.abs(lx) < CW * c.sc / 2 && Math.abs(ly) < CH * c.sc / 2) { hit = c; break; }
     }
@@ -624,43 +473,30 @@
   cv.addEventListener('pointerdown', pick);
 
   // ---------- Render ----------
+  // The characters are drawn from copies made at their on-screen pixel size with the browser's
+  // best resampling (as the cards), so they stay crisp at 3x and when the mockup is zoomed.
+  function artAt(s, w, h) {
+    var pw = Math.round(w * cv.width / W), ph = Math.round(h * cv.height / H);
+    if (s.bmpW === pw) return s.bmp || s.image;
+    s.bmpW = pw; s.bmp = null;
+    if (window.createImageBitmap && s.image.naturalWidth && pw < s.image.naturalWidth) {
+      createImageBitmap(s.image, { resizeWidth: pw, resizeHeight: ph, resizeQuality: 'high' })
+        .then(function (b) { if (s.bmpW === pw) { if (s.bmp && s.bmp.close) s.bmp.close(); s.bmp = b; } else if (b.close) b.close(); })
+        .catch(function () {});
+    }
+    return s.image;
+  }
   var last = 0, active = false, raf = 0;
-  function glow(x, y, r, col) {
-    var g = ctx.createRadialGradient(x, y, 0, x, y, r);
-    g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
-  }
   function drawSeat(s) {
-    if (s.light <= 0) return;
-    var px = s.pivot[0], py = s.pivot[1], sc = s.sc;
-    if (s.idle) sc *= 1 + .005 * Math.sin(clock * 1.7 + px);
-    if (s.vidReady && s.vidMask.complete && s.vidMask.naturalWidth) {
-      var r = s.video.rect, vc = s.vidCanvas, g = vc.getContext('2d');
-      g.globalCompositeOperation = 'source-over'; g.clearRect(0, 0, vc.width, vc.height);
-      g.drawImage(s.vid, 0, 0, vc.width, vc.height);
-      g.globalCompositeOperation = 'destination-in'; g.drawImage(s.vidMask, 0, 0, vc.width, vc.height);
-      ctx.save(); ctx.globalAlpha = Math.min(1, s.light);
-      ctx.drawImage(vc, r[0], r[1], r[2], r[3]); ctx.restore();
-      return;
-    }
+    if (!s.rect || s.alpha <= 0 || !s.image.naturalWidth) return;
+    var r = s.rect, sc = s.pop;
+    if (s.idle && !reduced) sc *= 1 + .008 * Math.sin(clock * 1.6 + s.phase);   // breathing
     ctx.save();
-    ctx.globalAlpha = Math.min(1, s.light * 1.15);
-    ctx.translate(px + s.dx, py + s.dy); ctx.rotate(s.rot); ctx.scale(sc, sc); ctx.translate(-px, -py);
-    ctx.drawImage(s.sprite, s.crop[0], s.crop[1]);
-    for (var k in s.parts) {
-      var pt = s.parts[k];
-      ctx.save();
-      ctx.translate(pt.p[0] + pt.dx, pt.p[1] + pt.dy); ctx.rotate(pt.rot); ctx.translate(-pt.p[0], -pt.p[1]);
-      ctx.drawImage(pt.sprite, pt.r[0], pt.r[1]);
-      ctx.restore();
-    }
+    ctx.globalAlpha = Math.min(1, s.alpha);
+    ctx.translate(r[0] + r[2] / 2, r[1] + r[3]);   // grows from the bottom middle
+    ctx.scale(s.flip ? -sc : sc, sc);
+    ctx.drawImage(artAt(s, r[2], r[3]), -r[2] / 2, -r[3], r[2], r[3]);
     ctx.restore();
-  }
-  function pool(x, y, rx, ry, a) {
-    sh.save(); sh.translate(x, y); sh.scale(rx, ry);
-    var g = sh.createRadialGradient(0, 0, 0, 0, 0, 1);
-    g.addColorStop(0, 'rgba(0,0,0,' + a + ')'); g.addColorStop(.55, 'rgba(0,0,0,' + a * .75 + ')'); g.addColorStop(1, 'rgba(0,0,0,0)');
-    sh.fillStyle = g; sh.fillRect(-1, -1, 2, 2); sh.restore();
   }
   function frame(now) {
     if (!active) return;
@@ -669,82 +505,39 @@
     ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0);
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.globalAlpha = 1;
-    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-    if (room.complete && room.naturalWidth) ctx.drawImage(room, 0, 0, W, H);
-    IDS.forEach(function (id) { if (SEATS[id].sprite) drawSeat(SEATS[id]); });
+    ctx.clearRect(0, 0, W, H);
 
-    // Room light: a dark veil with warm pools cut out where players sit and over the table.
-    sh.setTransform(1, 0, 0, 1, 0, 0);
-    sh.globalCompositeOperation = 'source-over'; sh.clearRect(0, 0, shade.width, shade.height);
-    sh.fillStyle = 'rgba(10,5,2,' + S.amb + ')'; sh.fillRect(0, 0, shade.width, shade.height);
-    sh.setTransform(.25, 0, 0, .25, 0, 0);
-    sh.globalCompositeOperation = 'destination-out';
-    pool(1000, 525, 620, 330, S.table);
-    pool(40, 260, 330, 330, .5 + .08 * Math.sin(clock * 9));
-    IDS.forEach(function (id) {
-      var s = SEATS[id];
-      if (s.light > 0) pool(s.crop[0] + s.crop[2] / 2, s.crop[1] + s.crop[3] / 2, s.crop[2] * .8, s.crop[3] * .8, .9 * s.light);
-    });
-    ctx.drawImage(shade, 0, 0, W, H);
+    // the cards in the players' hands, then the players in front of them, then everything else
+    var sorted = cards.sort(function (a, b) { return a.z - b.z; });
+    sorted.forEach(function (cd) { if (cd.behind) cd.draw(); });
+    IDS.forEach(function (id) { drawSeat(SEATS[id]); });
+    sorted.forEach(function (cd) { if (!cd.behind) cd.draw(); });
 
     ctx.globalCompositeOperation = 'lighter';
-    var fl = .13 + .05 * Math.sin(clock * 9) + .03 * Math.sin(clock * 23);
-    glow(30, 260, 300, 'rgba(255,140,40,' + fl + ')');
-    glow(1890, 30, 260, 'rgba(255,200,120,' + .12 * S.lamps + ')');
-    glow(1000, 525, 520, 'rgba(255,60,40,' + .05 * S.lamps + ')');
     IDS.forEach(function (id) {
       var s = SEATS[id];
-      if (s.light > 0) glow(s.crop[0] + s.crop[2] / 2, s.crop[1] + s.crop[3] / 2, s.crop[3] * .7, 'rgba(255,190,110,' + .07 * s.light * (1 - S.lamps * .6) + ')');
       if (s.ring > 0 && s.ring < 1) {
-        ctx.strokeStyle = 'rgba(241,212,154,' + .6 * (1 - s.ring) + ')'; ctx.lineWidth = 6 * (1 - s.ring);
+        ctx.strokeStyle = 'rgba(140,190,255,' + .6 * (1 - s.ring) + ')'; ctx.lineWidth = 6 * (1 - s.ring);
         ctx.beginPath(); ctx.ellipse(s.face[0], s.face[1], 40 + 200 * s.ring, 30 + 150 * s.ring, 0, 0, Math.PI * 2); ctx.stroke();
       }
     });
-    var top = SEATS.top;
-    if (top.light > 0 && !top.vidReady) {
-      var c = top.parts.cigar, h = top.parts.head;
-      glow(CIGAR_TIP[0] + c.dx, CIGAR_TIP[1] + c.dy, 10 + 18 * top.glow, 'rgba(255,' + (120 + 40 * top.glow) + ',40,' + (.35 + .55 * top.glow + .08 * Math.sin(clock * 13)) + ')');
-      glow(CYBER_EYE[0] + h.dx, CYBER_EYE[1] + h.dy, 16, 'rgba(255,190,60,' + (.25 + .2 * Math.sin(clock * 2.3)) * top.light + ')');
-    }
-    ctx.globalCompositeOperation = 'source-over';
-
-    cards.sort(function (a, b) { return a.z - b.z; }).forEach(function (cd) { cd.draw(); });
-
-    if (top.idle && !top.vidReady && clock > nextSmoke) {
-      smoke(CIGAR_TIP[0] + top.parts.cigar.dx, CIGAR_TIP[1] + top.parts.cigar.dy, 3);
-      nextSmoke = clock + 1.2 + Math.random();
-    }
     var ds = dt / 1000;
     particles = particles.filter(function (p) { return (p.life += ds) < p.max; });
     particles.forEach(function (p) {
-      if (p.life < 0) return;
       var k = p.life / p.max;
-      if (p.k === 'spark') {
-        p.x += p.vx * ds; p.y += p.vy * ds; p.vx *= .96; p.vy *= .96;
-        ctx.globalCompositeOperation = 'lighter';
-        ctx.fillStyle = 'rgba(255,214,130,' + (1 - k) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
-      } else {
-        p.x += (p.vx + Math.sin(clock * 2 + p.r) * 10) * ds; p.y += p.vy * ds; p.vx *= .99;
-        var r = p.r * (1 + k * 4), g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-        g.addColorStop(0, 'rgba(225,220,212,' + p.a * (1 - k) + ')'); g.addColorStop(1, 'rgba(225,220,212,0)');
-        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, Math.PI * 2); ctx.fill();
-      }
+      p.x += p.vx * ds; p.y += p.vy * ds; p.vx *= .96; p.vy *= .96;
+      ctx.fillStyle = 'rgba(190,220,255,' + (1 - k) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
     });
+    ctx.globalCompositeOperation = 'source-over';
 
-    if (moves.on && clock > moves.next) { moveSomeone(); moves.next = clock + MOVE_EVERY; }
     if (S.black > 0) { ctx.fillStyle = 'rgba(0,0,0,' + S.black + ')'; ctx.fillRect(0, 0, W, H); }
     raf = requestAnimationFrame(frame);
   }
 
-  // ---------- Boot: cut the sprites and paint the deck once the art has loaded ----------
-  var art = [img, room].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
+  // ---------- Boot: wait for the art and the deck ----------
+  var art = IDS.filter(function (id) { return SEATS[id].image; }).map(function (id) { return SEATS[id].image; })
+    .concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
   var booting = Promise.all(art.map(function (im) { return im.decode().catch(function () {}); })).then(function () {
-    IDS.forEach(function (id) {
-      var s = SEATS[id];
-      s.sprite = feathered(s.crop);
-      for (var k in s.parts) s.parts[k].sprite = feathered(s.parts[k].r, .5);
-    });
     faceCache = {}; backCache = {};
   });
 
@@ -752,7 +545,6 @@
   var playBtn = document.querySelector('[data-stage-play]');
   playBtn.addEventListener('click', function () {
     audio();
-    IDS.forEach(function (id) { SEATS[id].vid.load(); });
     // let the "into battle" hit land, then cut to the table
     setTimeout(function () { window.BlotNav.show('table'); }, 700);
   });
@@ -763,7 +555,7 @@
       sizeCanvas();
       resetState();
       cancelAnimationFrame(raf); raf = requestAnimationFrame(frame);
-      audio(); startFire();
+      audio();
       booting.then(function () { if (active) play(); });
     } else if (active) {
       active = false; run++;
@@ -772,13 +564,13 @@
       Object.keys(bubbles).forEach(function (k) { bubbles[k].textContent = ''; });
       if (window.BlotGame) window.BlotGame.stop();
       cancelAnimationFrame(raf);
-      IDS.forEach(function (id) { try { SEATS[id].vid.pause(); } catch (err) {} });
-      stopFire();
     }
   });
 
   // ---------- HUD ----------
-  // The settings gear is gone from the design; Escape still goes back to the stage select (prototype shortcut).
+  // The settings button leaves the table for the stage select (there is no settings screen in the
+  // prototype); Escape does the same.
+  screen.querySelector('[data-table-exit]').addEventListener('click', function () { window.BlotNav.show('play'); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && active) window.BlotNav.show('play'); });
 
   // Score and last trick. A new game starts at 0 : 0 with the "?" slot; the game logic

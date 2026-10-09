@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Blot Bazar — прототип</title>
+<title>Blot Bazar — прототип (новый стол)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#000000">
@@ -192,17 +192,18 @@
       <section class="screen screen--table table" data-screen-id="table">
         <canvas class="tb-canvas" aria-label="Игровой стол: игроки садятся, сдаются карты"></canvas>
 
-        <!-- UI (Figma: Mansion Table Example, nodes 1886:2519 before the first trick, 1886:1866 after) -->
+        <!-- UI (Figma: "Table - In Play", node 1868:456) -->
         <div class="tb-ui">
-          <!-- last trick: a "?" slot until a trick has been taken, then its four cards -->
+          <!-- settings (leaves the table in the prototype) and the last trick, top left -->
+          <button class="tb-icon tb-icon--gear" type="button" data-table-exit aria-label="Настройки">
+            <img src="assets/table/hud/gear.svg" alt="" style="left:-.99px;top:1.01px;width:41.99px;height:41.99px">
+          </button>
           <div class="tb-trick" aria-label="Последняя взятка">
-            <div class="tb-trick_empty" data-trick-empty><span>?</span></div>
             <div class="tb-trick_cards" data-trick-cards hidden></div>
+            <div class="tb-trick_empty" data-trick-empty><i></i><i></i><i></i><i></i></div>
           </div>
 
           <div class="tb-score" aria-label="Счёт">
-            <img class="tb-panel_bg" src="assets/table/ui/score-bg.webp" alt="">
-            <span class="tb-score_shine" aria-hidden="true"></span>
             <div class="tb-score_cell">
               <p class="tb-score_label">US</p>
               <p class="tb-score_value" data-score="us"><span><b>0</b><small>/301</small></span><span aria-hidden="true"><b>0</b><small>/301</small></span></p>
@@ -214,28 +215,35 @@
             </div>
           </div>
 
-          <!-- players: avatar (Vazgen1972 still has the placeholder), nickname, level badge (Figma 1899:1362, 1888:3560, 1899:1374) -->
-          <div class="tb-plate tb-plate--left" data-plate="left"><img class="tb-plate_avatar" src="assets/table/ui/avatar-hasmikg.webp" alt=""><p><b>HasmikG</b><span class="tb-badge"><span class="tb-lvl" data-text="LV. 16">LV. 16</span></span></p></div>
-          <div class="tb-plate tb-plate--top" data-plate="top"><img class="tb-plate_avatar" src="assets/table/ui/avatar-garikav.webp" alt=""><p><b>GarikAv</b><span class="tb-badge"><span class="tb-lvl" data-text="LV. 16">LV. 16</span></span></p></div>
-          <div class="tb-plate tb-plate--right tb-plate--blue" data-plate="right"><img class="tb-plate_avatar" src="assets/table/ui/avatar-placeholder.webp" alt=""><p><b>Vazgen1972</b><span class="tb-badge"><span class="tb-lvl" data-text="LV. 54">LV. 54</span></span></p></div>
+          <!-- nameplates (the characters are drawn on the canvas); the lit one with the timer is whose turn it is -->
+          <div class="tb-plate tb-plate--left" data-plate="left"><span data-text="Georgi2001">Georgi2001</span><i class="tb-plate_timer"></i></div>
+          <div class="tb-plate tb-plate--top" data-plate="top"><span data-text="Vazgen1972">Vazgen1972</span><i class="tb-plate_timer"></i></div>
+          <div class="tb-plate tb-plate--right" data-plate="right"><span data-text="GarikAv">GarikAv</span><i class="tb-plate_timer"></i></div>
+          <div class="tb-plate tb-plate--bottom" data-plate="bottom"><span data-text="Artexcb">Artexcb</span><i class="tb-plate_timer"></i></div>
 
-          <!-- each player's bid next to them; after the bidding only the contract stays (Figma 1889:3622) -->
+          <!-- each player's bid next to them; after the bidding only the contract stays -->
           <div class="tb-chip tb-chip--left" data-chip="left" hidden></div>
           <div class="tb-chip tb-chip--top" data-chip="top" hidden></div>
           <div class="tb-chip tb-chip--right" data-chip="right" hidden></div>
           <div class="tb-chip tb-chip--bottom" data-chip="bottom" hidden></div>
 
-          <!-- your bid: styled like the app's modals (Figma 1821:5120, "Game settings"), everything centred:
-               value and Kaput, the trump tiles, then Pass and Contra / Sur (8px apart, like value and Kaput) -->
+          <!-- your bid: the app's modal style (Figma 1821:5120), low enough to fit above your hand and
+               centred: value and Kaput | Pass and Contra / Sur (8px apart in each pair), then the trump tiles -->
           <div class="tb-panel tb-bid" data-bid hidden>
-            <p class="tb-panel_title">Your bid</p>
             <div class="tb-bid_row">
-              <div class="tb-step">
-                <button class="tb-step_btn" type="button" data-bid-minus aria-label="Less">−</button>
-                <span class="tb-step_value" data-bid-value>8</span>
-                <button class="tb-step_btn" type="button" data-bid-plus aria-label="More">+</button>
+              <div class="tb-bid_pair">
+                <div class="tb-step">
+                  <button class="tb-step_btn" type="button" data-bid-minus aria-label="Less">−</button>
+                  <span class="tb-step_value" data-bid-value>8</span>
+                  <button class="tb-step_btn" type="button" data-bid-plus aria-label="More">+</button>
+                </div>
+                <button class="tb-key tb-key--toggle" type="button" data-bid-kaput aria-pressed="false">Kaput</button>
               </div>
-              <button class="tb-key tb-key--toggle" type="button" data-bid-kaput aria-pressed="false">Kaput</button>
+              <div class="tb-bid_pair">
+                <button class="tb-key" type="button" data-bid-pass>Pass</button>
+                <button class="tb-key tb-key--red" type="button" data-bid-contra hidden>Contra</button>
+                <button class="tb-key tb-key--red" type="button" data-bid-sur hidden>Sur</button>
+              </div>
             </div>
             <div class="tb-bid_suits">
               <button class="tb-tile" type="button" data-bid-suit="C" aria-label="Clubs"><i data-s="C"></i><span data-bid-label>8</span></button>
@@ -243,11 +251,6 @@
               <button class="tb-tile" type="button" data-bid-suit="H" aria-label="Hearts"><i data-s="H"></i><span data-bid-label>8</span></button>
               <button class="tb-tile" type="button" data-bid-suit="S" aria-label="Spades"><i data-s="S"></i><span data-bid-label>8</span></button>
               <button class="tb-tile" type="button" data-bid-suit="NT" aria-label="No trump"><i data-s="NT">NT</i><span data-bid-label>8</span></button>
-            </div>
-            <div class="tb-bid_row">
-              <button class="tb-key" type="button" data-bid-pass>Pass</button>
-              <button class="tb-key tb-key--red" type="button" data-bid-contra hidden>Contra</button>
-              <button class="tb-key tb-key--red" type="button" data-bid-sur hidden>Sur</button>
             </div>
           </div>
 
@@ -257,20 +260,16 @@
             <button class="tb-key tb-key--primary tb-result_next" type="button" data-result-next>Next round</button>
           </div>
 
-          <!-- bottom bar (Figma 1893:716): chat, reactions | info -->
+          <!-- bottom bar: chat, reactions | info -->
           <div class="tb-bottom">
-            <button class="tb-btn tb-btn--lg" type="button" data-social="chat" aria-label="Чат" aria-expanded="false">
-              <span class="tb-btn_in">
-                <img class="tb-btn_icon" src="assets/table/ui/chat-web.svg" alt="" style="left:-.94px;top:1.07px;width:41.88px;height:41.87px">
-              </span>
+            <button class="tb-icon" type="button" data-social="chat" aria-label="Чат" aria-expanded="false">
+              <img src="assets/table/hud/chat.svg" alt="" style="left:-.94px;top:1.07px;width:41.88px;height:41.87px">
             </button>
-            <button class="tb-btn tb-btn--lg tb-btn--face" type="button" data-social="react" aria-label="Реакции" aria-expanded="false">
-              <img src="assets/table/ui/react-face.webp" alt="">
+            <button class="tb-icon" type="button" data-social="react" aria-label="Реакции" aria-expanded="false">
+              <img src="assets/table/hud/thumbs.svg" alt="" style="left:-1.63px;top:.38px;width:43.25px;height:41.19px">
             </button>
-            <button class="tb-btn tb-btn--lg tb-btn--info" type="button" data-table-info aria-label="Информация">
-              <span class="tb-btn_in">
-                <img class="tb-btn_icon" src="assets/table/ui/info-web.svg" alt="" style="left:-.94px;top:1.06px;width:41.88px;height:41.88px">
-              </span>
+            <button class="tb-icon tb-icon--info" type="button" data-table-info aria-label="Информация">
+              <img src="assets/table/hud/info.svg" alt="" style="left:-.94px;top:1.06px;width:41.88px;height:41.88px">
             </button>
             <div class="tb-pop tb-pop--chat" data-pop="chat" hidden>
               <button type="button">Good luck!</button>

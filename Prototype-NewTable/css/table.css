@@ -1,6 +1,7 @@
-/* Game table: one canvas with the 2000x923 salon scene stretched over the 852x393 screen
-   (the same 19.5:9 shape), drawn by js/table.js, with the HUD from Figma
-   ("Mansion Table Example", nodes 1886:2519 / 1886:1866) on top. Positions and sizes are Figma values. */
+/* Game table, new layout: Figma "Table - In Play" (node 1868:456), 852x393.
+   The canvas (js/table.js) draws the characters, their card fans and all the cards in scene
+   coordinates of 2000x923 (the same 19.5:9 shape); the background and the HUD are HTML.
+   Positions and sizes are Figma values. */
 
 @font-face {
   font-family: "Poppins";
@@ -10,7 +11,9 @@
   src: url("../assets/fonts/poppins-700-normal.woff2") format("woff2");
 }
 
-.table { background: #000; overflow: hidden; font-family: "Poppins", sans-serif; }
+/* dark navy cloth with the ornamental frame (Figma "table design": #0e0e11, the surface at 30%
+   in lighten and the colour art in color blend, flattened into one picture) */
+.table { background: #0e0e11 url("../assets/table/bg.webp") center / 100% 100% no-repeat; overflow: hidden; font-family: "Poppins", sans-serif; }
 .tb-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: manipulation; }
 .table p { margin: 0; }
 .table img { display: block; max-width: none; }
@@ -19,79 +22,53 @@
 .tb-ui { position: absolute; inset: 0; pointer-events: none; }
 .tb-ui > * { pointer-events: auto; }
 
-/* ---- panels: the backgrounds are the full Figma exports incl. their drop shadow,
-   so they sit 20px left / 18px up of the panel box */
-.tb-panel_bg { position: absolute; left: -20px; top: -18px; pointer-events: none; }
+/* ---- 40px icon buttons (settings, chat, reactions, info): the uploaded button art
+   (dark navy, inner shadow, light rim) with the Figma icon on top */
+.table .tb-icon { width: 40px; height: 40px; flex: none; background: url("../assets/table/hud/button.webp") 0 0 / 40px 40px no-repeat; transition: transform .12s ease, filter .15s ease; }
+.tb-icon img { position: absolute; filter: drop-shadow(0 0 2px #000) drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
+.table .tb-icon:active { transform: scale(.94); }
+.table .tb-icon[aria-expanded="true"] { filter: brightness(1.35); }
+.table .tb-icon--gear { position: absolute; left: 20px; top: 20px; }
 
-/* ---- last trick, top left (no panel) */
-/* the HUD keeps the same 24px from every edge of the screen */
-.tb-trick { position: absolute; left: 24px; top: 24px; height: 40px; }
+/* ---- last trick: 120x50 outlined box right of the gear, four small cards (23.7x33, 3px apart) */
+.tb-trick {
+  position: absolute;
+  left: 72px;
+  top: 20px;
+  width: 120px;
+  height: 50px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 4px;
+}
+.tb-trick_cards, .tb-trick_empty { display: flex; gap: 3px; }
 .tb-trick_cards[hidden], .tb-trick_empty[hidden] { display: none; }
-.tb-trick_cards { display: flex; gap: 3.529px; }
-/* the card PNGs have transparent rounded corners, so the shadow is a drop-shadow on the art */
-.tb-mini { display: block; width: 27.882px; height: 39.035px; filter: drop-shadow(0 2.353px 5px rgba(0, 0, 0, .8)); animation: tb-mini .3s ease backwards; }
+.tb-mini { display: block; width: 23.7px; height: 33.18px; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .6)); animation: tb-mini .3s ease backwards; }
 .tb-mini:nth-child(2) { animation-delay: .05s; }
 .tb-mini:nth-child(3) { animation-delay: .1s; }
 .tb-mini:nth-child(4) { animation-delay: .15s; }
 @keyframes tb-mini { from { opacity: 0; transform: translateY(-6px) scale(.8); } }
-/* before the first trick: a dark slot with a "?" */
-.tb-trick_empty { position: relative; width: 27.882px; height: 38.824px; border-radius: 1.765px; background: rgba(0, 0, 0, .5); }
-.tb-trick_empty span {
-  position: absolute;
-  left: calc(50% - .44px);
-  top: calc(50% - 10.41px);
-  transform: translateX(-50%);
-  font-weight: 700;
-  font-size: 12px;
-  line-height: 20px;
-  color: rgba(255, 255, 255, .3);
-}
+/* before the first trick: four empty slots */
+.tb-trick_empty i { width: 23.7px; height: 33px; border-radius: 1.5px; background: rgba(255, 255, 255, .05); }
 
-/* score: 145x50, top right */
-.tb-score { position: absolute; right: 24px; top: 24px; width: 145px; height: 50px; display: flex; align-items: center; padding: 6px 8px; box-sizing: border-box; }
-.tb-score .tb-panel_bg { width: 185px; height: 90px; }
-/* the score panel lives a little: its colour drifts and a light runs along it now and then */
-.tb-score .tb-panel_bg { animation: tb-score-hue 9s ease-in-out infinite alternate; }
-@keyframes tb-score-hue {
-  0% { filter: hue-rotate(-12deg) brightness(.95); }
-  50% { filter: hue-rotate(8deg) brightness(1.08) saturate(1.15); }
-  100% { filter: hue-rotate(22deg) brightness(1); }
-}
-.tb-score_shine {
+/* ---- score: 141x50 outlined box, top right */
+.tb-score {
   position: absolute;
-  inset: 0;
+  right: 20px;
+  top: 20px;
+  min-width: 141px;   /* grows to the left for three-digit scores */
+  height: 50px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, .2);
   border-radius: 4px;
-  overflow: hidden;
-  pointer-events: none;
 }
-/* a sweep across the panel ... */
-.tb-score_shine::before {
-  content: "";
-  position: absolute;
-  top: -10px;
-  bottom: -10px;
-  left: -60px;
-  width: 40px;
-  background: linear-gradient(90deg, rgba(160, 210, 255, 0), rgba(190, 225, 255, .35), rgba(160, 210, 255, 0));
-  transform: skewX(-20deg);
-  animation: tb-sweep 6s ease-in-out 2s infinite;
-}
-/* ... and along the stroke */
-.tb-score_shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 4px;
-  padding: 1.5px;
-  background: linear-gradient(110deg, rgba(120, 220, 255, 0) 35%, #bff0ff 50%, rgba(120, 220, 255, 0) 65%) -150% 0 / 300% 100% no-repeat;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-  animation: tb-stroke 6s ease-in-out 2s infinite;
-}
-@keyframes tb-sweep { 0% { left: -60px; } 30%, 100% { left: 170px; } }
-@keyframes tb-stroke { 0% { background-position: 150% 0; } 30%, 100% { background-position: -150% 0; } }
-.tb-score_cell { position: relative; width: 64px; height: 100%; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; white-space: nowrap; text-align: center; }
+.tb-score_cell { position: relative; flex: 1 0 auto; min-width: 64px; padding: 0 4px; box-sizing: border-box; height: 100%; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; white-space: nowrap; text-align: center; }
 .tb-score_label { font-weight: 600; font-size: 10px; line-height: 10px; color: #fff; opacity: .45; }
 .tb-score_value { position: relative; font-weight: 700; line-height: 20px; }
 .tb-score_value b { font-weight: 700; font-size: 20px; }
@@ -111,27 +88,100 @@
   background-clip: text;
   color: transparent;
 }
-.tb-score_divider { position: relative; width: 1px; height: 30px; background: rgba(255, 255, 255, .2); }
+.tb-score_divider { width: 1px; height: 30px; flex: none; background: #303030; }
 
-/* ---- bottom bar (Figma 1893:716): chat and reactions on the left, info on the right. */
-.tb-bottom { position: absolute; left: 24px; right: 24px; bottom: 24px; height: 48px; display: flex; align-items: flex-start; gap: 12px; }
+/* ---- nameplates: the uploaded 104x33 metal plate; lit (blue gems + timer bar) on its owner's turn */
+.tb-plate {
+  position: absolute;
+  width: 104px;
+  height: 32.44px;
+  background: url("../assets/table/hud/plate.svg") 0 0 / 104px 32.44px no-repeat;
+  pointer-events: none;
+}
+.tb-plate.is-turn { background-image: url("../assets/table/hud/plate-turn.svg"); }
+.tb-plate--left { left: 51px; top: 228px; }
+.tb-plate--top { left: 374px; top: 106px; }
+.tb-plate--right { left: 697px; top: 226px; }
+.tb-plate--bottom { left: 372px; top: 344px; }
+/* nickname: Poppins SemiBold 12, white to 80% white with a 1px shadow (two copies, as the score) */
+.tb-plate span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8.4px;
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 14.4px;
+  letter-spacing: -.24px;
+  text-align: center;
+  white-space: nowrap;
+  color: transparent;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, .8);
+}
+.tb-plate span::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  text-shadow: none;
+  background: linear-gradient(180deg, #fff, rgba(255, 255, 255, .8));
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* turn timer: the blue bar along the bottom of the lit plate, running down */
+.tb-plate_timer {
+  position: absolute;
+  left: 11.03px;
+  top: 27.67px;
+  width: 81.94px;
+  height: 1.59px;
+  background: linear-gradient(90deg, #4190ff, #fff);
+  box-shadow: 0 -1px 4px rgba(27, 112, 230, .5);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  opacity: 0;
+}
+.tb-plate.is-turn .tb-plate_timer { opacity: 1; animation: tb-timer 20s linear forwards; }
+@keyframes tb-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* ---- bid chips (Figma "Container 01"): grey frosted pill, the suit in a cream circle, the value */
+.tb-chip {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4.8px;
+  padding: 2.4px 7.2px 2.4px 4.8px;
+  border-radius: 120px;
+  background: rgba(182, 182, 182, .2);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14.4px;
+  line-height: 21.6px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: tb-chip .3s cubic-bezier(.34, 1.56, .64, 1);
+}
+.tb-chip[hidden] { display: none; }
+/* next to each character's head (Figma 104/160.8 for the left one, +24 px like the side players), and right of your nameplate */
+.tb-chip--left { left: 128px; top: 160.8px; }
+.tb-chip--top { left: 451px; top: 39.8px; }
+.tb-chip--right { right: 128px; top: 159.8px; }
+.tb-chip--bottom { left: 484px; top: 349px; }
+.tb-chip i { width: 16.8px; height: 16.8px; font-size: 7.5px; line-height: 16.8px; }
+.tb-chip small { font-size: 11px; color: #ffd66b; }
+.tb-chip.is-pass { font-size: 12px; padding-left: 8px; color: rgba(255, 255, 255, .7); }
+@keyframes tb-chip { from { opacity: 0; transform: scale(.6); } }
+
+.tb-suit { color: #fff; }
+.tb-suit.is-red { color: #ff5a5a; }
+
+/* ---- bottom bar: chat and reactions on the left, info on the right, 20px from the edges */
+.tb-bottom { position: absolute; left: 20px; right: 20px; bottom: 21px; height: 40px; display: flex; align-items: flex-start; gap: 12px; }
 /* the bar spans the full width over your cards: only its buttons and popovers take taps */
 .tb-ui > .tb-bottom { pointer-events: none; }
 .tb-bottom > * { pointer-events: auto; }
-/* plain semi-transparent boxes */
-.table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; background: rgba(0, 0, 0, .5); transition: background-color .15s ease; }
-.tb-btn--info { margin-left: auto; }
-/* the bottom buttons are 48px: the 40px Figma button scaled 1.2x */
-.table .tb-btn--lg { width: 48px; height: 48px; border-radius: 9.6px; }
-.tb-btn_in { position: absolute; left: 4px; top: 4px; width: 40px; height: 40px; transform: scale(1.2); }
-.tb-btn_icon { position: absolute; filter: brightness(1.15) drop-shadow(0 0 2px #000) drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
-.table .tb-btn:active { transform: scale(.94); }
-.table .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, .75); }
-/* reactions: no box, the laughing face itself is the 48px icon */
-.table .tb-btn--face { overflow: visible; background: none; transition: transform .15s ease; }
-.tb-btn--face img { width: 48px; height: 48px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .7)); }
-.table .tb-btn--face[aria-expanded="true"] { background: none; transform: scale(1.08); }
-.table .tb-btn--face:active { transform: scale(.94); }
+.tb-icon--info { margin-left: auto; }
 
 /* popovers: the app's modal surface */
 .tb-pop {
@@ -151,20 +201,20 @@
 .tb-pop[hidden] { display: none; }
 /* the chat list starts right of the island (the screen's left 48px are under it in landscape) */
 .tb-pop--chat { left: 28px; flex-direction: column; min-width: 128px; }
-.tb-pop--react { left: 60px; }
+.tb-pop--react { left: 52px; }
 .table .tb-pop--chat button { padding: 7px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; line-height: 18px; text-align: left; color: rgba(255, 255, 255, .95); white-space: nowrap; }
 .table .tb-pop--chat button:hover, .table .tb-pop--chat button:active { background: rgba(255, 255, 255, .05); }
 .table .tb-pop--react button { width: 36px; height: 36px; border-radius: 4px; font-size: 22px; line-height: 36px; }
 .table .tb-pop--react button:hover { background: rgba(255, 255, 255, .05); }
 .table .tb-pop--react button:active { transform: scale(.85); }
 
-/* speech bubbles above the seats: bids, combinations, chat, reactions */
+/* speech bubbles by the players: bids, combinations, chat, reactions */
 .tb-say { position: absolute; inset: 0; pointer-events: none; }
 .tb-bubble { position: absolute; transform: translate(-50%, 0); display: flex; justify-content: center; }
-.tb-bubble--bottom { left: 426px; top: 262px; }
-.tb-bubble--left { left: 128px; top: 118px; }
-.tb-bubble--top { left: 548px; top: 30px; }
-.tb-bubble--right { left: 740px; top: 118px; }
+.tb-bubble--bottom { left: 426px; top: 232px; }
+.tb-bubble--left { left: 136px; top: 106px; }
+.tb-bubble--top { left: 556px; top: 28px; }
+.tb-bubble--right { left: 748px; top: 102px; }
 /* everything a player says is a white cloud with a tail towards them (above the side players
    and your hand, to the left for the top player, whose cloud sits beside his head) */
 .tb-say_line {
@@ -206,132 +256,16 @@
 .tb-say_line--hint::after { display: none; }
 .tb-say_emoji { font-size: 44px; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .6)); animation: tb-emoji 2s ease forwards; }
 
-/* ---- player nameplates: dark fade, rank badge, nickname and level */
-.tb-plate {
-  position: absolute;
-  height: 50px;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 7px 11px 7px 9px;   /* Figma 6/10/8 inside a 1px stroke */
-  border-radius: 4px;
-  /* thin white lines along the top and bottom (the stroke fades out at the ends) over the dark fade */
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .8) 50%, rgba(255, 255, 255, 0)) top / 100% 1px no-repeat,
-    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .8) 50%, rgba(255, 255, 255, 0)) bottom / 100% 1px no-repeat,
-    linear-gradient(90deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, .5) 25%, #000 50%, rgba(0, 0, 0, .5) 75%, rgba(0, 0, 0, 0) 100%);
-  pointer-events: none;
-}
-.tb-plate--left { left: 80px; top: 232px; }
-.tb-plate--top { left: 371px; top: 82px; }
-.tb-plate--right { left: 658.5px; top: 232px; }
-.tb-plate_avatar { width: 36px; height: 36px; flex: none; object-fit: cover; }
-.tb-plate p { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; white-space: nowrap; }
-/* level badge (44x17): the uploaded orange / blue textured plates behind the text */
-.tb-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 17px;
-  min-width: 41px;
-  box-sizing: border-box;
-  padding: 2px 6px;
-  border-radius: 2px;
-  background: url("../assets/table/ui/level-orange.png") center / 100% 100% no-repeat;
-}
-.tb-plate--blue .tb-badge { background-image: url("../assets/table/ui/level-blue.png"); }
-.tb-plate b { font-weight: 700; font-size: 12px; line-height: 16px; color: #fff; text-shadow: 0 1px 4px #000; }
-/* level: white-to-orange gradient (blue for the right player, as in Figma) with a soft glow.
-   The glow is a text-shadow on a transparent base, the gradient a copy on top (Safari drops
-   shadows under background-clip:text). */
-.tb-plate { --lvl: #e07c46; }
-.tb-plate--blue { --lvl: #89caff; }
-.tb-lvl {
-  position: relative;
-  font-weight: 700;
-  font-size: 10px;
-  line-height: 12px;
-  color: transparent;
-  text-shadow: 0 8px 4px rgba(0, 0, 0, .6), 0 2px 4px rgba(0, 0, 0, .5);
-}
-.tb-lvl::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  text-shadow: none;
-  background: linear-gradient(180deg, #fff, var(--lvl));
-  -webkit-background-clip: text;
-  background-clip: text;
-}
-
-/* whose turn it is: thin blue lines light up along the top and bottom edge of the nameplate,
-   fading out at the ends like the plate itself */
-.tb-plate::before,
-.tb-plate::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, rgba(92, 160, 255, 0) 0%, #5ca0ff 22%, #e2f1ff 50%, #5ca0ff 78%, rgba(92, 160, 255, 0) 100%);
-  box-shadow: 0 0 6px #5ca0ff, 0 0 16px rgba(92, 160, 255, .7);
-  opacity: 0;
-  transition: opacity .25s ease;
-  pointer-events: none;
-}
-.tb-plate::before { top: 0; }
-.tb-plate::after { bottom: 0; }
-.tb-plate.is-turn::before,
-.tb-plate.is-turn::after { opacity: 1; animation: tb-turn 1s ease-in-out infinite alternate; }
-@keyframes tb-turn { from { opacity: .65; } to { opacity: 1; } }
-
-/* ---- bid chips: blurred dark pill, suit in a cream circle, value */
-.tb-chip {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: 4.8px;
-  padding: 2.4px 7.2px 2.4px 4.8px;
-  border-radius: 120px;
-  background: rgba(0, 0, 0, .5);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
-  color: #fff;
-  font-weight: 600;
-  font-size: 14.4px;
-  line-height: 22px;
-  white-space: nowrap;
-  pointer-events: none;
-  animation: tb-chip .3s cubic-bezier(.34, 1.56, .64, 1);
-}
-.tb-chip[hidden] { display: none; }
-.tb-chip--left { left: 172px; top: 154px; }
-.tb-chip--top { left: 478px; top: 90px; }
-.tb-chip--right { right: 172px; top: 154px; }
-.tb-chip--bottom { left: 50%; top: 282px; transform: translateX(-50%); }
-.tb-chip i { width: 16.8px; height: 16.8px; font-size: 7.5px; line-height: 16.8px; }
-.tb-chip small { font-size: 11px; color: #ffd66b; }
-.tb-chip.is-pass { opacity: .7; font-size: 12px; padding-left: 8px; }
-@keyframes tb-chip { from { opacity: 0; transform: scale(.6); } }
-.tb-chip--bottom { animation-name: tb-chip-c; }
-@keyframes tb-chip-c { from { opacity: 0; transform: translateX(-50%) scale(.6); } }
-
-.tb-suit { color: #fff; }
-.tb-suit.is-red { color: #ff5a5a; }
-
 /* ---- panels: bidding and round result, in the app's modal style (Figma 1821:5120,
    "Game settings" 1821:4970): navy surface, hairline border, dark inset tiles with a blue
-   selected state, 30px buttons with the matte diamond texture. The bid panel fits between
-   the nameplates, the side piles and your hand: 316 wide, 136..318 tall. */
+   selected state, buttons with the matte diamond texture. */
 .tb-panel {
   position: absolute;
   left: 50%;
-  top: 227px;
+  top: 205px;
   transform: translate(-50%, -50%);
-  width: 316px;
   box-sizing: border-box;
-  padding: 12px 16px;
+  padding: 12px 16px 14px;
   border: 1px solid rgba(255, 255, 255, .1);
   border-radius: 8px;
   background: linear-gradient(180deg, #0d1828, #01152f 57.3%);
@@ -342,7 +276,7 @@
 }
 .tb-panel[hidden] { display: none; }
 @keyframes tb-panel { from { opacity: 0; transform: translate(-50%, -50%) scale(.9); } }
-.tb-panel_title { font-weight: 600; font-size: 16px; line-height: 20px; }
+.tb-panel_title { font-weight: 600; font-size: 16px; line-height: 22px; }
 
 .table .tb-panel button { transition: opacity .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .table .tb-panel button:disabled { opacity: .35; cursor: default; }
@@ -355,6 +289,7 @@
   padding: 0 14px;
   box-sizing: border-box;
   overflow: hidden;
+  isolation: isolate;
   border: 1px solid rgba(168, 204, 255, .4);
   border-radius: 4px;
   background: #000c1c;
@@ -376,13 +311,15 @@
   mask: linear-gradient(180deg, transparent, #000 41%);
   box-shadow: inset 0 4px 4px rgba(0, 0, 0, .5);
 }
-.table .tb-key { isolation: isolate; }
 .table .tb-key--primary, .table .tb-key--toggle[aria-pressed="true"] { border-color: #5ca0ff; box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 2px 8px #074baa; }
 .table .tb-key--red { border-color: rgba(255, 138, 138, .6); background: #1a0610; box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 2px 8px rgba(170, 7, 30, .55); color: #ffd2d2; }
 .tb-key--red::before { filter: hue-rotate(135deg); opacity: .55; }
 
-/* value and Kaput, and Pass and Contra / Sur: centred rows, 8px apart; the buttons share one width */
-.tb-bid_row { margin-top: 8px; display: flex; gap: 8px; justify-content: center; }
+/* bid panel: wide and low, between the top player's nameplate and your hand (434 x 120,
+   y 145..265), everything centred: value and Kaput | Pass and Contra / Sur, then the trump tiles */
+.tb-bid { width: 434px; padding: 12px 14px; }
+.tb-bid_row { display: flex; gap: 16px; justify-content: center; }
+.tb-bid_pair { display: flex; gap: 8px; }
 .table .tb-bid .tb-key { width: 84px; height: 30px; padding: 0; line-height: 28px; }
 /* value stepper: one inset dark tile, − value + */
 .tb-step {
@@ -401,15 +338,15 @@
 .tb-step_value.is-off { font-size: 12px; color: rgba(255, 255, 255, .5); }
 
 /* trump: one tile per suit (the Game-settings tiles), tap to bid; the pill shows the value */
-.tb-bid_suits { margin-top: 8px; display: flex; gap: 6px; }
+.tb-bid_suits { margin-top: 8px; display: flex; gap: 8px; }
 .table .tb-tile {
   flex: 1;
-  height: 52px;
+  height: 56px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
   border: 1px solid rgba(255, 255, 255, .06);
   border-radius: 8px;
   background: #061427;
@@ -452,14 +389,14 @@
 .table .tb-tile:not(:disabled):active { border-color: #5ca0ff; box-shadow: 0 2px 2px rgba(0, 3, 8, .4), inset 0 2px 8px #074baa; }
 
 /* round result: Us and Them as tiles, the side that took the round selected. Shown once the
-   hands are empty, so it can be wider (380) and lower; it stays clear of the nameplates. */
-.tb-result { top: 240px; width: 380px; }
+   hands are empty, so it can be taller; it stays between the top and the bottom nameplates. */
+.tb-result { top: 241px; width: 380px; padding: 10px 16px 12px; }
 .tb-result_title { font-weight: 600; font-size: 16px; line-height: 22px; }
 .tb-result_line { font-weight: 600; font-size: 11px; line-height: 18px; color: rgba(255, 255, 255, .6); }
 .tb-result_tag { display: inline-block; margin-left: 4px; padding: 0 8px; border-radius: 100px; font-weight: 600; font-size: 10px; line-height: 16px; vertical-align: 1px; }
 .tb-result_tag.is-made { background: rgba(64, 214, 120, .16); color: #7dffa0; }
 .tb-result_tag.is-down { background: rgba(255, 90, 90, .16); color: #ff8a8a; }
-.tb-result_sides { margin-top: 8px; display: flex; gap: 8px; }
+.tb-result_sides { margin-top: 6px; display: flex; gap: 8px; }
 .tb-result_side {
   flex: 1;
   padding: 6px 8px 8px;
@@ -476,7 +413,7 @@
 .tb-result_side p { font-weight: 600; font-size: 10px; line-height: 14px; color: rgba(255, 255, 255, .8); }
 .tb-result_side p em { font-style: normal; color: #7dffa0; }
 .tb-result_side .tb-result_from { color: rgba(255, 255, 255, .45); }
-.table .tb-result_next { margin-top: 10px; width: 100%; }
+.table .tb-result_next { margin-top: 8px; width: 100%; }
 
 @keyframes tb-pop { from { opacity: 0; transform: scale(.6); } }
 @keyframes tb-say {
@@ -493,20 +430,21 @@
   100% { opacity: 0; transform: translateY(-40px) scale(.9); }
 }
 
-/* ---- entrance: the HUD comes in once the room has faded up */
-/* hidden until the first hand is dealt (a nameplate shows when its player sits down) */
+/* ---- entrance: a nameplate shows when its player sits down; the rest of the HUD comes in
+   once the first hand is dealt */
 .tb-plate { opacity: 0; transition: opacity .5s ease; }
 .tb-plate.is-on { opacity: 1; }
-.tb-trick, .tb-score, .tb-bottom { opacity: 0; }
+.tb-icon--gear, .tb-trick, .tb-score, .tb-bottom { opacity: 0; }
 .table:not(.tb-enter) .tb-bottom > * { pointer-events: none; }
-.tb-enter .tb-trick, .tb-enter .tb-score { animation: tb-drop .45s cubic-bezier(.34, 1.4, .64, 1) forwards; }
-.tb-enter .tb-score { animation-delay: .08s; }
+.tb-enter .tb-icon--gear, .tb-enter .tb-trick, .tb-enter .tb-score { animation: tb-drop .45s cubic-bezier(.34, 1.4, .64, 1) forwards; }
+.tb-enter .tb-trick { animation-delay: .05s; }
+.tb-enter .tb-score { animation-delay: .1s; }
 .tb-enter .tb-bottom { animation: tb-rise .45s cubic-bezier(.34, 1.4, .64, 1) .16s forwards; }
 @keyframes tb-drop { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
 @keyframes tb-rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .tb-score .tb-panel_bg, .tb-score_shine::before, .tb-score_shine::after { animation: none; }
-  .tb-trick, .tb-score, .tb-bottom { opacity: 1; animation: none !important; }
+  .tb-icon--gear, .tb-trick, .tb-score, .tb-bottom { opacity: 1; animation: none !important; }
   .tb-plate { transition: none; }
+  .tb-plate.is-turn .tb-plate_timer { animation: none; transform: scaleX(1); }
 }
