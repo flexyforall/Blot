@@ -332,12 +332,12 @@
     var f = SEATS[id].fan, a = (f.a + k * FAN_STEP) * Math.PI / 180;
     return { x: f.p[0] + Math.sin(a) * FAN_R, y: f.p[1] - Math.cos(a) * FAN_R, rot: a, sc: FAN_SC };
   }
-  // your hand: an arc like the mockup's, 37 px apart, 6 degrees between cards; it sits 22 px
-  // lower while the bid window is open, so the window in the middle does not cover your cards
+  // your hand: a slight arc, 37 px apart, 2.4 degrees between cards (the outer ones dip ~6 px);
+  // it sits 22 px lower while the bid window is open, so the window in the middle does not cover it
   var handDrop = 0;
   function handAt(i, n) {
-    var k = i - (n - 1) / 2, a = k * .105;
-    return { x: 1000 + k * 87, y: 730 + handDrop + 915 * (1 - Math.cos(a)), rot: a };
+    var k = i - (n - 1) / 2, a = k * .042;
+    return { x: 1000 + k * 87, y: 730 + handDrop + 1500 * (1 - Math.cos(a)), rot: a };
   }
 
   var view = {
