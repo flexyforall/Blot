@@ -84,29 +84,19 @@
           </nav>
         </header>
 
-        <div class="lb-modes">
-          <button class="lb-mode lb-mode--training" type="button">
-            <img class="lb-mode_tile" src="assets/lobby/figma/card-tile.webp" alt="">
-            <img class="lb-mode_art" src="assets/lobby/figma/training.webp" alt="">
-            <div class="lb-mode_ellipses"><img src="assets/lobby/figma/ellipses-training.svg" alt=""></div>
-            <div class="lb-mode_text">
-              <div class="lb-mode_copy">
-                <p class="lb-mode_title">Training Game</p>
-                <p class="lb-mode_sub">Play with bots to master Blot</p>
-              </div>
-            </div>
-            <span class="lb-mode_dim"></span>
-          </button>
-
-          <div class="lb-top">
-            <div class="lb-top_plate"></div>
-            <div class="lb-top_tile"><img src="assets/lobby/figma/card-tile.webp" alt=""></div>
-            <div class="lb-top_art"><img src="assets/lobby/figma/online-art.webp" alt=""></div>
-            <img class="lb-top_shade" src="assets/lobby/figma/online-shade.webp" alt="">
-            <div class="lb-top_row">
-              <div class="lb-top_copy">
-                <p class="lb-top_title">Play Online</p>
-                <p class="lb-top_sub">Play against random opponents</p>
+        <!-- game modes: a looping carousel of three cards (Figma 1908:38888). The one in the middle is
+             active: full size, blue highlight, its characters break out over the top edge. Tap or swipe to
+             a side card and it slides to the middle; its characters push out of the card (js/lobby.js). -->
+        <div class="lb-modes" data-modes>
+          <div class="lb-card lb-card--training" data-card="training">
+            <div class="lb-card_plate"></div>
+            <div class="lb-card_tile"><img class="lb-card_bg" src="assets/lobby/figma/training.webp" alt=""></div>
+            <img class="lb-card_shade" src="assets/lobby/figma/online-shade.webp" alt="">
+            <span class="lb-card_dim"></span>
+            <div class="lb-card_row">
+              <div class="lb-card_copy">
+                <p class="lb-card_title">Training Game</p>
+                <p class="lb-card_sub">Play with bots to master Blot</p>
               </div>
               <button class="lb-play" type="button" data-play>
                 <img class="lb-play_effects" src="assets/lobby/figma/play-effects.webp" alt="">
@@ -118,20 +108,48 @@
               </button>
             </div>
           </div>
-
-          <button class="lb-mode lb-mode--friends" type="button">
-            <img class="lb-mode_tile" src="assets/lobby/figma/card-tile.webp" alt="">
-            <img class="lb-mode_art" src="assets/lobby/figma/friends.webp" alt="">
-            <div class="lb-mode_ellipses"><img src="assets/lobby/figma/ellipses-friends.svg" alt=""></div>
-            <div class="lb-mode_text">
-              <div class="lb-mode_copy">
-                <p class="lb-mode_title">Play with Friends</p>
-                <p class="lb-mode_sub">Battle your friends in Blot now</p>
+          <div class="lb-card lb-card--online is-active" data-card="online">
+            <div class="lb-card_plate"></div>
+            <div class="lb-card_tile"><img class="lb-card_bg" src="assets/lobby/figma/card-tile.webp" alt=""></div>
+            <div class="lb-card_pop"><img class="lb-card_art" src="assets/lobby/figma/online-art.webp" alt=""></div>
+            <img class="lb-card_shade" src="assets/lobby/figma/online-shade.webp" alt="">
+            <span class="lb-card_dim"></span>
+            <div class="lb-card_row">
+              <div class="lb-card_copy">
+                <p class="lb-card_title">Play Online</p>
+                <p class="lb-card_sub">Play against random opponents</p>
               </div>
-              <div class="lb-mode_line"><img src="assets/lobby/figma/friends-line.svg" alt=""></div>
+              <button class="lb-play" type="button" data-play>
+                <img class="lb-play_effects" src="assets/lobby/figma/play-effects.webp" alt="">
+                <span class="lb-play_label">
+                  <img class="lb-play_icon" src="assets/lobby/figma/swords.webp" alt="">
+                  <span>Play now</span>
+                </span>
+                <span class="lb-play_inner"></span>
+              </button>
             </div>
-            <span class="lb-mode_dim"></span>
-          </button>
+          </div>
+          <div class="lb-card lb-card--friends" data-card="friends">
+            <div class="lb-card_plate"></div>
+            <div class="lb-card_tile"><img class="lb-card_bg" src="assets/lobby/figma/friends-bg.webp" alt=""></div>
+            <div class="lb-card_pop"><img class="lb-card_art" src="assets/lobby/figma/friends-pop.webp" alt=""></div>
+            <img class="lb-card_shade" src="assets/lobby/figma/online-shade.webp" alt="">
+            <span class="lb-card_dim"></span>
+            <div class="lb-card_row">
+              <div class="lb-card_copy">
+                <p class="lb-card_title">Play with Friends</p>
+                <p class="lb-card_sub">Battle your friends in Blot now</p>
+              </div>
+              <button class="lb-play" type="button" data-play>
+                <img class="lb-play_effects" src="assets/lobby/figma/play-effects.webp" alt="">
+                <span class="lb-play_label">
+                  <img class="lb-play_icon" src="assets/lobby/figma/swords.webp" alt="">
+                  <span>Play now</span>
+                </span>
+                <span class="lb-play_inner"></span>
+              </button>
+            </div>
+          </div>
         </div>
 
         <div class="lb-bottom">
@@ -295,6 +313,7 @@
 <script src="js/app.js"></script>
 <script src="js/sounds.js"></script>
 <script src="js/stage.js"></script>
+<script src="js/lobby.js"></script>
 <script src="js/blot-rules.js"></script>
 <script src="js/table.js"></script>
 <script src="js/game.js"></script>

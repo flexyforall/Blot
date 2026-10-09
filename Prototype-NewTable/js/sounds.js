@@ -123,6 +123,10 @@
   }
 
   // ---- tap sounds
+  // a lobby card sliding to the middle (caught before js/lobby.js makes it the active one)
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('.lb-card:not(.is-active)')) sfx('whoosh', 0.4);
+  }, true);
   document.addEventListener('click', function (e) {
     var el = e.target.closest('button');
     if (!el || !el.closest('.lobby, .stsel, .table')) return;

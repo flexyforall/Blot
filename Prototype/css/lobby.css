@@ -192,76 +192,94 @@
 /* the icons overhang the pill: keep them above its stroke ring (::after) and bottom edge (::before) */
 .lb-pill_crown, .lb-pill_gem, .lb-pill_chip { z-index: 2; }
 
-/* ---- game modes */
-.lb-modes {
+/* ---- game modes: a looping carousel of three 446x216 cards (Figma 1908:38888).
+   The active card sits in the middle at full size with the blue highlight, and its characters
+   break out over the top edge; the others are the same card at 392x190 (scale .8796) under a
+   dark veil, text and button at half strength, 24px apart. js/lobby.js sets each card's slot. */
+.lb-modes { position: absolute; left: 0; right: 0; top: 99px; height: 216px; touch-action: pan-y; }
+.lb-card {
+  --slot: 0;
+  --s: .8796;
   position: absolute;
   left: 50%;
-  top: 99px;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 24px;
-  align-items: center;
+  top: 0;
+  width: 446px;
+  height: 216px;
+  margin-left: -223px;
+  transform: translateX(calc(var(--slot) * 443px)) scale(var(--s));
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .3s ease;
+  cursor: pointer;
 }
+.lb-card.is-active { --s: 1; z-index: 2; cursor: default; }
+.lb-card.is-jumping { transition: none; }
+.lb-card.is-leaving { opacity: 0; }
+.lb-card > * { position: absolute; }
 
-.lobby .lb-mode {
-  flex: none;
-  width: 232px;
-  height: 189px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: 8px;
-  overflow: hidden;
-  background: #1a1a1a;
-}
-.lb-mode > * { position: absolute; }
-.lb-mode_tile { inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
-.lb-mode--training .lb-mode_art { left: -11px; top: -28px; width: 245px; height: 245px; object-fit: cover; }
-.lb-mode--friends .lb-mode_art { left: 0; top: -10px; width: 260px; height: 238px; object-fit: cover; }
-.lb-mode_ellipses { width: 605.055px; height: 230.977px; }
-.lb-mode--training .lb-mode_ellipses { left: -68.74px; top: 67.99px; }
-.lb-mode--friends .lb-mode_ellipses { left: -144.32px; top: 61.6px; }
-.lb-mode_ellipses img { position: absolute; top: -24.32%; bottom: -24.32%; left: -14.14%; right: -14.14%; width: auto; height: auto; }
-.lb-mode_text { top: 137.28px; width: 363.44px; display: flex; align-items: flex-end; justify-content: space-between; }
-.lb-mode--training .lb-mode_text { left: 13.79px; }
-.lb-mode--friends .lb-mode_text { left: 14.08px; }
-.lb-mode_copy { display: flex; flex-direction: column; gap: 1.76px; width: 156.64px; }
-.lb-mode_title { font-size: 17.6px; line-height: 22.88px; color: #fff; }
-.lb-mode_sub { font-size: 9.68px; line-height: normal; color: rgba(255, 255, 255, .7); }
-.lb-mode_line { left: 245.52px; top: 10.56px; width: 115.28px; height: 2.64px; }
-.lb-mode_line img { position: absolute; top: -266.67%; bottom: -266.67%; left: -6.11%; right: -6.11%; width: auto; height: auto; }
-.lb-mode_dim { left: 0; top: -.5px; width: 232px; height: 189px; background: rgba(12, 6, 26, .7); }
-
-/* featured "Play Online" card */
-.lb-top { position: relative; flex: none; width: 446px; height: 216px; }
-.lb-top > * { position: absolute; }
-.lb-top_plate { left: 0; top: 1px; width: 446px; height: 215px; background: #d9d9d9; border: 1px solid #5ca0ff; border-radius: 8px; }
-/* Figma "Highlight": 1px outside stroke, cyan at the top to blue at the bottom; the art overlaps it */
-.lb-top_plate::before {
+/* frame: white hairline when idle; blue stroke with the cyan-to-blue outer highlight when active */
+.lb-card_plate { left: 0; top: 1px; width: 446px; height: 215px; box-sizing: border-box; background: #1a1a1a; border: 1px solid rgba(255, 255, 255, .16); border-radius: 8px; transition: border-color .4s ease; }
+.lb-card_plate::before {
   content: "";
   position: absolute;
   inset: -2px;
   border-radius: 9px;
   background: linear-gradient(180deg, #43defe 0%, #5ca0ff 100%);
   z-index: -1;
+  opacity: 0;
+  transition: opacity .4s ease;
 }
-.lb-top_tile { left: 0; top: 1px; width: 446px; height: 215px; border-radius: 8px; overflow: hidden; }
-.lb-top_tile img { position: absolute; left: 0; top: -36px; width: 446px; height: 251px; object-fit: cover; }
-.lb-top_art { left: 0; top: -35px; width: 446px; height: 251px; border-radius: 0 0 8px 8px; }
-.lb-top_art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
-/* Figma's inner shadow on this image follows the artwork's alpha; a CSS inset shadow would
-   darken the transparent strip above the card, so it is drawn only over the card itself. */
-.lb-top_art::after { content: ""; position: absolute; left: 0; right: 0; top: 36px; bottom: 0; border-radius: 8px; box-shadow: inset 0 4px 4px rgba(0, 0, 0, .25); }
-.lb-top_shade { left: 0; top: 37px; width: 446px; height: 179px; object-fit: cover; border-radius: 8px; }
-.lb-top_row { left: 16px; top: 155px; width: 414px; display: flex; align-items: flex-end; justify-content: space-between; }
-.lb-top_copy { display: flex; flex-direction: column; gap: 2px; width: 178px; }
-.lb-top_title {
+.lb-card.is-active .lb-card_plate { border-color: #5ca0ff; }
+.lb-card.is-active .lb-card_plate::before { opacity: 1; }
+
+/* the scene, clipped to the card */
+.lb-card_tile { left: 0; top: 1px; width: 446px; height: 215px; border-radius: 8px; overflow: hidden; }
+.lb-card_tile img { position: absolute; max-width: none; }
+.lb-card--online .lb-card_tile img { left: 0; top: -36px; width: 446px; height: 251px; object-fit: cover; }
+.lb-card--friends .lb-card_tile img { left: -29px; top: -49px; width: 529px; height: 264px; }
+.lb-card--training .lb-card_tile img { left: 0; top: -96px; width: 446px; height: 446px; object-fit: cover; }
+
+/* the characters, cut out: clipped to the card while it is idle (they match the scene under them);
+   on the active card the clip opens upwards and they push out over the top edge */
+.lb-card_pop {
+  left: 0;
+  top: 1px;
+  width: 446px;
+  height: 215px;
+  clip-path: inset(0 0 0 0 round 8px);
+  transition: clip-path .45s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
+}
+.lb-card.is-active .lb-card_pop { clip-path: inset(-90px 0 0 0 round 8px); }
+.lb-card_art { position: absolute; max-width: none; transform-origin: 50% 100%; }
+.lb-card--online .lb-card_art { left: 0; top: -36px; width: 446px; height: 251px; object-fit: cover; }
+.lb-card--friends .lb-card_art { left: -29px; top: -49px; width: 529px; height: 264px; }
+/* the push: they lean out a little past their place and settle back (class added by js/lobby.js) */
+.lb-card.is-popping .lb-card_art { animation: lb-push .7s cubic-bezier(.3, 1.4, .5, 1) .12s backwards; }
+@keyframes lb-push {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.06) translateY(-3px); }
+  100% { transform: none; }
+}
+
+.lb-card_shade { left: 0; top: 37px; width: 446px; height: 179px; object-fit: cover; border-radius: 8px; pointer-events: none; }
+/* the veil over an idle card (Figma rgba(12,6,26,.7)) */
+.lb-card_dim { left: 0; top: 1px; width: 446px; height: 215px; border-radius: 8px; background: rgba(12, 6, 26, .7); transition: opacity .4s ease; pointer-events: none; }
+.lb-card.is-active .lb-card_dim { opacity: 0; }
+
+.lb-card_row { left: 16px; top: 155px; width: 414px; display: flex; align-items: flex-end; justify-content: space-between; opacity: .5; transition: opacity .4s ease; }
+.lb-card.is-active .lb-card_row { opacity: 1; }
+.lb-card_copy { display: flex; flex-direction: column; gap: 2px; width: 178px; }
+.lb-card_title {
   font-size: 20px;
   line-height: 26px;
+  white-space: nowrap;
   background: linear-gradient(180deg, #fff, rgba(255, 255, 255, .8));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.lb-top_sub { font-size: 11px; line-height: normal; color: rgba(255, 255, 255, .7); white-space: nowrap; }
+.lb-card_sub { font-size: 11px; line-height: normal; color: rgba(255, 255, 255, .7); white-space: nowrap; }
+/* an idle card's button only selects the card */
+.lb-card:not(.is-active) .lb-play { pointer-events: none; }
 
 /* PLAY NOW button */
 .lobby .lb-play {
@@ -327,7 +345,6 @@
 
 /* ---- press feedback (prototype only) */
 .lobby .lb-pill:active, .lobby .lb-icon:active, .lobby .lb-play:active { transform: scale(.96); }
-.lobby .lb-mode:active { transform: scale(.98); }
 .lobby .lb-play:active { filter: brightness(1.15); }
 
 /* ---- entrance animation (class "lb-enter" is added each time the lobby opens).
@@ -353,12 +370,16 @@
 .lb-enter .lb-pill:nth-child(2) .lb-pill_gem > span { animation-delay: .53s; }
 .lb-enter .lb-pill:nth-child(3) .lb-pill_chip { animation-delay: .61s; }
 
-.lb-enter .lb-top           { animation: lb-zoom .6s cubic-bezier(.22, 1.2, .36, 1) .15s backwards; }
-.lb-enter .lb-mode--training { animation: lb-from-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
-.lb-enter .lb-mode--friends  { animation: lb-from-right .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
-.lb-enter .lb-top_copy      { animation: lb-rise .5s ease-out .55s backwards; }
-.lb-enter .lb-mode_copy     { animation: lb-rise .5s ease-out .65s backwards; }
-.lb-enter .lb-play          { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards; }
+/* the cards come in by slot: the middle one zooms, the side ones slide in from their edge
+   (with the separate scale / translate properties, so the slot transform stays untouched) */
+.lb-enter .lb-card[data-slot="0"]  { animation: lb-card-zoom .6s cubic-bezier(.22, 1.2, .36, 1) .15s backwards; }
+.lb-enter .lb-card[data-slot="-1"] { animation: lb-card-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+.lb-enter .lb-card[data-slot="1"]  { animation: lb-card-right .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+@keyframes lb-card-zoom  { from { opacity: 0; scale: .9; } }
+@keyframes lb-card-left  { from { opacity: 0; translate: -48px 0; } }
+@keyframes lb-card-right { from { opacity: 0; translate: 48px 0; } }
+.lb-enter .lb-card_copy     { animation: lb-rise .5s ease-out .55s backwards; }
+.lb-enter .lb-card.is-active .lb-play { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards; }
 
 .lb-enter .lb-icon          { animation: lb-rise .4s cubic-bezier(.34, 1.4, .64, 1) backwards; }
 .lb-enter .lb-bottom_group .lb-icon:nth-child(1) { animation-delay: .50s; }
@@ -373,14 +394,14 @@
 @keyframes lb-pop       { from { opacity: 0; transform: scale(.5); } }
 @keyframes lb-badge     { from { opacity: 0; transform: scale(.2) rotate(-90deg); } }
 @keyframes lb-icon-pop  { from { opacity: 0; transform: scale(.3) rotate(-20deg); } }
-@keyframes lb-zoom      { from { opacity: 0; transform: scale(.9); } }
-@keyframes lb-from-left { from { opacity: 0; transform: translateX(-48px); } }
-@keyframes lb-from-right { from { opacity: 0; transform: translateX(48px); } }
 @keyframes lb-fill      { from { transform: translateX(-36px); opacity: 0; } 15% { opacity: 1; } }
 
 /* ---- PLAY NOW invites: a light sweep and a soft breathing glow, looping */
-.lobby .lb-play { animation: lb-breathe 2.4s ease-in-out 1.4s infinite; }
-.lb-enter .lb-play { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards, lb-breathe 2.4s ease-in-out 1.4s infinite; }
+.lobby .lb-card.is-active .lb-play { animation: lb-breathe 2.4s ease-in-out 1.4s infinite; }
+.lb-enter .lb-card.is-active .lb-play { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards, lb-breathe 2.4s ease-in-out 1.4s infinite; }
+.lb-card:not(.is-active) .lb-play::after { animation: none; opacity: 0; }
+/* a card brought to the middle: its button pops in as the card lands */
+.lb-enter .lb-card.is-popping .lb-play { animation: lb-pop .45s cubic-bezier(.34, 1.56, .64, 1) .2s backwards, lb-breathe 2.4s ease-in-out 1s infinite; }
 .lb-play::after {
   content: "";
   position: absolute;

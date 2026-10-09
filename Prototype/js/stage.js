@@ -101,7 +101,14 @@
   });
 
   // navigation
-  document.querySelector('[data-play]').addEventListener('click', function () { window.BlotNav.show('play'); });
+  // every lobby card has a PLAY NOW; only the active card's one opens the stage select
+  document.querySelectorAll('[data-play]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var card = b.closest('.lb-card');
+      if (card && !card.classList.contains('is-active')) return;
+      window.BlotNav.show('play');
+    });
+  });
   screen.querySelector('[data-back]').addEventListener('click', function () { window.BlotNav.show('lobby'); });
 
   document.addEventListener('screen:show', function (e) {
