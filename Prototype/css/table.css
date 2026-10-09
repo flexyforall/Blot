@@ -119,8 +119,11 @@
 .tb-ui > .tb-bottom { pointer-events: none; }
 .tb-bottom > * { pointer-events: auto; }
 /* plain semi-transparent boxes */
-.table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; background: rgba(0, 0, 0, .5); transition: background-color .15s ease; }
-.tb-btn--info { margin-left: auto; }
+.table .tb-btn { width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex: none; background: rgba(0, 0, 0, .6); transition: background-color .15s ease; }
+/* chat and reactions sit on the right */
+.tb-btn--chat { margin-left: auto; }
+/* the gear: a plain 28px icon in the middle (Figma 1914:50239) */
+.tb-btn_glyph { position: absolute; left: 10px; top: 10px; width: 28px; height: 28px; filter: drop-shadow(0 0 2px #000) drop-shadow(0 2px 6px rgba(0, 0, 0, .5)); }
 /* the bottom buttons are 48px: the 40px Figma button scaled 1.2x */
 .table .tb-btn--lg { width: 48px; height: 48px; border-radius: 9.6px; }
 .tb-btn_in { position: absolute; left: 4px; top: 4px; width: 40px; height: 40px; transform: scale(1.2); }
@@ -129,7 +132,7 @@
 .table .tb-btn[aria-expanded="true"] { background: rgba(0, 0, 0, .75); }
 /* reactions: no box, the laughing face itself is the 48px icon */
 .table .tb-btn--face { overflow: visible; background: none; transition: transform .15s ease; }
-.tb-btn--face img { width: 48px; height: 48px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .7)); }
+.tb-btn--face img { width: 50px; height: 50px; margin: -1px; filter: drop-shadow(-2px 0 10px rgba(0, 0, 0, .5)) drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
 .table .tb-btn--face[aria-expanded="true"] { background: none; transform: scale(1.08); }
 .table .tb-btn--face:active { transform: scale(.94); }
 
@@ -150,18 +153,14 @@
 }
 .tb-pop[hidden] { display: none; }
 /* the chat list starts right of the island (the screen's left 48px are under it in landscape) */
-.tb-pop--chat { left: 28px; flex-direction: column; min-width: 128px; }
-.tb-pop--react { left: 60px; }
+.tb-pop--chat { left: auto; right: 60px; flex-direction: column; min-width: 128px; transform-origin: 80% 100%; }
 .table .tb-pop--chat button { padding: 7px 10px; border-radius: 4px; font-weight: 600; font-size: 12px; line-height: 18px; text-align: left; color: rgba(255, 255, 255, .95); white-space: nowrap; }
 .table .tb-pop--chat button:hover, .table .tb-pop--chat button:active { background: rgba(255, 255, 255, .05); }
-.table .tb-pop--react button { width: 36px; height: 36px; border-radius: 4px; font-size: 22px; line-height: 36px; }
-.table .tb-pop--react button:hover { background: rgba(255, 255, 255, .05); }
-.table .tb-pop--react button:active { transform: scale(.85); }
 
 /* speech bubbles above the seats: bids, combinations, chat, reactions */
 .tb-say { position: absolute; inset: 0; pointer-events: none; }
 .tb-bubble { position: absolute; transform: translate(-50%, 0); display: flex; justify-content: center; }
-.tb-bubble--bottom { left: 426px; top: 262px; }
+.tb-bubble--bottom { left: 426px; top: 236px; }
 .tb-bubble--left { left: 128px; top: 118px; }
 .tb-bubble--top { left: 548px; top: 30px; }
 .tb-bubble--right { left: 740px; top: 118px; }
@@ -226,6 +225,7 @@
 .tb-plate--left { left: 80px; top: 232px; }
 .tb-plate--top { left: 371px; top: 82px; }
 .tb-plate--right { left: 658.5px; top: 232px; }
+.tb-plate--bottom { left: 368px; top: 301px; }   /* Figma 1914:50217 */
 .tb-plate_avatar { width: 36px; height: 36px; flex: none; object-fit: cover; }
 .tb-plate p { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; white-space: nowrap; }
 /* level badge (44x17): the uploaded orange / blue textured plates behind the text */
@@ -241,12 +241,20 @@
   background: url("../assets/table/ui/level-orange.png") center / 100% 100% no-repeat;
 }
 .tb-plate--blue .tb-badge { background-image: url("../assets/table/ui/level-blue.png"); }
+/* your badge: olive green with the diamond texture in luminosity, white hairline (Figma 1914:50224) */
+.tb-plate--green .tb-badge {
+  background: url("../assets/table/ui/diamond-tile.webp") -1px -1px / 41px 23px no-repeat, #3c5600;
+  background-blend-mode: luminosity;
+  border: .5px solid #fff;
+  box-shadow: inset 0 2.76px 2.76px rgba(0, 0, 0, .5);
+}
 .tb-plate b { font-weight: 700; font-size: 12px; line-height: 16px; color: #fff; text-shadow: 0 1px 4px #000; }
 /* level: white-to-orange gradient (blue for the right player, as in Figma) with a soft glow.
    The glow is a text-shadow on a transparent base, the gradient a copy on top (Safari drops
    shadows under background-clip:text). */
 .tb-plate { --lvl: #e07c46; }
 .tb-plate--blue { --lvl: #89caff; }
+.tb-plate--green { --lvl: #e0c946; }
 .tb-lvl {
   position: relative;
   font-weight: 700;
@@ -309,12 +317,11 @@
 .tb-chip--left { left: 172px; top: 154px; }
 .tb-chip--top { left: 478px; top: 90px; }
 .tb-chip--right { right: 172px; top: 154px; }
-.tb-chip--bottom { left: 50%; top: 282px; transform: translateX(-50%); }
+.tb-chip--bottom { left: 485px; top: 313px; }
 .tb-chip i { width: 16.8px; height: 16.8px; font-size: 7.5px; line-height: 16.8px; }
 .tb-chip small { font-size: 11px; color: #ffd66b; }
 .tb-chip.is-pass { opacity: .7; font-size: 12px; padding-left: 8px; }
 @keyframes tb-chip { from { opacity: 0; transform: scale(.6); } }
-.tb-chip--bottom { animation-name: tb-chip-c; }
 @keyframes tb-chip-c { from { opacity: 0; transform: translateX(-50%) scale(.6); } }
 
 .tb-suit { color: #fff; }
@@ -509,4 +516,58 @@
   .tb-score .tb-panel_bg, .tb-score_shine::before, .tb-score_shine::after { animation: none; }
   .tb-trick, .tb-score, .tb-bottom { opacity: 1; animation: none !important; }
   .tb-plate { transition: none; }
+}
+
+/* ---- reactions drawer (Figma 1914:50150): frosted panel on the right over a blurred table */
+.tb-react { position: absolute; inset: 0; z-index: 5; }
+.tb-react[hidden] { display: none; }
+.tb-react_veil { position: absolute; inset: 0; background: rgba(0, 0, 0, .25); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: tb-fade .25s ease; }
+.tb-react_panel {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  width: 292px;
+  height: 377px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, .2);
+  -webkit-backdrop-filter: blur(50px);
+  backdrop-filter: blur(50px);
+  overflow: hidden;
+  animation: tb-drawer .35s cubic-bezier(.22, 1, .36, 1);
+}
+.tb-react_head { display: flex; align-items: center; gap: 10px; height: 40px; flex: none; }
+.tb-react_head p { flex: 1; font-weight: 600; font-size: 18px; line-height: 1.4; color: #eff3fa; }
+.table .tb-react_close { width: 32px; height: 32px; flex: none; }
+.tb-react_close img { position: absolute; left: -8px; top: 0; width: 48px; height: 48px; }
+.table .tb-react_close:active { transform: scale(.92); }
+.tb-react_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 78.79px);
+  gap: 11.82px;
+  overflow-y: auto;
+  margin: 0 -16px -16px;
+  padding: 0 16px 16px;
+  scrollbar-width: none;
+}
+.tb-react_grid::-webkit-scrollbar { display: none; }
+.table .tb-react_grid button { width: 78.79px; height: 78.79px; transition: transform .15s ease; }
+.tb-react_grid img { width: 100%; height: 100%; filter: drop-shadow(0 -4px 4px rgba(119, 119, 119, .25)) drop-shadow(0 2px 8px rgba(0, 0, 0, .5)); }
+.table .tb-react_grid button:hover { transform: scale(1.06); }
+.table .tb-react_grid button:active { transform: scale(.92); }
+@keyframes tb-drawer { from { opacity: 0; transform: translateX(24px); } }
+@keyframes tb-fade { from { opacity: 0; } }
+/* a sent reaction pops up over your seat */
+.tb-say_react { width: 72px; height: 72px; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .6)); animation: tb-react-pop 3s ease forwards; }
+@keyframes tb-react-pop {
+  0% { opacity: 0; transform: translateY(16px) scale(.3); }
+  12% { opacity: 1; transform: translateY(-6px) scale(1.15); }
+  22% { transform: none; }
+  85% { opacity: 1; transform: translateY(-8px); }
+  100% { opacity: 0; transform: translateY(-28px) scale(.9); }
 }

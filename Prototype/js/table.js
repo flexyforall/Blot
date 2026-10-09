@@ -832,8 +832,12 @@
   });
   function bubble(seat, text, kind) {
     var el = document.createElement('div');
-    el.className = kind === 'emoji' ? 'tb-say_emoji' : 'tb-say_line' + (kind ? ' tb-say_line--' + kind : '');
-    el.textContent = text;
+    if (kind === 'react') {   // a reaction picture from the drawer
+      el = document.createElement('img'); el.className = 'tb-say_react'; el.src = text; el.alt = '';
+    } else {
+      el.className = kind === 'emoji' ? 'tb-say_emoji' : 'tb-say_line' + (kind ? ' tb-say_line--' + kind : '');
+      el.textContent = text;
+    }
     bubbles[seat].textContent = ''; bubbles[seat].appendChild(el);
   }
   var social = screen.querySelectorAll('[data-social]');
@@ -854,8 +858,14 @@
   screen.querySelectorAll('[data-pop="chat"] button').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); pop('tb-say_line', b.textContent); });
   });
-  screen.querySelectorAll('[data-pop="react"] button').forEach(function (b) {
-    b.addEventListener('click', function () { closePops(null); pop('tb-say_emoji', b.textContent); });
+  // reactions drawer: a picture pops up over your seat; the veil or the cross closes it
+  screen.querySelectorAll('[data-react]').forEach(function (b) {
+    b.addEventListener('click', function () { closePops(null); bubble('bottom', b.getAttribute('data-react'), 'react'); });
   });
-  screen.addEventListener('click', function (e) { if (!e.target.closest('.tb-bottom')) closePops(null); });
+  screen.querySelectorAll('[data-react-close]').forEach(function (b) {
+    b.addEventListener('click', function () { closePops(null); });
+  });
+  screen.addEventListener('click', function (e) { if (!e.target.closest('.tb-bottom, .tb-react_panel')) closePops(null); });
+  // the settings gear leaves the table (there is no settings screen in the prototype)
+  screen.querySelector('[data-table-exit]').addEventListener('click', function () { window.BlotNav.show('play'); });
 })();
