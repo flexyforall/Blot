@@ -563,7 +563,7 @@
 @keyframes tb-drawer { from { opacity: 0; transform: translateX(24px); } }
 @keyframes tb-fade { from { opacity: 0; } }
 /* a sent reaction pops up over your seat */
-.tb-say_react { width: 72px; height: 72px; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .6)); animation: tb-react-pop 3s ease forwards; }
+.tb-say_react { width: 80px; height: 80px; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .6)); animation: tb-react-pop 3.4s ease forwards; }
 @keyframes tb-react-pop {
   0% { opacity: 0; transform: translateY(16px) scale(.3); }
   12% { opacity: 1; transform: translateY(-6px) scale(1.15); }

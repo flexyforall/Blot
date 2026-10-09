@@ -833,7 +833,7 @@
   function bubble(seat, text, kind) {
     var el = document.createElement('div');
     if (kind === 'react') {   // a reaction picture from the drawer
-      el = document.createElement('img'); el.className = 'tb-say_react'; el.src = text; el.alt = '';
+      el = document.createElement('img'); el.className = 'tb-say_react'; el.src = text + '?t=' + Date.now(); el.alt = '';   // fresh copy, so the clip starts from its first frame
     } else {
       el.className = kind === 'emoji' ? 'tb-say_emoji' : 'tb-say_line' + (kind ? ' tb-say_line--' + kind : '');
       el.textContent = text;
