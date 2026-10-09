@@ -192,11 +192,41 @@
 /* the icons overhang the pill: keep them above its stroke ring (::after) and bottom edge (::before) */
 .lb-pill_crown, .lb-pill_gem, .lb-pill_chip { z-index: 2; }
 
-/* ---- game modes: a looping carousel of three 446x216 cards (Figma 1908:38888).
-   The active card sits in the middle at full size with the blue highlight, and its characters
-   break out over the top edge; the others are the same card at 392x190 (scale .8796) under a
-   dark veil, text and button at half strength, 24px apart. js/lobby.js sets each card's slot. */
-.lb-modes { position: absolute; left: 0; right: 0; top: 99px; height: 216px; touch-action: pan-y; }
+/* ---- game modes (Figma 1908:38888). Play Online and Play with Friends are one card component:
+   the active one sits in the middle at 446x216 with the blue highlight, and its characters break
+   out over the top edge; the other is the same card at 392x190 (scale .8796) under a dark veil,
+   text and button at half strength, 24px away. Training is the original static card, a
+   placeholder on the left. js/lobby.js shifts the whole row by one card (--shift 0 or 1), so
+   everything glides and nothing disappears. */
+.lb-modes { --shift: 0; position: absolute; left: 0; right: 0; top: 99px; height: 216px; touch-action: pan-y; }
+
+/* Training: as before (232x189), where the old flex row put it; it only moves with the row */
+.lobby .lb-mode {
+  position: absolute;
+  left: -53px;
+  top: 13.5px;
+  width: 232px;
+  height: 189px;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a1a1a;
+  translate: calc(var(--shift) * -443px) 0;
+  transition: translate .55s cubic-bezier(.22, 1, .36, 1);
+}
+.lb-mode > * { position: absolute; }
+.lb-mode_tile { inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+.lb-mode--training .lb-mode_art { left: -11px; top: -28px; width: 245px; height: 245px; object-fit: cover; }
+.lb-mode_ellipses { width: 605.055px; height: 230.977px; }
+.lb-mode--training .lb-mode_ellipses { left: -68.74px; top: 67.99px; }
+.lb-mode_ellipses img { position: absolute; top: -24.32%; bottom: -24.32%; left: -14.14%; right: -14.14%; width: auto; height: auto; }
+.lb-mode_text { top: 137.28px; width: 363.44px; display: flex; align-items: flex-end; justify-content: space-between; }
+.lb-mode--training .lb-mode_text { left: 13.79px; }
+.lb-mode_copy { display: flex; flex-direction: column; gap: 1.76px; width: 156.64px; }
+.lb-mode_title { font-size: 17.6px; line-height: 22.88px; color: #fff; }
+.lb-mode_sub { font-size: 9.68px; line-height: normal; color: rgba(255, 255, 255, .7); }
+.lb-mode_dim { left: 0; top: -.5px; width: 232px; height: 189px; background: rgba(12, 6, 26, .7); }
+
 .lb-card {
   --slot: 0;
   --s: .8796;
@@ -206,13 +236,11 @@
   width: 446px;
   height: 216px;
   margin-left: -223px;
-  transform: translateX(calc(var(--slot) * 443px)) scale(var(--s));
-  transition: transform .55s cubic-bezier(.22, 1, .36, 1), opacity .3s ease;
+  transform: translateX(calc((var(--slot) - var(--shift)) * 443px)) scale(var(--s));
+  transition: transform .55s cubic-bezier(.22, 1, .36, 1);
   cursor: pointer;
 }
 .lb-card.is-active { --s: 1; z-index: 2; cursor: default; }
-.lb-card.is-jumping { transition: none; }
-.lb-card.is-leaving { opacity: 0; }
 .lb-card > * { position: absolute; }
 
 /* frame: white hairline when idle; blue stroke with the cyan-to-blue outer highlight when active */
@@ -235,7 +263,6 @@
 .lb-card_tile img { position: absolute; max-width: none; }
 .lb-card--online .lb-card_tile img { left: 0; top: -36px; width: 446px; height: 251px; object-fit: cover; }
 .lb-card--friends .lb-card_tile img { left: -29px; top: -49px; width: 529px; height: 264px; }
-.lb-card--training .lb-card_tile img { left: 0; top: -96px; width: 446px; height: 446px; object-fit: cover; }
 
 /* the characters, cut out: clipped to the card while it is idle (they match the scene under them);
    on the active card the clip opens upwards and they push out over the top edge */
@@ -345,6 +372,7 @@
 
 /* ---- press feedback (prototype only) */
 .lobby .lb-pill:active, .lobby .lb-icon:active, .lobby .lb-play:active { transform: scale(.96); }
+.lobby .lb-mode:active { transform: scale(.98); }
 .lobby .lb-play:active { filter: brightness(1.15); }
 
 /* ---- entrance animation (class "lb-enter" is added each time the lobby opens).
@@ -370,16 +398,19 @@
 .lb-enter .lb-pill:nth-child(2) .lb-pill_gem > span { animation-delay: .53s; }
 .lb-enter .lb-pill:nth-child(3) .lb-pill_chip { animation-delay: .61s; }
 
-/* the cards come in by slot: the middle one zooms, the side ones slide in from their edge
-   (with the separate scale / translate properties, so the slot transform stays untouched) */
-.lb-enter .lb-card[data-slot="0"]  { animation: lb-card-zoom .6s cubic-bezier(.22, 1.2, .36, 1) .15s backwards; }
-.lb-enter .lb-card[data-slot="-1"] { animation: lb-card-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
-.lb-enter .lb-card[data-slot="1"]  { animation: lb-card-right .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+/* the cards come in by where they are when the lobby opens (data-in, set by js/lobby.js and removed
+   once they are in, so switching cards never replays these): the middle one zooms, the side ones
+   slide in from their edge (separate scale / translate properties, the row transform stays free) */
+.lb-enter .lb-mode--training { animation: lb-from-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+.lb-enter .lb-mode_copy      { animation: lb-rise .5s ease-out .65s backwards; }
+.lb-enter .lb-card[data-in="0"]  { animation: lb-card-zoom .6s cubic-bezier(.22, 1.2, .36, 1) .15s backwards; }
+.lb-enter .lb-card[data-in="-1"] { animation: lb-card-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+.lb-enter .lb-card[data-in="1"]  { animation: lb-card-right .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+@keyframes lb-from-left { from { opacity: 0; transform: translateX(-48px); } }
 @keyframes lb-card-zoom  { from { opacity: 0; scale: .9; } }
 @keyframes lb-card-left  { from { opacity: 0; translate: -48px 0; } }
 @keyframes lb-card-right { from { opacity: 0; translate: 48px 0; } }
-.lb-enter .lb-card_copy     { animation: lb-rise .5s ease-out .55s backwards; }
-.lb-enter .lb-card.is-active .lb-play { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards; }
+.lb-enter .lb-card[data-in] .lb-card_copy { animation: lb-rise .5s ease-out .55s backwards; }
 
 .lb-enter .lb-icon          { animation: lb-rise .4s cubic-bezier(.34, 1.4, .64, 1) backwards; }
 .lb-enter .lb-bottom_group .lb-icon:nth-child(1) { animation-delay: .50s; }
@@ -397,11 +428,10 @@
 @keyframes lb-fill      { from { transform: translateX(-36px); opacity: 0; } 15% { opacity: 1; } }
 
 /* ---- PLAY NOW invites: a light sweep and a soft breathing glow, looping */
-.lobby .lb-card.is-active .lb-play { animation: lb-breathe 2.4s ease-in-out 1.4s infinite; }
-.lb-enter .lb-card.is-active .lb-play { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards, lb-breathe 2.4s ease-in-out 1.4s infinite; }
+.lobby .lb-card.is-active .lb-play { animation: lb-breathe 2.4s ease-in-out 1s infinite; }
+.lb-enter .lb-card.is-active[data-in] .lb-play { animation: lb-pop .55s cubic-bezier(.34, 1.56, .64, 1) .70s backwards, lb-breathe 2.4s ease-in-out 1.4s infinite; }
 .lb-card:not(.is-active) .lb-play::after { animation: none; opacity: 0; }
-/* a card brought to the middle: its button pops in as the card lands */
-.lb-enter .lb-card.is-popping .lb-play { animation: lb-pop .45s cubic-bezier(.34, 1.56, .64, 1) .2s backwards, lb-breathe 2.4s ease-in-out 1s infinite; }
+
 .lb-play::after {
   content: "";
   position: absolute;
