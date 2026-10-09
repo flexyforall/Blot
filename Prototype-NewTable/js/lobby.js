@@ -1,7 +1,9 @@
 // Lobby game modes: Play Online and Play with Friends are the same card; the one in the middle is
 // active (full size, highlight, PLAY NOW). Tap Play with Friends, swipe, or use the arrow keys and
 // the whole row (Training included, which stays the original static card) glides one card to the
-// left; tap Play Online on the left to glide back. Nothing fades out or jumps. When a card becomes
+// left; tap Play Online on the left to glide back. A second Training card waits after Play with
+// Friends, so as the first one slides out on the left it slides in on the right and the row never
+// ends. Nothing fades out or jumps. When a card becomes
 // active its characters push out over the top edge (css/lobby.css: .lb-card_pop opens its clip,
 // .is-popping bounces the cut-out).
 (function () {

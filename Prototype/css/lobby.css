@@ -196,8 +196,9 @@
    the active one sits in the middle at 446x216 with the blue highlight, and its characters break
    out over the top edge; the other is the same card at 392x190 (scale .8796) under a dark veil,
    text and button at half strength, 24px away. Training is the original static card, a
-   placeholder on the left. js/lobby.js shifts the whole row by one card (--shift 0 or 1), so
-   everything glides and nothing disappears. */
+   placeholder on the left, and again after Play with Friends so the row never ends.
+   js/lobby.js shifts the whole row by one card (--shift 0 or 1): everything glides, the Training
+   on the left slides out as its copy slides in on the right, nothing disappears. */
 .lb-modes { --shift: 0; position: absolute; left: 0; right: 0; top: 99px; height: 216px; touch-action: pan-y; }
 
 /* Training: as before (232x189), where the old flex row put it; it only moves with the row */
@@ -215,6 +216,8 @@
   transition: translate .55s cubic-bezier(.22, 1, .36, 1);
 }
 .lb-mode > * { position: absolute; }
+/* its copy after Play with Friends: 24px right of that card once it is in the middle */
+.lobby .lb-mode--next { left: 1116px; }
 .lb-mode_tile { inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
 .lb-mode--training .lb-mode_art { left: -11px; top: -28px; width: 245px; height: 245px; object-fit: cover; }
 .lb-mode_ellipses { width: 605.055px; height: 230.977px; }
@@ -402,11 +405,13 @@
    once they are in, so switching cards never replays these): the middle one zooms, the side ones
    slide in from their edge (separate scale / translate properties, the row transform stays free) */
 .lb-enter .lb-mode--training { animation: lb-from-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
+.lb-enter .lb-mode--next     { animation: lb-from-right .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
 .lb-enter .lb-mode_copy      { animation: lb-rise .5s ease-out .65s backwards; }
 .lb-enter .lb-card[data-in="0"]  { animation: lb-card-zoom .6s cubic-bezier(.22, 1.2, .36, 1) .15s backwards; }
 .lb-enter .lb-card[data-in="-1"] { animation: lb-card-left .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
 .lb-enter .lb-card[data-in="1"]  { animation: lb-card-right .6s cubic-bezier(.22, 1, .36, 1) .32s backwards; }
 @keyframes lb-from-left { from { opacity: 0; transform: translateX(-48px); } }
+@keyframes lb-from-right { from { opacity: 0; transform: translateX(48px); } }
 @keyframes lb-card-zoom  { from { opacity: 0; scale: .9; } }
 @keyframes lb-card-left  { from { opacity: 0; translate: -48px 0; } }
 @keyframes lb-card-right { from { opacity: 0; translate: 48px 0; } }
