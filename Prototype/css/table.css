@@ -452,8 +452,8 @@
 .table .tb-tile:not(:disabled):active { border-color: #5ca0ff; box-shadow: 0 2px 2px rgba(0, 3, 8, .4), inset 0 2px 8px #074baa; }
 
 /* round result: Us and Them as tiles, the side that took the round selected. Shown once the
-   hands are empty, so it can be wider (380) and lower; it stays clear of the nameplates. */
-.tb-result { top: 240px; width: 380px; }
+   hands are empty, so it can be wider (380); centred on the screen. */
+.tb-result { top: 50%; width: 380px; }   /* centred on the screen */
 .tb-result_title { font-weight: 600; font-size: 16px; line-height: 22px; }
 .tb-result_line { font-weight: 600; font-size: 11px; line-height: 18px; color: rgba(255, 255, 255, .6); }
 .tb-result_tag { display: inline-block; margin-left: 4px; padding: 0 8px; border-radius: 100px; font-weight: 600; font-size: 10px; line-height: 16px; vertical-align: 1px; }

@@ -66,8 +66,10 @@
   var HAND_SC = 1.7;                   // your cards: 57 px wide, as in the mockup
 
   // ---------- Cards ----------
-  // The deck: one transparent PNG per card in assets/table/cards/play/ (cut by tools/cut_cards.py),
-  // 450x630, so a card is 78 x 109.2 scene units.
+  // The deck: the classic Bicycle-style faces from the first prototype, in one atlas
+  // (assets/table/cards/standard.webp: 240x336 cells, columns 7..A, rows S H C D, the corners
+  // transparent). Each face is cut out into its own canvas once the atlas has loaded.
+  // A card is 78 x 109.2 scene units.
   var CW = 78, CH = 109.2, PAD = 10, CR = 3;   // CR: corner radius, as on the card art
   // Card pictures are cached per on-screen size (in steps of 1/4 device pixel per scene unit),
   // so the table draws them at almost exactly 1:1. Each size is made in one step straight from
@@ -77,10 +79,17 @@
   function bucket(k) { return Math.max(.75, Math.min(6, Math.ceil(k * 4 - .05) / 4)); }
   var RANKS = ['7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
   var SUITS = [{ s: '♠', l: 'S' }, { s: '♥', l: 'H' }, { s: '♣', l: 'C' }, { s: '♦', l: 'D' }];
+  var atlas = new Image(); atlas.src = A + 'cards/standard.webp';
   var faceArt = {};
-  SUITS.forEach(function (su) {
-    RANKS.forEach(function (r) { var im = new Image(); im.src = A + 'cards/play/' + r + su.l + '.png'; faceArt[r + su.s] = im; });
-  });
+  function cutFaces() {
+    SUITS.forEach(function (su, row) {
+      RANKS.forEach(function (r, col) {
+        var c = document.createElement('canvas'); c.width = 238; c.height = 334;
+        c.getContext('2d').drawImage(atlas, col * 240 + 1, row * 336 + 1, 238, 334, 0, 0, 238, 334);
+        faceArt[r + su.s] = c;
+      });
+    });
+  }
   function rr(g, x, y, w, h, r) { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); }
   function levelCanvas(res) {
     var c = document.createElement('canvas');
@@ -265,7 +274,7 @@
       var s = SEATS[id];
       s.alpha = 0; s.pop = 1; s.ring = 0; s.idle = false;
     });
-    S.black = 1;
+    S.black = 1; handDrop = 0;
     cards = []; particles = []; hover = null; humanWait = null;
     screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.remove('is-turn'); });
   }
@@ -323,10 +332,12 @@
     var f = SEATS[id].fan, a = (f.a + k * FAN_STEP) * Math.PI / 180;
     return { x: f.p[0] + Math.sin(a) * FAN_R, y: f.p[1] - Math.cos(a) * FAN_R, rot: a, sc: FAN_SC };
   }
-  // your hand: an arc like the mockup's, 37 px apart, 6 degrees between cards
+  // your hand: an arc like the mockup's, 37 px apart, 6 degrees between cards; it sits 22 px
+  // lower while the bid window is open, so the window in the middle does not cover your cards
+  var handDrop = 0;
   function handAt(i, n) {
     var k = i - (n - 1) / 2, a = k * .105;
-    return { x: 1000 + k * 87, y: 730 + 915 * (1 - Math.cos(a)), rot: a };
+    return { x: 1000 + k * 87, y: 730 + handDrop + 915 * (1 - Math.cos(a)), rot: a };
   }
 
   var view = {
@@ -384,6 +395,11 @@
         if (c.flip < 1) tween(c, { flip: 1 }, .35, { delay: .45 + i * .06, ease: ease.inOut, fn: function (p) { if (p === 1) flick(.1); } });
       });
       return wait(.9);
+    },
+    lowerHand: function (on) {
+      var d = (on ? 52 : 0) - handDrop;
+      handDrop += d;
+      if (d) cards.forEach(function (c) { if (c.mine) tween(c, { y: c.y + d }, .3, { ease: ease.inOut }); });
     },
     // an opponent's fan, closed up after a card leaves
     layoutPile: function (seat, ids) {
@@ -535,9 +551,9 @@
   }
 
   // ---------- Boot: wait for the art and the deck ----------
-  var art = IDS.filter(function (id) { return SEATS[id].image; }).map(function (id) { return SEATS[id].image; })
-    .concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
+  var art = IDS.filter(function (id) { return SEATS[id].image; }).map(function (id) { return SEATS[id].image; }).concat([atlas]);
   var booting = Promise.all(art.map(function (im) { return im.decode().catch(function () {}); })).then(function () {
+    cutFaces();
     faceCache = {}; backCache = {};
   });
 
@@ -606,7 +622,9 @@
   function setLastTrick(cards) {
     var box = screen.querySelector('[data-trick-cards]');
     box.innerHTML = (cards || []).map(function (c) {
-      return '<img class="tb-mini" src="' + A + 'cards/play/' + c.rank + c.suit + '.png" alt="' + c.rank + c.suit + '">';
+      // a window onto the same atlas (9 columns: 7..A and a spare, 4 rows)
+      var col = RANKS.indexOf(c.rank), row = 'SHCD'.indexOf(c.suit);
+      return '<i class="tb-mini" role="img" aria-label="' + c.rank + c.suit + '" style="background-position:' + col / 8 * 100 + '% ' + row / 3 * 100 + '%"></i>';
     }).join('');
     box.hidden = !(cards && cards.length);
     screen.querySelector('[data-trick-empty]').hidden = !box.hidden;

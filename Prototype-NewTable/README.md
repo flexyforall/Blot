@@ -11,5 +11,5 @@ Open `index.html` in a browser (no build step, works from the file system).
   opponents' fans, your hand arc, tricks; the view API that `js/game.js` drives.
 - `css/table.css` — background, HUD, nameplates, bid / result panels, speech clouds.
 - `assets/table/` — `bg.webp` (the flattened table design), `players/` (character art), `hud/`
-  (button, nameplates, icons), `ui/suits/` (suit discs), `cards/play/` (the deck).
+  (button, nameplates, icons), `ui/suits/` (suit discs), `cards/standard.webp` (the classic Bicycle-style deck from the first prototype).
 - The side players sit 24 px further in than in the mockup, so the left one clears the iPhone island.

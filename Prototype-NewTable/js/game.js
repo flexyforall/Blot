@@ -165,9 +165,11 @@
         if (b.matches('[data-bid-sur]')) out = { type: 'sur' };
         if (!out) return;
         bidEl.hidden = true; bidEl.onclick = null;
+        if (view.lowerHand) view.lowerHand(false);
         res(out);
       };
       render();
+      if (view.lowerHand) view.lowerHand(true);
       bidEl.hidden = false;
     });
   }
@@ -188,6 +190,7 @@
   }
   function hidePanels() {
     bidEl.hidden = true; resultEl.hidden = true; bidEl.onclick = null;
+    if (view && view.lowerHand) view.lowerHand(false);
   }
 
   // ---------- game flow ----------

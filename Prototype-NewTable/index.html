@@ -227,23 +227,17 @@
           <div class="tb-chip tb-chip--right" data-chip="right" hidden></div>
           <div class="tb-chip tb-chip--bottom" data-chip="bottom" hidden></div>
 
-          <!-- your bid: the app's modal style (Figma 1821:5120), low enough to fit above your hand and
-               centred: value and Kaput | Pass and Contra / Sur (8px apart in each pair), then the trump tiles -->
+          <!-- your bid: styled like the app's modals (Figma 1821:5120, "Game settings"), everything centred:
+               value and Kaput, the trump tiles, then Pass and Contra / Sur (8px apart, like value and Kaput) -->
           <div class="tb-panel tb-bid" data-bid hidden>
+            <p class="tb-panel_title">Your bid</p>
             <div class="tb-bid_row">
-              <div class="tb-bid_pair">
-                <div class="tb-step">
-                  <button class="tb-step_btn" type="button" data-bid-minus aria-label="Less">−</button>
-                  <span class="tb-step_value" data-bid-value>8</span>
-                  <button class="tb-step_btn" type="button" data-bid-plus aria-label="More">+</button>
-                </div>
-                <button class="tb-key tb-key--toggle" type="button" data-bid-kaput aria-pressed="false">Kaput</button>
+              <div class="tb-step">
+                <button class="tb-step_btn" type="button" data-bid-minus aria-label="Less">−</button>
+                <span class="tb-step_value" data-bid-value>8</span>
+                <button class="tb-step_btn" type="button" data-bid-plus aria-label="More">+</button>
               </div>
-              <div class="tb-bid_pair">
-                <button class="tb-key" type="button" data-bid-pass>Pass</button>
-                <button class="tb-key tb-key--red" type="button" data-bid-contra hidden>Contra</button>
-                <button class="tb-key tb-key--red" type="button" data-bid-sur hidden>Sur</button>
-              </div>
+              <button class="tb-key tb-key--toggle" type="button" data-bid-kaput aria-pressed="false">Kaput</button>
             </div>
             <div class="tb-bid_suits">
               <button class="tb-tile" type="button" data-bid-suit="C" aria-label="Clubs"><i data-s="C"></i><span data-bid-label>8</span></button>
@@ -251,6 +245,11 @@
               <button class="tb-tile" type="button" data-bid-suit="H" aria-label="Hearts"><i data-s="H"></i><span data-bid-label>8</span></button>
               <button class="tb-tile" type="button" data-bid-suit="S" aria-label="Spades"><i data-s="S"></i><span data-bid-label>8</span></button>
               <button class="tb-tile" type="button" data-bid-suit="NT" aria-label="No trump"><i data-s="NT">NT</i><span data-bid-label>8</span></button>
+            </div>
+            <div class="tb-bid_row">
+              <button class="tb-key" type="button" data-bid-pass>Pass</button>
+              <button class="tb-key tb-key--red" type="button" data-bid-contra hidden>Contra</button>
+              <button class="tb-key tb-key--red" type="button" data-bid-sur hidden>Sur</button>
             </div>
           </div>
 
