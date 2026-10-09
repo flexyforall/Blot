@@ -322,12 +322,12 @@
 
 /* ---- panels: bidding and round result, in the app's modal style (Figma 1821:5120,
    "Game settings" 1821:4970): navy surface, hairline border, dark inset tiles with a blue
-   selected state, 30px buttons with the matte diamond texture. The bid panel fits between
-   the nameplates, the side piles and your hand: 316 wide, 136..318 tall. */
+   selected state, 30px buttons with the matte diamond texture. Centred on the screen; the bid
+   panel (316 wide, 105..288) stays clear of your hand. */
 .tb-panel {
   position: absolute;
   left: 50%;
-  top: 227px;
+  top: 50%;   /* centred on the screen */
   transform: translate(-50%, -50%);
   width: 316px;
   box-sizing: border-box;
