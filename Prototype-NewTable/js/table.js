@@ -37,18 +37,18 @@
   // the side players sit 24 px further in than in the mockup, so the left one clears the iPhone's
   // island (the screen's left 48 px in landscape) and the layout stays symmetric.
   // rect: the character art (right is GarikAv, mirrored so he looks at the table; you are the robot
-  // too for now, right of your hand with your nameplate under it, like the others);
+  // too for now, in the middle behind your hand, your nameplate under it);
   // fan: where the player's cards are held: the pivot just off the screen edge and the direction
   // the cards point (degrees, 0 = up), as the mockup's card fans; face: where won tricks go;
   // deck: where the deck starts when this player deals.
   var SEATS = {
-    bottom: { art: 'vazgen', rect: [645, 253, 81, 97], face: [686, 300], deck: [426, 300], deckRot: 0 },
+    bottom: { art: 'vazgen', rect: [385.5, 236, 81, 97], face: [426, 290], deck: [426, 300], deckRot: 0 },
     left:   { art: 'georgi', rect: [62, 139, 81, 97], fan: { p: [9, 211.4], a: 83.94 }, face: [102, 187], deck: [164, 196], deckRot: Math.PI / 2 },
     top:    { art: 'vazgen', rect: [385, 18, 81, 97], fan: { p: [424, -15], a: 180 }, face: [426, 66], deck: [426, 128], deckRot: Math.PI },
     right:  { art: 'garik', rect: [706, 134, 93, 97], flip: true, fan: { p: [843, 212.4], a: -83.94 }, face: [752, 182], deck: [688, 196], deckRot: -Math.PI / 2 }
   };
   var IDS = Object.keys(SEATS);
-  var JOIN_ORDER = ['left', 'top', 'right', 'bottom'];   // you sit down last
+  var JOIN_ORDER = ['bottom', 'left', 'top', 'right'];   // you sit down first
   function px(p) { return [p[0] * F, p[1] * F]; }
   IDS.forEach(function (id, n) {
     var s = SEATS[id];
@@ -61,7 +61,7 @@
   });
   // the middle of the table (the ornamental frame) and where each player's card lands in a trick
   var MID = [1000, 460];
-  var TRICK_SPOT = { bottom: [1000, 505, -.04], top: [1000, 415, .04], left: [930, 462, -.14], right: [1070, 458, .14] };
+  var TRICK_SPOT = { bottom: [1000, 492, -.04], top: [1000, 412, .04], left: [930, 455, -.14], right: [1070, 451, .14] };
   var TRICK_SC = 1.53;                 // the mockup's played card: 51 px wide
   var FAN_R = 32 * F, FAN_STEP = 9.14, FAN_SC = 1.265;   // the fans: 42 px cards, 64 degrees for 8 cards
   var HAND_SC = 1.7;                   // your cards: 57 px wide, as in the mockup
@@ -329,16 +329,16 @@
   // Your cards wait in a small pile until layoutHand spreads them.
   function pileAt(id, i, n) {
     var k = i - (n - 1) / 2;
-    if (id === 'bottom') return { x: 1000 + k * 15, y: 700, rot: k * .03, sc: 1.2 };
+    if (id === 'bottom') return { x: 1000 + k * 15, y: 760, rot: k * .03, sc: 1.2 };
     var f = SEATS[id].fan, a = (f.a + k * FAN_STEP) * Math.PI / 180;
     return { x: f.p[0] + Math.sin(a) * FAN_R, y: f.p[1] - Math.cos(a) * FAN_R, rot: a, sc: FAN_SC };
   }
-  // your hand: a slight arc, 37 px apart, 2.4 degrees between cards (the outer ones dip ~6 px);
-  // it sits 22 px lower while the bid window is open, so the window in the middle does not cover it
+  // your hand: a slight arc, 37 px apart, 2.4 degrees between cards (the outer ones dip ~6 px), low
+  // enough that your character's head shows above it and the bid window clears it
   var handDrop = 0;
   function handAt(i, n) {
     var k = i - (n - 1) / 2, a = k * .042;
-    return { x: 1000 + k * 87, y: 730 + handDrop + 1500 * (1 - Math.cos(a)), rot: a };
+    return { x: 1000 + k * 87, y: 779 + handDrop + 1500 * (1 - Math.cos(a)), rot: a };
   }
 
   var view = {
@@ -398,7 +398,7 @@
       return wait(.9);
     },
     lowerHand: function (on) {
-      var d = (on ? 52 : 0) - handDrop;
+      var d = 0 - handDrop;   // the hand sits low enough already; kept for the controller's calls
       handDrop += d;
       if (d) cards.forEach(function (c) { if (c.mine) tween(c, { y: c.y + d }, .3, { ease: ease.inOut }); });
     },

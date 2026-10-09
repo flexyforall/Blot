@@ -106,7 +106,7 @@
 .tb-plate--left { left: 51px; top: 228px; }
 .tb-plate--top { left: 374px; top: 106px; }
 .tb-plate--right { left: 697px; top: 226px; }
-.tb-plate--bottom { left: 634px; top: 342px; }   /* under your avatar, right of your hand */
+.tb-plate--bottom { left: 374px; top: 353px; }   /* centred, under your avatar and hand */
 /* nickname: Poppins SemiBold 12, white to 80% white with a 1px shadow (two copies, as the score) */
 .tb-plate span {
   position: absolute;
@@ -171,7 +171,7 @@
 .tb-chip--left { left: 128px; top: 160.8px; }
 .tb-chip--top { left: 451px; top: 39.8px; }
 .tb-chip--right { right: 128px; top: 159.8px; }
-.tb-chip--bottom { left: 711px; top: 274.8px; }
+.tb-chip--bottom { left: 486px; top: 358px; }   /* right of your nameplate */
 .tb-chip i { width: 16.8px; height: 16.8px; font-size: 7.5px; line-height: 16.8px; }
 .tb-chip small { font-size: 11px; color: #ffd66b; }
 .tb-chip.is-pass { font-size: 12px; padding-left: 8px; color: rgba(255, 255, 255, .7); }
@@ -215,7 +215,7 @@
 /* speech bubbles by the players: bids, combinations, chat, reactions */
 .tb-say { position: absolute; inset: 0; pointer-events: none; }
 .tb-bubble { position: absolute; transform: translate(-50%, 0); display: flex; justify-content: center; }
-.tb-bubble--bottom { left: 426px; top: 232px; }
+.tb-bubble--bottom { left: 548px; top: 252px; }   /* beside your head, above the hand */
 .tb-bubble--left { left: 136px; top: 106px; }
 .tb-bubble--top { left: 556px; top: 28px; }
 .tb-bubble--right { left: 748px; top: 102px; }
@@ -320,8 +320,7 @@
 .tb-key--red::before { filter: hue-rotate(135deg); opacity: .55; }
 
 /* bid panel: the same window as in the other prototype (316 wide, four centred rows: title,
-   value and Kaput, the trump tiles, Pass and Contra / Sur), in the middle of the screen; your hand
-   drops a little while it is open so the panel does not cover it */
+   value and Kaput, the trump tiles, Pass and Contra / Sur), in the middle of the screen, above your hand */
 .tb-bid { width: 316px; padding: 12px 16px; }
 .tb-bid .tb-panel_title { line-height: 20px; }
 .tb-bid_row { margin-top: 8px; display: flex; gap: 8px; justify-content: center; }
