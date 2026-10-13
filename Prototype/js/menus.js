@@ -76,6 +76,53 @@
   }
   var global = [0, 1, 2, 3, 4, 5, 6, 7];
 
+
+  // ---- Tasks (the clipboard icon): Objectives / Streak / Rewards; the card on the left follows the tab
+  function blueBtn(label, attr) {
+    return '<button class="mn-cta" type="button"' + (attr || '') + '><img class="mn-cta_fx" src="' + LB + 'play-effects.webp" alt="">' +
+      '<span class="mn-cta_label">' + label + '</span><span class="mn-cta_inner"></span></button>';
+  }
+  function side(pane, icon, title, sub, box, foot) {
+    return '<div class="mn-side" data-pane="' + pane + '"' + (pane === 'objectives' ? '' : ' hidden') + '><div class="mn-side_head"><img src="' + A + icon +
+      '" alt=""><p class="mn-card_name">' + title + '</p>' + (sub ? '<p class="mn-card_since">' + sub + '</p>' : '') + '</div>' + box + foot + '</div>';
+  }
+  function counter(n, label, bar) {
+    return '<div class="mn-counter' + (bar ? ' mn-counter--bar' : '') + '"><b data-count>' + n + '</b><span>' + label + '</span>' + (bar ? progress() : '') + '</div>';
+  }
+  var taskList = [['ach-firsttrick.webp', 'First trick', 'Win your first trick', '0/1', 2, 0],
+    ['ach-hothand.webp', 'Hot hand', 'Win 5 games in a row', '2/5', 8, 1],
+    ['ach-perfect.webp', 'Perfect match', 'Win 10 games with the same bond', '1/10', 12, 1]];
+  function taskRows(withProgress) {
+    return taskList.map(function (a) {
+      return '<div class="mn-ach"><img class="mn-ach_badge" src="' + A + a[0] + '" alt=""><div class="mn-ach_text"><b>' + a[1] + '</b><span>' + a[2] +
+        '</span></div>' + (withProgress ? (a[5] ? progress() : track()) + '<b class="mn-ach_count">' + a[3] + '</b>' : '') +
+        '<span class="mn-reward"><img src="' + A + 'gem.webp" alt="">' + a[4] + '</span></div>';
+    }).join('');
+  }
+  var tasksCard = '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div>' +
+    side('objectives', 't-checklist.webp', 'Today’s tasks', 'Resets at <span data-reset>5:03:25</span>', counter('1/3', 'Tasks completed', true), '<p class="mn-side_foot">1 reroll left</p>') +
+    side('streak', 'flame-big.webp', 'Current streak', '', counter('5', 'Days played in a row'), '<p class="mn-side_foot">4 days till your longest streak</p>') +
+    side('rewards', 't-chest.webp', 'Rewards earned', '', counter('6', 'Rewards wait for you'), blueBtn('Collect all', ' data-collect')) + '</div>';
+  var streakPane = '<div class="mn-pane" data-pane="streak" hidden><p class="mn-h">5 days in a row</p><div class="mn-streak">' +
+    days.map(function (d) {
+      return '<div class="mn-day' + (d[1] ? ' is-on' : '') + (d[1] === 2 ? ' is-today' : '') + '"><span class="mn-day_box"><img src="' + A +
+        (d[1] ? 'flame-on.svg' : 'flame-off.svg') + '" alt=""></span><span class="mn-day_label">' + d[0] + '</span></div>';
+    }).join('') + '</div><div class="mn-pair"><div class="mn-big"><b>10</b><span>Longest streak</span></div><div class="mn-big"><b>23</b><span>Days played</span></div></div>' +
+    '<div class="mn-ach mn-ach--shield"><img class="mn-ach_badge" src="' + A + 'ach-firsttrick.webp" alt=""><div class="mn-ach_text"><b>Streak shields</b>' +
+    '<span>Used automatically to cover a missed day</span></div><span class="mn-reward mn-reward--small">2/2</span></div></div>';
+  var tasksHtml = '<div class="mn" data-menu="tasks" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--art">' + tasksCard +
+    '<div class="mn-main">' + tabs([['objectives', 'Objectives'], ['streak', 'Streak'], ['rewards', 'Rewards']]) + close() +
+    '<div class="mn-pane mn-list" data-pane="objectives">' + taskRows(true) + '</div>' + streakPane +
+    '<div class="mn-pane mn-list" data-pane="rewards" hidden>' + taskRows(false) + '</div></div></div></div>';
+
+  // ---- Buy Premium (the crown pill in the header)
+  var premiumHtml = '<div class="mn" data-menu="premium" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--premium"><div class="mn-prem">' +
+    '<p class="mn-prem_title">Buy Premium</p>' + close() + '<div class="mn-perks">' +
+    [['p-noads.webp', 'No Ads', 72], ['p-analysis.webp', 'Unlimited game analysis', 70], ['p-xp.webp', '+50% XP', 70], ['gem.webp', 'Monthly gems', 58]].map(function (k) {
+      return '<div class="mn-perk"><span class="mn-perk_icon"><img src="' + A + k[0] + '" alt="" style="width:' + k[2] + 'px;height:' + k[2] + 'px"></span><p>' + k[1] + '</p></div>';
+    }).join('') + '</div><div class="mn-buy"><p><b>Buy Premium</b> $1,99 / month</p>' + blueBtn('Get premium', ' data-buy') + '</div>' +
+    '<img class="mn-buy_crown" src="' + LB + 'crown.webp" alt=""></div></div></div>';
+
   var html =
     '<div class="mn" data-menu="profile" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--art">' +
       card(level) + '<div class="mn-main">' + tabs([['stats', 'Stats'], ['achievements', 'Achievements']]) + close() + stats + ach + '</div></div></div>' +
@@ -110,6 +157,8 @@
         return '<button class="mn-opt mn-opt--table' + (c === 'red' ? ' is-active' : '') + '" type="button"><img src="' + A + 'table-' + c + '.webp" alt=""></button>';
       }).join('') + '</div></div></div></div></div></div>';
 
+  html += tasksHtml + premiumHtml;
+
   var host = document.createElement('div');
   host.className = 'mn-host';
   host.innerHTML = html;
@@ -123,6 +172,8 @@
   lobby.querySelector('.lb-avatar').setAttribute('data-menu-open', 'profile');
   lobby.querySelector('.lb-icon[aria-label="Рейтинг"]').setAttribute('data-menu-open', 'leaderboard');
   lobby.querySelector('[data-settings]').setAttribute('data-menu-open', 'settings');
+  lobby.querySelector('.lb-icon[aria-label="Задания"]').setAttribute('data-menu-open', 'tasks');
+  lobby.querySelector('.lb-pill_crown').closest('.lb-pill').setAttribute('data-menu-open', 'premium');
 
   lobby.addEventListener('click', function (e) {
     var t = e.target;
@@ -131,7 +182,7 @@
     if (t.closest('[data-menu-close]')) { shut(); return; }
     var tab = t.closest('.mn-tab');
     if (tab) {
-      var main = tab.closest('.mn-main');
+      var main = tab.closest('.mn_panel');
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
       main.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== tab.getAttribute('data-tab'); });
       return;
@@ -140,12 +191,30 @@
     if (opt) { opt.parentNode.querySelectorAll('.mn-opt').forEach(function (o) { o.classList.toggle('is-active', o === opt); }); return; }
     var set = t.closest('[data-set]');
     if (set && set.getAttribute('data-set') === 'game') { open('game'); return; }
+    if (set && set.getAttribute('data-set') === 'noads') { open('premium'); return; }
+    var collect = t.closest('[data-collect]');
+    if (collect && !collect.disabled) {
+      var panel = collect.closest('.mn_panel');
+      panel.querySelector('[data-pane="rewards"].mn-list').classList.add('is-collected');
+      collect.closest('.mn-side').querySelector('[data-count]').textContent = '0';
+      collect.disabled = true; collect.querySelector('.mn-cta_label').textContent = 'Collected';
+      return;
+    }
     if (set && set.getAttribute('data-set') === 'music') { var s = document.querySelector('[data-sound-toggle]'); if (s) s.click(); return; }
     var link = t.closest('[data-link="logout"]');
     if (link) { shut(); if (window.BlotNav && BlotNav.restart) BlotNav.restart(); }
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shut(); });
   document.addEventListener('screen:show', shut);
+
+  // Today's tasks count down to the reset
+  var left = 5 * 3600 + 3 * 60 + 25;
+  var resetEl = host.querySelector('[data-reset]');
+  setInterval(function () {
+    left = left > 0 ? left - 1 : 24 * 3600;
+    var h = Math.floor(left / 3600), m = Math.floor(left / 60) % 60, sec = left % 60;
+    resetEl.textContent = h + ':' + (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
+  }, 1000);
 
   window.BlotMenus = { open: open, close: shut };
 })();

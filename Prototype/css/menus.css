@@ -221,3 +221,87 @@
 
 /* the avatar opens Profile */
 .lb-avatar[data-menu-open] { cursor: pointer; }
+
+/* ---- blue call-to-action (GET PREMIUM, COLLECT ALL): the lobby's PLAY NOW button */
+.mn .mn-cta {
+  position: relative; height: 44px; display: flex; align-items: center; justify-content: center; padding: 8px 14px; box-sizing: border-box;
+  border: 1px solid #5ca0ff !important; border-radius: 4px; background: #031f47 !important; overflow: hidden;
+}
+.mn-cta_fx { position: absolute; left: -1px; top: -1px; width: calc(100% + 2px); height: calc(100% + 2px); object-fit: cover; pointer-events: none; }
+.mn-cta_label { position: relative; font-weight: 800; font-style: italic; font-size: 16px; text-transform: uppercase; white-space: nowrap; color: #fff; text-shadow: 0 1.5px 4px #000; }
+.mn-cta_inner { position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 2px 8px rgba(56, 149, 255, .5); pointer-events: none; }
+.mn .mn-cta:active { transform: scale(.96); }
+.mn .mn-cta:disabled { filter: grayscale(.7) brightness(.7); cursor: default; }
+
+/* ---- Tasks: the left card changes with the tab */
+.mn-side { position: absolute; inset: 7px 7px 15px; display: flex; flex-direction: column; align-items: center; }
+.mn-side_head { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 10px; }
+.mn-side_head img { width: 48px; height: 48px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5)); }
+.mn-side[data-pane="rewards"] .mn-side_head img { width: 56px; height: 56px; }
+.mn-side[data-pane="objectives"] .mn-side_head { padding-top: 10px; }
+.mn-side .mn-card_name { padding-top: 2px; }
+.mn-counter {
+  position: relative; margin: 14px 10px 0; align-self: stretch; height: 79px; box-sizing: border-box;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px solid #87b5f5; border-radius: 4px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, .6)), url("../assets/menus/tile-diamond-btn.webp") -31px -2px / 231px 130px, #03112a;
+  box-shadow: inset 0 0 12px #0b6eff;
+}
+.mn-counter b { font-size: 32px; line-height: 40px; color: #f0f3f9; font-weight: 600; }
+.mn-counter span { font-size: 10px; line-height: 1.35; color: rgba(255, 255, 255, .7); }
+.mn-counter--bar { height: 104px; }
+.mn-counter--bar .lb-progress { width: 147px; margin-top: 8px; }
+.mn .mn-side_foot { margin-top: auto; font-size: 10px; line-height: 1.35; color: rgba(255, 255, 255, .7); }
+.mn-side .mn-cta { margin-top: auto; width: 175px; height: 36px; }
+.mn-side .mn-cta_label { font-size: 14px; }
+
+/* Streak tab */
+.mn-pair { display: flex; gap: 8px; margin-top: 16px; }
+.mn-big {
+  flex: 1; height: 65px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  border: 1px solid #87b5f5; border-radius: 4px;
+  background: linear-gradient(180deg, rgba(3, 14, 36, .35), rgba(3, 14, 36, .7)), url("../assets/menus/tile-diamond-btn.webp") -45px -52px / 346px 195px, #03112a;
+  box-shadow: inset 0 0 12px #0b6eff;
+}
+.mn-big b { font-size: 24px; line-height: 24px; color: #f0f3f9; font-weight: 600; }
+.mn-big span { font-size: 10px; line-height: 1.35; color: rgba(255, 255, 255, .7); }
+.mn-ach--shield { height: 66px; padding: 8px 16px; margin-top: 16px; }
+.mn-reward--small { height: 32px; }
+/* Rewards tab after Collect all */
+.mn-list.is-collected .mn-ach { opacity: .4; transition: opacity .3s ease; }
+
+/* ---- Buy Premium */
+.mn_panel--premium { background: #05101f; border-color: rgba(255, 255, 255, .2); border-radius: 10px; }
+.mn-prem {
+  position: absolute; left: 8px; top: 8px; width: 788px; height: 329px; box-sizing: border-box; border: 1px solid #000; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(180deg, #0d1828 0%, #00193b 57.3%);
+}
+.mn-prem::before {   /* the diamond lattice, strongest at the top */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: url("../assets/menus/tile-diamond-btn.webp") -120px -180px / 1026px 578px;
+  -webkit-mask: linear-gradient(180deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .15) 70%, rgba(0, 0, 0, .3));
+  mask: linear-gradient(180deg, rgba(0, 0, 0, .7), rgba(0, 0, 0, .15) 70%, rgba(0, 0, 0, .3));
+  opacity: .55;
+}
+.mn-prem_title { position: absolute; left: 0; right: 0; top: 17px; text-align: center; font-size: 24px; line-height: 36px; }
+.mn .mn-prem .mn-close { right: 16px; top: 19px; }
+.mn-perks { position: absolute; left: 11px; width: 764px; top: 149px; transform: translateY(-50%); display: flex; justify-content: center; gap: 12px; }
+.mn-perk { width: 132px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.mn-perk_icon { width: 72px; height: 72px; display: grid; place-items: center; }
+.mn-perk_icon img { filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5)); }
+.mn-perk_icon img[src$="gem.webp"] { transform: rotate(-7deg); }
+.mn-perk p { font-size: 16px; line-height: 1.2; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.mn-buy {
+  position: absolute; left: 116.5px; top: 250px; width: 555px; height: 62px; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 12px;
+  border: 1px solid #5ca0ff; border-radius: 12px; overflow: hidden;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .55), rgba(0, 0, 0, .8)), url("../assets/menus/tile-diamond-btn.webp") -22px -24px / 597px 336px, #000;
+  box-shadow: 0 0 12px rgba(135, 181, 245, .4);
+}
+.mn-buy p { font-size: 16px; line-height: 1.2; }
+.mn-buy b { font-size: 20px; font-weight: 600; margin-right: 4px; }
+.mn-buy .mn-cta { width: 140px; }
+.mn-buy_crown {
+  position: absolute; left: 101px; top: 215px; width: 55px; height: 55px; transform: rotate(-15.49deg);
+  filter: drop-shadow(0 -4px 12px rgba(249, 198, 79, .5)); pointer-events: none;
+}
