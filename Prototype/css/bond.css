@@ -21,6 +21,8 @@
 }
 .bd-glow::before, .bd-glow::after {
   content: ""; position: absolute; inset: 0; border-radius: 50%; mix-blend-mode: screen;
+  /* the artwork has violet patches: drop its colour and tint it our blue */
+  filter: grayscale(1) sepia(1) hue-rotate(178deg) saturate(3.2) brightness(.95);
   background: url("../assets/bond/glow-bg.webp") center / 620px auto no-repeat;
   -webkit-mask: radial-gradient(closest-side, #000 26%, rgba(0, 0, 0, .7) 52%, transparent 80%);
   mask: radial-gradient(closest-side, #000 26%, rgba(0, 0, 0, .7) 52%, transparent 80%);
