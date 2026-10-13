@@ -155,5 +155,5 @@
   });
   render();
 
-  window.BlotSound = { muted: function () { return muted; } };
+  window.BlotSound = { muted: function () { return muted; }, sfx: sfx };
 })();

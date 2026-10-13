@@ -1,0 +1,203 @@
+/* Bond mode of the stage select (Figma 1952:1246): the pair on the left, "Your bonds" on the right. */
+.bd { display: none; position: absolute; inset: 0; font-family: "Poppins", sans-serif; font-weight: 600; color: #fff; }
+.stsel.is-bond .bd { display: block; }
+.stsel.is-bond .st-track, .stsel.is-bond .st-play, .stsel.is-bond .st-cost { display: none; }
+.bd p { margin: 0; }
+.bd button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+.bd-main, .bd-friends {
+  position: absolute; top: 72px; height: 301px; box-sizing: border-box; border: 1px solid #000; border-radius: 8px; overflow: hidden;
+  background: linear-gradient(180deg, #0d1828 0%, #00193b 57.3%);
+}
+.bd-main { left: 20px; width: 537px; }
+.bd-friends { left: 569px; width: 263px; padding: 16px; transition: box-shadow .3s ease, border-color .3s ease; }
+.bd-friends::before { content: ""; position: absolute; inset: 0; border: 1px solid rgba(255, 255, 255, .08); border-radius: 7px; pointer-events: none; }
+
+/* ---- the pair */
+.bd-glow {
+  position: absolute; left: 161px; top: -21px; width: 233px; height: 233px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(70, 140, 255, .55), rgba(40, 100, 230, .25) 55%, rgba(20, 60, 160, 0) 100%);
+  opacity: 0; transform: scale(.6); transition: opacity .6s ease, transform .8s cubic-bezier(.22, 1, .36, 1);
+}
+.bd-main.is-bonded .bd-glow { opacity: 1; transform: none; }
+.bd-pair { position: absolute; left: 157px; top: 59px; width: 227px; height: 184px; transition: top .55s cubic-bezier(.22, 1, .36, 1); }
+.bd-main.is-bonded .bd-pair { top: 26px; }
+.bd-me, .bd-mate {
+  position: absolute; width: 109px; height: 109px; box-sizing: border-box; border-radius: 8px; overflow: hidden;
+}
+.bd-me img, .bd-mate_img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bd-me { left: 12.9px; top: 12.9px; transform: rotate(-9deg); z-index: 2; border: 2px solid #5ca0ff; box-shadow: 0 0 20px rgba(0, 87, 209, .5); }
+.bd-mate {
+  left: 107.6px; top: 10.6px; transform: rotate(9deg); z-index: 1;
+  display: grid; place-items: center; background: #031936; border: 1px solid rgba(255, 255, 255, .1);
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, .5);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.bd .bd-mate_img { display: none; pointer-events: none; }
+.bd-main.is-bonded .bd-mate { cursor: pointer; border: 2px solid #5ca0ff; box-shadow: 0 0 20px rgba(0, 87, 209, .5); }
+.bd .bd-main.is-bonded .bd-mate_img { display: block; }
+.bd-main.is-bonded .bd-add { display: none; }
+.bd .bd-add {
+  position: relative; width: 32px; height: 32px; border-radius: 4px; display: grid; place-items: center;
+  background: #061c38; box-shadow: 0 8px 8px rgba(0, 0, 0, .25), inset 0 3px 12px rgba(0, 0, 0, .5); border: 1px solid rgba(168, 204, 255, .45);
+}
+.bd-add img { width: 25px; height: 25px; margin: 0 0 -5px; }
+.bd .bd-add:active { transform: scale(.92); }
+/* waiting for a friend after "+": the slot breathes */
+.bd-mate.is-waiting { border-color: #5ca0ff; box-shadow: inset 0 4px 12px rgba(0, 0, 0, .5), 0 0 16px rgba(92, 160, 255, .55); }
+.bd-mate.is-waiting .bd-add { animation: bd-breathe 1s ease-in-out infinite; }
+@keyframes bd-breathe { 50% { transform: scale(1.12); box-shadow: 0 0 14px #5ca0ff, inset 0 3px 12px rgba(0, 0, 0, .5); } }
+/* dragging a friend: the slot opens up, and grows when the friend is over it */
+.bd-mate.is-target { border: 2px dashed #5ca0ff; box-shadow: inset 0 0 18px rgba(68, 224, 255, .35), 0 0 18px rgba(92, 160, 255, .5); }
+.bd-mate.is-hot { transform: rotate(9deg) scale(1.08); border-color: #44e0ff; box-shadow: inset 0 0 26px rgba(68, 224, 255, .6), 0 0 28px rgba(68, 224, 255, .7); }
+
+/* the link between the two cards */
+.bd-link { position: absolute; left: 91px; top: 85px; width: 48px; height: 48px; z-index: 3; }
+.bd-link::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; background: #01193a; border: 1px solid rgba(255, 255, 255, .1);
+  transform: rotate(7deg); transition: border-color .3s ease, box-shadow .3s ease;
+}
+.bd-main.is-bonded .bd-link::before { border-color: #55b3fe; box-shadow: inset 0 0 4px 2px #44e0ff, 0 0 14px rgba(68, 224, 255, .45); }
+.bd-link img { position: absolute; left: 7px; top: 7px; width: 34px; height: 34px; }
+.bd-link_on { opacity: 0; transform: scale(.4) rotate(-40deg); transition: opacity .25s ease, transform .4s cubic-bezier(.34, 1.8, .64, 1); }
+.bd-main.is-bonded .bd-link_on { opacity: 1; transform: none; }
+.bd-main.is-bonded .bd-link_off { opacity: 0; }
+.bd-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid #44e0ff; opacity: 0; pointer-events: none; }
+.bd-sparks { position: absolute; left: 50%; top: 50%; pointer-events: none; }
+.bd-sparks i {
+  position: absolute; left: 0; top: -1.5px; width: 12px; height: 3px; border-radius: 3px; opacity: 0;
+  background: linear-gradient(90deg, rgba(68, 224, 255, 0), #bff5ff 60%, #fff);
+  transform: rotate(var(--a)) translateX(10px);
+}
+
+.bd-names { position: absolute; left: 0; right: 0; top: 140.8px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); white-space: nowrap; }
+.bd-title { font-size: 20px; line-height: 1.4; color: #eff3fa; }
+.bd-title span { color: rgba(239, 243, 250, .5); }
+.bd-main.is-bonded .bd-title span { color: #eff3fa; }
+.bd-sub { font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, .7); }
+.bd-main.is-bonded .bd-sub { background: linear-gradient(0deg, #5ca0ff, #44e0ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+
+/* record and PLAY NOW, only once a bond is chosen */
+.bd-bottom {
+  position: absolute; left: 16px; right: 16px; top: 239px; height: 44px; display: flex; gap: 12px;
+  opacity: 0; transform: translateY(16px); pointer-events: none; transition: opacity .35s ease, transform .45s cubic-bezier(.22, 1, .36, 1);
+}
+.bd-main.is-bonded .bd-bottom { opacity: 1; transform: none; pointer-events: auto; transition-delay: .35s; }
+.bd-record {
+  display: flex; align-items: center; gap: 16px; padding: 0 16px; border-radius: 6px; white-space: nowrap;
+  background: rgba(0, 0, 0, .2); border: 1px solid rgba(255, 255, 255, .1); font-size: 12px; line-height: 1.2;
+}
+.bd-record span { color: rgba(255, 255, 255, .45); display: flex; align-items: center; gap: 8px; }
+.bd-record b { color: #fff; font-size: 14px; font-weight: 700; }
+.bd-record i { width: 1px; height: 16px; background: rgba(255, 255, 255, .1); }
+.bd .bd-play {
+  position: relative; flex: 1; height: 44px; border: 1px solid #5ca0ff; border-radius: 4px; background: #031f47; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.bd-play_fx { position: absolute; left: -1px; top: -1px; width: calc(100% + 2px); height: calc(100% + 2px); object-fit: cover; pointer-events: none; }
+.bd-play_label {
+  position: relative; display: flex; align-items: center; gap: 6px; font-weight: 800; font-style: italic; font-size: 16px; text-transform: uppercase;
+  text-shadow: 0 1.5px 4px #000;
+}
+.bd-play_label img { width: 28px; height: 28px; filter: drop-shadow(0 0 3px rgba(0, 0, 0, .5)); }
+.bd-play_inner { position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 2px 8px rgba(56, 149, 255, .5); pointer-events: none; }
+.bd .bd-play:active { transform: scale(.96); }
+
+/* ---- the bond forming */
+.bd-main::after {
+  content: ""; position: absolute; left: 268px; top: 135px; width: 10px; height: 10px; margin: -5px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, rgba(220, 250, 255, .95), rgba(68, 224, 255, .45) 35%, rgba(68, 224, 255, 0) 70%); opacity: 0;
+}
+.bd-main.is-bonding::after { animation: bd-flash .9s ease-out .32s; }
+.bd-main.is-bonding .bd-mate { animation: bd-fly .6s cubic-bezier(.2, 1.3, .4, 1); }
+.bd-main.is-bonding .bd-me { animation: bd-nudge .6s ease .3s; }
+.bd-main.is-bonding .bd-link { animation: bd-snap .5s cubic-bezier(.34, 1.8, .64, 1) .32s; }
+.bd-main.is-bonding .bd-ring { animation: bd-ring .8s ease-out .36s; }
+.bd-main.is-bonding .bd-ring--2 { animation-delay: .5s; }
+.bd-main.is-bonding .bd-sparks i { animation: bd-spark .7s cubic-bezier(.1, .8, .3, 1) .36s; }
+.bd-main.is-bonding .bd-title { animation: bd-name .8s ease .4s; }
+.bd-main.is-bonding .bd-me::after, .bd-main.is-bonding .bd-mate::after {
+  content: ""; position: absolute; inset: -20%; pointer-events: none; z-index: 2;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, .65) 48%, rgba(160, 230, 255, .3) 54%, transparent 65%);
+  animation: bd-sheen .8s ease .45s backwards;
+}
+@keyframes bd-fly {
+  0% { opacity: 0; transform: translate(150px, -30px) rotate(40deg) scale(1.3); }
+  60% { opacity: 1; transform: translate(-8px, 2px) rotate(5deg) scale(.97); }
+  100% { transform: rotate(9deg); }
+}
+@keyframes bd-nudge { 30% { transform: translateX(-7px) rotate(-12deg); } 100% { transform: rotate(-9deg); } }
+@keyframes bd-snap { 0% { transform: scale(.4); } 60% { transform: scale(1.35); } 100% { transform: none; } }
+@keyframes bd-ring { 0% { opacity: .95; transform: scale(.8); } 100% { opacity: 0; transform: scale(3.4); border-width: .5px; } }
+@keyframes bd-spark {
+  0% { opacity: 1; transform: rotate(var(--a)) translateX(14px) scaleX(.4); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scaleX(1.2); }
+}
+@keyframes bd-flash { 0% { opacity: 0; transform: scale(1); } 20% { opacity: 1; transform: scale(18); } 100% { opacity: 0; transform: scale(42); } }
+@keyframes bd-sheen { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
+@keyframes bd-name { 0% { text-shadow: 0 0 0 rgba(68, 224, 255, 0); } 35% { text-shadow: 0 0 16px rgba(68, 224, 255, .9), 0 4px 4px rgba(0, 0, 0, .5); } 100% { text-shadow: 0 4px 4px rgba(0, 0, 0, .5); } }
+
+/* ---- Your bonds */
+.bd-friends_head { display: flex; align-items: center; justify-content: space-between; height: 32px; }
+.bd-friends_head p { font-size: 18px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.bd .bd-sort {
+  width: 32px; height: 32px; border-radius: 4px; display: grid; place-items: center; background: #061c38;
+  box-shadow: 0 8px 8px rgba(0, 0, 0, .25), inset 0 3px 12px rgba(0, 0, 0, .5); border: 1px solid rgba(168, 204, 255, .45);
+}
+.bd-sort img { width: 20px; height: 20px; }
+.bd-hint {
+  position: absolute; left: 16px; right: 16px; top: 50px; font-size: 10px; line-height: 14px; color: #8cc4ff; text-align: center;
+  opacity: 0; transform: translateY(-4px); transition: opacity .25s ease, transform .25s ease; pointer-events: none;
+}
+.bd-list { position: absolute; left: 16px; right: 16px; top: 65px; bottom: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; scrollbar-width: none; padding-bottom: 12px; }
+.bd-list::-webkit-scrollbar { display: none; }
+.bd-row {
+  position: relative; flex: none; height: 46px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 6px;
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); border-radius: 8px;
+  cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  transition: border-color .2s ease, background .2s ease, opacity .2s ease, transform .2s ease;
+}
+.bd-row:hover { background: rgba(255, 255, 255, .08); }
+.bd-row.is-bonded { border-color: #1ad398; }
+.bd-row.is-dragging { opacity: .45; }
+.bd-row_av { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; pointer-events: none; }
+.bd-row_text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.bd-row_text b { display: flex; align-items: center; gap: 4px; font-size: 12px; line-height: 1.4; font-weight: 600; color: #eff3fa; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.bd-row_text span { font-size: 8px; line-height: 1.4; color: rgba(255, 255, 255, .7); white-space: nowrap; }
+.bd-online { width: 4px; height: 4px; border-radius: 50%; background: #1ad398; box-shadow: 0 0 4px #1ad398; }
+.bd-row_btn {
+  width: 32px; height: 32px; box-sizing: border-box; border-radius: 4px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .05);
+}
+.bd-row_btn img { width: 18px; height: 18px; }
+
+/* picking after "+": the whole panel lights up and the friends shimmer one after another */
+.bd-friends.is-picking { border-color: #5ca0ff; animation: bd-panel 1.4s ease-in-out infinite; }
+.bd-friends.is-picking .bd-hint { opacity: 1; transform: none; }
+.bd-friends.is-picking .bd-row { border-color: rgba(92, 160, 255, .7); cursor: pointer; animation: bd-row 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * .12s); }
+.bd-friends.is-picking .bd-row::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(100deg, transparent 30%, rgba(140, 196, 255, .22) 50%, transparent 70%) -100% 0 / 200% 100% no-repeat;
+  animation: bd-shine 1.4s ease-in-out infinite; animation-delay: calc(var(--i) * .12s);
+}
+@keyframes bd-panel { 50% { box-shadow: 0 0 22px rgba(92, 160, 255, .55), inset 0 0 18px rgba(92, 160, 255, .25); } }
+@keyframes bd-row { 0%, 100% { transform: none; } 30% { transform: translateX(-4px); background: rgba(92, 160, 255, .14); } }
+@keyframes bd-shine { 0% { background-position: -100% 0; } 60%, 100% { background-position: 200% 0; } }
+
+/* the friend being dragged */
+.bd-ghost {
+  position: absolute; z-index: 60; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 8px; object-fit: cover; pointer-events: none;
+  border: 2px solid #5ca0ff; box-shadow: 0 10px 24px rgba(0, 0, 0, .6), 0 0 18px rgba(92, 160, 255, .6); transform: rotate(-6deg) scale(1.05);
+}
+.bd-ghost.is-dropped { transition: transform .25s ease, opacity .25s ease; transform: scale(.5); opacity: 0; }
+.bd-ghost.is-back { transition: opacity .25s ease; opacity: 0; }
+
+/* entrance when switching to the Bond tab */
+.bd-enter .bd-main { animation: bd-in .45s cubic-bezier(.22, 1, .36, 1); }
+.bd-enter .bd-friends { animation: bd-in .45s cubic-bezier(.22, 1, .36, 1) .08s backwards; }
+@keyframes bd-in { from { opacity: 0; transform: translateY(14px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bd *, .bd *::before, .bd *::after, .bd-main::after { animation: none !important; transition: none !important; }
+}
