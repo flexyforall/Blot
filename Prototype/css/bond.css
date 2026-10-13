@@ -16,13 +16,13 @@
 /* ---- the pair */
 .bd-glow {   /* the storm behind the pair: our cloud artwork in a soft circle, slowly turning */
   position: absolute; left: 107px; top: -75px; width: 340px; height: 340px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(closest-side, rgba(70, 140, 255, .42), rgba(40, 100, 230, .18) 55%, rgba(20, 60, 160, 0) 100%);
+  background: radial-gradient(closest-side, rgba(18, 96, 255, .5), rgba(8, 64, 210, .22) 52%, rgba(4, 36, 140, 0) 100%);
   opacity: 0; transform: scale(.4); transition: opacity .6s ease, transform .9s cubic-bezier(.22, 1, .36, 1);
 }
 .bd-glow::before, .bd-glow::after {
-  content: ""; position: absolute; inset: 0; border-radius: 50%; mix-blend-mode: screen;
-  /* the artwork has violet patches: drop its colour and tint it our blue */
-  filter: grayscale(1) sepia(1) hue-rotate(178deg) saturate(3.2) brightness(.95);
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  /* the artwork has violet patches: drop its colour, tint it a clean saturated blue and keep it deep */
+  mix-blend-mode: screen; filter: grayscale(1) sepia(1) hue-rotate(184deg) saturate(8) brightness(.78) contrast(1.15);
   background: url("../assets/bond/glow-bg.webp") center / 620px auto no-repeat;
   -webkit-mask: radial-gradient(closest-side, #000 26%, rgba(0, 0, 0, .7) 52%, transparent 80%);
   mask: radial-gradient(closest-side, #000 26%, rgba(0, 0, 0, .7) 52%, transparent 80%);
@@ -164,7 +164,7 @@
   position: absolute; left: 16px; right: 16px; top: 50px; font-size: 10px; line-height: 14px; color: #8cc4ff; text-align: center;
   opacity: 0; transform: translateY(-4px); transition: opacity .25s ease, transform .25s ease; pointer-events: none;
 }
-.bd-list { position: absolute; left: 16px; right: 16px; top: 65px; bottom: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; scrollbar-width: none; padding-bottom: 12px; }
+.bd-list { position: absolute; left: 16px; right: 16px; top: 65px; bottom: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; scrollbar-width: none; padding: 1px 0 12px; }
 .bd-list::-webkit-scrollbar { display: none; }
 .bd-row {
   position: relative; flex: none; height: 46px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 6px;
@@ -174,7 +174,14 @@
 }
 .bd-row:hover { background: rgba(255, 255, 255, .08); }
 /* green = online (as in Figma); the friend you're bonded with gets the blue highlight */
-.bd-row.is-online { border-color: #1ad398; }
+/* online: the usual faint border with soft green light along the top (right) and bottom (left) edges, as in Figma */
+.bd-row.is-online::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(26, 211, 152, 0) 38%, rgba(26, 211, 152, .75) 70%, rgba(26, 211, 152, 0) 96%) top / 100% 1px no-repeat,
+    linear-gradient(90deg, rgba(26, 211, 152, 0) 6%, rgba(26, 211, 152, .75) 34%, rgba(26, 211, 152, 0) 62%) bottom / 100% 1px no-repeat;
+}
+.bd-row.is-bonded::before { display: none; }
 .bd-row.is-bonded { border-color: #5ca0ff; background: rgba(92, 160, 255, .14); box-shadow: 0 0 12px rgba(92, 160, 255, .45), inset 0 0 10px rgba(92, 160, 255, .25); }
 .bd-row.is-dragging { opacity: .45; }
 .bd-row_av { width: 32px; height: 32px; border-radius: 4px; object-fit: cover; pointer-events: none; }
