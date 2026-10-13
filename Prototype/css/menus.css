@@ -98,7 +98,7 @@
 .mn-main {
   position: absolute; left: 225px; top: 8px; width: 571px; height: 329px; box-sizing: border-box;
   border: 1px solid rgba(255, 255, 255, .08); border-radius: 8px; overflow: hidden;
-  background: rgba(3, 10, 24, .55);
+  background: #050d1c;   /* solid: the cloud artwork stays only around the edges of the panel */
 }
 .mn-main .mn-tabs { position: absolute; left: 16px; top: 16px; }
 .mn-pane { position: absolute; left: 16px; right: 16px; top: 64px; bottom: 0; }
