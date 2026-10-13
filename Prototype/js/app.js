@@ -70,15 +70,13 @@
     set: function (v) { balance = v; renderBalance(); }
   };
 
-  window.BlotNav = { show: show };
+  window.BlotNav = { show: show, restart: playSplash };   // Settings > Log out replays the splash
 
   // Start screen: the tap is the user gesture that lets the splash play with sound.
   document.querySelector('[data-start]').addEventListener('click', playSplash);
 
   skip.addEventListener('click', toLobby);
   video.addEventListener('ended', toLobby);
-  // Prototype shortcut: the settings gear replays the splash.
-  document.querySelector('[data-settings]').addEventListener('click', playSplash);
 
   show('start');
 })();
