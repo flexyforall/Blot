@@ -40,9 +40,9 @@
       '<div class="bd-friends_head"><p>Your bonds</p><button class="bd-sort" type="button" aria-label="Сортировка"><img src="' + B + 'sort.svg" alt=""></button></div>' +
       '<p class="bd-hint">Tap a friend or drag them to the card</p>' +
       '<div class="bd-list">' + FRIENDS.map(function (f, i) {
-        return '<div class="bd-row" data-friend="' + i + '" style="--i:' + i + '"><img class="bd-row_av" src="' + B + f.img + '.webp" alt="" draggable="false">' +
+        return '<div class="bd-row' + (f.online ? ' is-online' : '') + '" data-friend="' + i + '" style="--i:' + i + '"><img class="bd-row_av" src="' + B + f.img + '.webp" alt="" draggable="false">' +
           '<div class="bd-row_text"><b>' + f.name + (f.online ? '<i class="bd-online"></i>' : '') + '</b><span>' + f.rank + ' • Lv. ' + f.lv + '</span></div>' +
-          '<span class="bd-row_btn"><img src="' + B + 'plane.svg" alt=""></span><span class="bd-row_btn"><img src="' + B + 'user-plus.svg" alt=""></span></div>';
+          '<span class="bd-row_btn"><img class="bd-ic-plane" src="' + B + 'plane.svg" alt=""></span><span class="bd-row_btn"><img class="bd-ic-add" src="' + B + 'user-plus.svg" alt=""></span></div>';
       }).join('') + '</div>' +
     '</div>';
   screen.appendChild(root);
