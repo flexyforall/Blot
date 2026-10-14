@@ -161,7 +161,7 @@
   // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
   var C = 'assets/clubs/';
   var CLUBS = [
-    { name: 'Yerevan Courtyard', badge: C + 'dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot II', games: 42, pts: '12,480',
+    { name: 'Yerevan Courtyard', badge: C + 'dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
       about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00. No pressure to grind, but show up for the league weekend.' },
     { name: 'Gyumri Regulards', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
       about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
@@ -192,8 +192,8 @@
     '<p class="mn-card_name mn-club_name" data-c="name"></p><p class="mn-card_since mn-side_sub"><span data-c="n"></span>/50 members</p></div>' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
     '<div class="mn-main">' +
     '<div class="mn-pane mn-clubpage"><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
-    '<div class="mn-join"><b data-c="status"></b><span>Level <span data-c="lvl"></span> and above</span></div><div class="mn-tiles mn-tiles--3">' +
-    '<div class="mn-tile is-badge"><img src="' + A + 'badge-novice.webp" alt=""><b data-c="club"></b><span>Ranking</span></div>' +
+    '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div><div class="mn-tiles mn-tiles--3">' +
+    '<div class="mn-tile is-badge"><img src="' + A + 'badge-novice.webp" alt=""><b data-c="club"></b><span>Division</span></div>' +
     '<div class="mn-tile"><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b><span>Games played this week</span></div>' +
     '<div class="mn-tile"><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b><span>Week points</span></div></div></div></div></div></div>';
 
@@ -312,6 +312,7 @@
     page.querySelector('[data-c="name"]').innerHTML = words.slice(0, -1).join(' ') + '<br>' + words[words.length - 1];
     set('n', c.n); set('about', c.about); set('lvl', c.lvl); set('club', c.club); set('games', c.games); set('pts', c.pts);
     set('status', c.n >= 50 ? 'Club is full' : c.open ? 'Open to join' : 'Invite only');
+    page.querySelector('[data-c="check"]').hidden = !(c.open && c.n < 50);
     var join = page.querySelector('[data-join]');
     var can = c.open && c.n < 50;
     join.disabled = !can;

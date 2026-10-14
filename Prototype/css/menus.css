@@ -277,12 +277,11 @@
 }
 .mn-big b { font-size: 24px; line-height: 24px; color: #f0f3f9; font-weight: 600; }
 /* Streak tab: Longest streak / Days played are secondary, so they sit quieter than the week above */
-.mn-pair .mn-big {   /* styled like an inactive tab, with a soft blue edge */
-  border: 1px solid rgba(92, 160, 255, .35); background: #061427;
-  box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 6px 12px rgba(0, 0, 0, .5);
+.mn-pair .mn-big {   /* Figma 1942:3424: black box, blue edge, faint diamond tile, no glow */
+  border: 1px solid #87b5f5;
+  background: linear-gradient(180deg, rgba(0, 0, 0, .72), rgba(0, 0, 0, .9)), url("../assets/menus/tile-diamond-btn.webp") -45px -52px / 346px 195px, #000;
+  box-shadow: none;
 }
-.mn-pair .mn-big b { color: rgba(240, 243, 249, .8); }
-.mn-pair .mn-big span { color: rgba(255, 255, 255, .5); }
 .mn-big span { font-size: 10px; line-height: 1.35; color: rgba(255, 255, 255, .7); }
 .mn-ach--shield { height: 66px; padding: 8px 16px; margin-top: 16px; }
 .mn-reward--small { height: 32px; }
@@ -345,9 +344,11 @@
 .mn-about { padding: 16px; border-radius: 4px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); display: flex; flex-direction: column; gap: 4px; }
 .mn-about_h { font-size: 18px; line-height: 1.4; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
 .mn-about_t { font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, .7); }
-.mn-join { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-radius: 4px; font-size: 12px; line-height: 1.4;
+.mn-join { display: flex; justify-content: space-between; align-items: center; padding: 7px 16px 7px 8px; border-radius: 4px; font-size: 12px; line-height: 1.4;
   background: rgba(255, 255, 255, .05); border: 1px solid #5ca0ff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
-.mn-join b { font-weight: 600; }
+.mn-join b { font-weight: 600; font-size: 14px; display: flex; align-items: center; gap: 4px; }
+.mn-join b img { width: 16px; height: 16px; }
+.mn-join b img[hidden] { display: none; }
 .mn-join > span { color: rgba(255, 255, 255, .7); }
 .mn-tiles--3 { margin-top: 8px; }
 .mn-tiles--3 .mn-tile { flex: 1; width: auto; }
