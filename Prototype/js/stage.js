@@ -115,12 +115,15 @@
   });
 
   // navigation
-  // every lobby card has a PLAY NOW; only the active card's one opens the stage select
+  // every lobby card has a PLAY NOW; only the active card's one opens the stage select.
+  // Play with Friends opens it straight on the Bond tab, Play Online on Quick Game
   document.querySelectorAll('[data-play]').forEach(function (b) {
     b.addEventListener('click', function () {
       var card = b.closest('.lb-card');
       if (card && !card.classList.contains('is-active')) return;
+      var tab = card && card.getAttribute('data-card') === 'friends' ? 'Bond' : 'Quick Game';
       window.BlotNav.show('play');
+      screen.querySelectorAll('.st-tab').forEach(function (t) { if (t.textContent.trim() === tab) t.click(); });
     });
   });
   screen.querySelector('[data-back]').addEventListener('click', function () { window.BlotNav.show('lobby'); });

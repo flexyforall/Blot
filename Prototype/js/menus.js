@@ -161,17 +161,17 @@
   // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
   var C = 'assets/clubs/';
   var CLUBS = [
-    { name: 'Yerevan Courtyard', badge: C + 'dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
+    { name: 'Yerevan Courtyard', badge: C + 'crest-dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
       about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00.' },
-    { name: 'Gyumri Regulards', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
+    { name: 'Gyumri Regulards', badge: C + 'crest-eagle.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
       about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
-    { name: 'Ararat Evenings', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
+    { name: 'Ararat Evenings', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
       about: 'Armenians abroad who miss the evening game. Mostly European time zones, invite only.' },
-    { name: 'Sevan Sharks', badge: C + 'dragon.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
+    { name: 'Sevan Sharks', badge: C + 'crest-spade.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
       about: 'Competitive club for league weekends. Bring your best partner.' },
-    { name: 'Vanadzor Aces', badge: A + 'ach-firsttrick.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
+    { name: 'Vanadzor Aces', badge: C + 'crest-eagle.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
       about: 'Brand new club, everyone welcome.' },
-    { name: 'Night Owls', badge: C + 'dragon.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
+    { name: 'Night Owls', badge: C + 'crest-stag.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
       about: 'Late games after midnight. Full for now.' }
   ];
   function clubRows() {
