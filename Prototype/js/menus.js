@@ -235,6 +235,27 @@
       el.classList.add('mn-in');
     });
     root.querySelectorAll('.mn-pane:not([hidden]) .mn-streak').forEach(lightStreak);
+    root.querySelectorAll('.mn-side:not([hidden]) .mn-counter [data-count]').forEach(countDown);
+  }
+  // the big number on the left counts down to its value: ticks slow down as it nears it, each with
+  // a click, and it lands with a pop and a coin. "1/3" counts down from its total, 3/3 → 2/3 → 1/3
+  function countDown(el) {
+    clearTimeout(el._t);
+    if (!el.hasAttribute('data-final')) el.setAttribute('data-final', el.textContent);
+    var parts = el.getAttribute('data-final').split('/'), to = +parts[0], tail = parts[1] ? '/' + parts[1] : '';
+    el.classList.remove('is-tick', 'is-landed');
+    if (!to || (parts[1] && to >= +parts[1])) { el.textContent = parts.join('/'); return; }
+    var n = parts[1] ? +parts[1] : to + 9, total = n - to, step = 0, snd = window.BlotSound && BlotSound.sfx;
+    el.textContent = n + tail;
+    (function tick() {
+      el._t = setTimeout(function () {
+        n--; step++;
+        el.textContent = n + tail;
+        el.classList.remove('is-tick'); void el.offsetWidth;
+        if (n > to) { el.classList.add('is-tick'); if (snd) snd('click', 0.22 + step * 0.02); tick(); }
+        else { el.classList.add('is-landed'); if (snd) { snd('pop', 0.5); snd('coin', 0.45); } }
+      }, step === 0 ? 380 : 45 + Math.pow((step + 1) * 9 / total, 2) * 3.2);   // a short run (3/3 → 1/3) ticks just as slowly near the end
+    })();
   }
   // the streak's played days close one after another, each with a sound; the last (today) rings out
   function lightStreak(row) {
@@ -292,7 +313,7 @@
     if (collect && !collect.disabled) {
       var panel = collect.closest('.mn_panel');
       panel.querySelector('[data-pane="rewards"].mn-list').classList.add('is-collected');
-      collect.closest('.mn-side').querySelector('[data-count]').textContent = '0';
+      var cnt = collect.closest('.mn-side').querySelector('[data-count]'); clearTimeout(cnt._t); cnt.setAttribute('data-final', '0'); cnt.classList.remove('is-tick', 'is-landed'); cnt.textContent = '0';
       collect.disabled = true; collect.querySelector('.mn-cta_label').textContent = 'Collected';
       return;
     }
