@@ -157,7 +157,47 @@
         return '<button class="mn-opt mn-opt--table' + (c === 'red' ? ' is-active' : '') + '" type="button"><img src="' + A + 'table-' + c + '.webp" alt=""></button>';
       }).join('') + '</div></div></div></div></div></div>';
 
-  html += tasksHtml + premiumHtml;
+
+  // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
+  var C = 'assets/clubs/';
+  var CLUBS = [
+    { name: 'Yerevan Courtyard', badge: C + 'dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot II', games: 42, pts: '12,480',
+      about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00. No pressure to grind, but show up for the league weekend.' },
+    { name: 'Gyumri Regulards', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
+      about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
+    { name: 'Ararat Evenings', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
+      about: 'Armenians abroad who miss the evening game. Mostly European time zones, invite only.' },
+    { name: 'Sevan Sharks', badge: C + 'dragon.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
+      about: 'Competitive club for league weekends. Bring your best partner.' },
+    { name: 'Vanadzor Aces', badge: A + 'ach-firsttrick.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
+      about: 'Brand new club, everyone welcome.' },
+    { name: 'Night Owls', badge: C + 'dragon.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
+      about: 'Late games after midnight. Full for now.' }
+  ];
+  function clubRows() {
+    return CLUBS.map(function (c, i) {
+      return '<div class="mn-ach mn-club" data-club-row="' + i + '"' + (c.open ? ' data-open' : '') + '><img class="mn-ach_badge" src="' + c.badge + '" alt="">' +
+        '<div class="mn-ach_text"><b>' + c.name + '</b><span>' + c.rank + '<i class="mn-dot"></i>' + c.n + '/50 members<i class="mn-dot"></i>' + c.city + '</span></div>' +
+        '<button class="mn-btn mn-view" type="button" data-club="' + i + '">View</button></div>';
+    }).join('');
+  }
+  var clubsHtml = '<div class="mn" data-menu="clubs" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--art">' +
+    '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head"><img class="mn-side_big" src="' + A + 'swords.webp" alt="">' +
+    '<p class="mn-card_name">Clubs</p><p class="mn-card_since mn-side_sub">20 to 50 players</p></div>' + blueBtn('Create club') + '</div></div>' +
+    '<div class="mn-main">' + tabs([['all', 'All'], ['open', 'Open to join']]).replace('mn-tab is-active" type="button" data-tab="all"', 'mn-tab" type="button" data-tab="all"').replace('mn-tab" type="button" data-tab="open"', 'mn-tab is-active" type="button" data-tab="open"') +
+    '<div class="mn-tools"><button class="mn-search" type="button" aria-label="Поиск"><img src="' + C + 'search.svg" alt=""></button>' + close() + '</div>' +
+    '<div class="mn-pane mn-list mn-clubs is-open-only" data-clubs>' + clubRows() + '</div></div></div></div>' +
+    '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel mn_panel--art">' +
+    '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head"><span class="mn-club_badge"><img class="mn-club_glow" src="' + C + 'badge-glow.svg" alt=""><img data-c="badge" alt=""></span>' +
+    '<p class="mn-card_name mn-club_name" data-c="name"></p><p class="mn-card_since mn-side_sub"><span data-c="n"></span>/50 members</p></div>' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
+    '<div class="mn-main">' +
+    '<div class="mn-pane mn-clubpage"><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
+    '<div class="mn-join"><b data-c="status"></b><span>Level <span data-c="lvl"></span> and above</span></div><div class="mn-tiles mn-tiles--3">' +
+    '<div class="mn-tile is-badge"><img src="' + A + 'badge-novice.webp" alt=""><b data-c="club"></b><span>Ranking</span></div>' +
+    '<div class="mn-tile"><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b><span>Games played this week</span></div>' +
+    '<div class="mn-tile"><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b><span>Week points</span></div></div></div></div></div></div>';
+
+  html += tasksHtml + premiumHtml + clubsHtml;
 
   var host = document.createElement('div');
   host.className = 'mn-host';
@@ -173,6 +213,7 @@
   lobby.querySelector('.lb-icon[aria-label="Рейтинг"]').setAttribute('data-menu-open', 'leaderboard');
   lobby.querySelector('[data-settings]').setAttribute('data-menu-open', 'settings');
   lobby.querySelector('.lb-icon[aria-label="Задания"]').setAttribute('data-menu-open', 'tasks');
+  lobby.querySelector('.lb-icon[aria-label="Турниры"]').setAttribute('data-menu-open', 'clubs');
   lobby.querySelector('.lb-pill_crown').closest('.lb-pill').setAttribute('data-menu-open', 'premium');
 
   lobby.addEventListener('click', function (e) {
@@ -180,7 +221,17 @@
     var opener = t.closest('[data-menu-open]');
     if (opener) { open(opener.getAttribute('data-menu-open')); return; }
     if (t.closest('[data-menu-close]')) { shut(); return; }
+    var view = t.closest('[data-club]');
+    if (view) { showClub(CLUBS[+view.getAttribute('data-club')]); return; }
+    if (t.closest('[data-club-back]')) { open('clubs'); return; }
+    var join = t.closest('[data-join]');
+    if (join && !join.disabled) { join.disabled = true; join.querySelector('.mn-cta_label').textContent = 'Request sent'; return; }
     var tab = t.closest('.mn-tab');
+    if (tab && tab.closest('[data-menu="clubs"]')) {
+      tab.parentNode.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
+      host.querySelector('[data-clubs]').classList.toggle('is-open-only', tab.getAttribute('data-tab') === 'open');
+      return;
+    }
     if (tab) {
       var main = tab.closest('.mn_panel');
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
@@ -215,6 +266,21 @@
     var h = Math.floor(left / 3600), m = Math.floor(left / 60) % 60, sec = left % 60;
     resetEl.textContent = h + ':' + (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
   }, 1000);
+
+  function showClub(c) {
+    var page = host.querySelector('[data-menu="club"]');
+    function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
+    page.querySelector('[data-c="badge"]').src = c.badge;
+    var words = c.name.split(' ');
+    page.querySelector('[data-c="name"]').innerHTML = words.slice(0, -1).join(' ') + '<br>' + words[words.length - 1];
+    set('n', c.n); set('about', c.about); set('lvl', c.lvl); set('club', c.club); set('games', c.games); set('pts', c.pts);
+    set('status', c.n >= 50 ? 'Club is full' : c.open ? 'Open to join' : 'Invite only');
+    var join = page.querySelector('[data-join]');
+    var can = c.open && c.n < 50;
+    join.disabled = !can;
+    join.querySelector('.mn-cta_label').textContent = can ? 'Ask to join' : (c.n >= 50 ? 'Club is full' : 'Invite only');
+    open('club');
+  }
 
   window.BlotMenus = { open: open, close: shut };
 })();

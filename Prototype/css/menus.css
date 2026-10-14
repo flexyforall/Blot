@@ -305,3 +305,32 @@
   position: absolute; left: 101px; top: 215px; width: 55px; height: 55px; transform: rotate(-15.49deg);
   filter: drop-shadow(0 -4px 12px rgba(249, 198, 79, .5)); pointer-events: none;
 }
+
+/* ---- Clubs (Figma 1958:6619) */
+.mn-tools { position: absolute; right: 16px; top: 16px; display: flex; gap: 8px; }
+.mn .mn-tools .mn-close { position: relative; right: auto; top: auto; }
+.mn .mn-search { width: 32px; height: 32px; position: relative; padding: 0; background: none; border: 0; }
+.mn-search img { position: absolute; left: -8px; top: 0; width: 48px; height: 48px; }
+.mn-side .mn-side_big { width: 56px; height: 56px; filter: drop-shadow(0 2px 6px #000); }
+.mn-side_sub { font-size: 12px; }
+.mn-club { height: 74px; }
+.mn-dot { display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: rgba(255, 255, 255, .6); margin: 0 4px; vertical-align: middle; }
+.mn .mn-view { width: 61px; height: 32px; flex: none; }
+.mn-clubs.is-open-only .mn-club:not([data-open]) { display: none; }
+/* a club's page */
+.mn-club_badge { position: relative; width: 80px; height: 80px; display: block; }
+.mn-side_head .mn-club_badge img { position: absolute; width: 80px; height: 80px; left: 0; top: 0; filter: none; }
+.mn-side_head .mn-club_badge .mn-club_glow { left: -8.5px; top: -9px; width: 97px; height: 97px; }
+.mn-club_name { text-align: center; line-height: 22px; margin-top: 2px; }
+.mn-clubpage { top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.mn-about { padding: 16px; border-radius: 4px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); display: flex; flex-direction: column; gap: 4px; }
+.mn-about_h { font-size: 18px; line-height: 1.4; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.mn-about_t { font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, .7); }
+.mn-join { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; border-radius: 4px; font-size: 12px; line-height: 1.4;
+  background: rgba(255, 255, 255, .05); border: 1px solid #5ca0ff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.mn-join b { font-weight: 600; }
+.mn-join > span { color: rgba(255, 255, 255, .7); }
+.mn-tiles--3 { margin-top: 8px; }
+.mn-tiles--3 .mn-tile { flex: 1; width: auto; }
+.mn-tiles--3 .mn-tile b { font-size: 22px; }
+.mn-tiles--3 .mn-tile.is-badge b { font-size: 20px; }
