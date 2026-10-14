@@ -380,3 +380,32 @@
 }
 @keyframes mn-flame { 0% { transform: scale(.2); opacity: 0; } 60% { transform: scale(1.5); opacity: 1; } 100% { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .mn-in, .mn-day.is-lighting .mn-day_box, .mn-day.is-lighting .mn-day_box img { animation: none !important; } }
+
+/* ---- Rewards earned: the gem pills and COLLECT ALL shimmer to tease the collect.
+   A light sweep crosses each pill in turn and then the button, the gems wiggle as it passes, and the
+   button's glow breathes. Everything stops once the rewards are collected */
+@media (prefers-reduced-motion: no-preference) {
+  .mn-list[data-pane="rewards"]:not(.is-collected) .mn-reward { position: relative; overflow: hidden; animation: mn-tease-glow 2.4s ease-in-out infinite; }
+  .mn-list[data-pane="rewards"]:not(.is-collected) .mn-reward::after,
+  .mn [data-collect]:not(:disabled)::after {
+    content: ""; position: absolute; top: -20%; bottom: -20%; left: 0; width: 60%; pointer-events: none;
+    background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(191, 245, 255, .55) 50%, rgba(255, 255, 255, 0) 100%);
+    transform: translateX(-120%) skewX(-12deg); animation: mn-sheen 2.4s ease-in-out infinite;
+  }
+  .mn-list[data-pane="rewards"]:not(.is-collected) .mn-reward img { animation: mn-gem 2.4s ease-in-out infinite; }
+  .mn-list[data-pane="rewards"] .mn-ach:nth-child(2) .mn-reward,
+  .mn-list[data-pane="rewards"] .mn-ach:nth-child(2) .mn-reward::after,
+  .mn-list[data-pane="rewards"] .mn-ach:nth-child(2) .mn-reward img { animation-delay: .18s; }
+  .mn-list[data-pane="rewards"] .mn-ach:nth-child(3) .mn-reward,
+  .mn-list[data-pane="rewards"] .mn-ach:nth-child(3) .mn-reward::after,
+  .mn-list[data-pane="rewards"] .mn-ach:nth-child(3) .mn-reward img { animation-delay: .36s; }
+  .mn [data-collect]:not(:disabled)::after { width: 45%; animation-delay: .55s; }
+  .mn [data-collect]:not(:disabled)::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    box-shadow: inset 0 0 10px rgba(68, 224, 255, .2), 0 0 0 rgba(68, 224, 255, 0); animation: mn-tease-btn 2.4s ease-in-out .55s infinite;
+  }
+}
+@keyframes mn-sheen { 0% { transform: translateX(-120%) skewX(-12deg); } 45%, 100% { transform: translateX(260%) skewX(-12deg); } }
+@keyframes mn-gem { 0%, 100% { transform: rotate(-7deg); } 12% { transform: rotate(8deg) scale(1.22); filter: drop-shadow(0 0 6px rgba(68, 224, 255, .9)); } 26% { transform: rotate(-7deg); } }
+@keyframes mn-tease-glow { 0%, 100% { box-shadow: inset 0 0 8px #0b6eff; border-color: #87b5f5; } 15% { box-shadow: inset 0 0 14px #44a8ff, 0 0 10px rgba(68, 224, 255, .45); border-color: #bff5ff; } }
+@keyframes mn-tease-btn { 0%, 100% { box-shadow: inset 0 0 10px rgba(68, 224, 255, .2); } 18% { box-shadow: inset 0 0 18px rgba(68, 224, 255, .75); } }
