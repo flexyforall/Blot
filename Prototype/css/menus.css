@@ -329,7 +329,7 @@
 .mn .mn-tools .mn-close { position: relative; right: auto; top: auto; }
 .mn .mn-search { width: 32px; height: 32px; position: relative; padding: 0; background: none; border: 0; }
 .mn-search img { position: absolute; left: -8px; top: 0; width: 48px; height: 48px; }
-.mn-side .mn-side_big { width: 56px; height: 56px; filter: drop-shadow(0 2px 6px #000); }
+.mn-side .mn-side_big { width: 72px; height: 72px; filter: drop-shadow(0 2px 6px #000); }
 .mn-side_sub { font-size: 12px; }
 .mn-club { height: 74px; }
 .mn-dot { display: inline-block; width: 3px; height: 3px; border-radius: 50%; background: rgba(255, 255, 255, .6); margin: 0 4px; vertical-align: middle; }
@@ -340,9 +340,9 @@
 .mn-side_head .mn-club_badge img { position: absolute; width: 80px; height: 80px; left: 0; top: 0; filter: none; }
 .mn-side_head .mn-club_badge .mn-club_glow { left: -8.5px; top: -9px; width: 97px; height: 97px; }
 .mn-club_name { text-align: center; line-height: 22px; margin-top: 2px; }
-.mn-clubpage { top: 16px; display: flex; flex-direction: column; gap: 8px; }
-.mn-about { padding: 16px; border-radius: 4px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); display: flex; flex-direction: column; gap: 4px; }
-.mn-about_h { font-size: 18px; line-height: 1.4; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.mn-clubpage { top: 64px; display: flex; flex-direction: column; gap: 10px; }
+.mn-about { padding: 12px; border-radius: 4px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); display: flex; flex-direction: column; gap: 4px; }
+.mn-about_h { font-size: 16px; line-height: 22px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
 .mn-about_t { font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, .7); }
 .mn-join { display: flex; justify-content: space-between; align-items: center; padding: 7px 16px 7px 8px; border-radius: 4px; font-size: 12px; line-height: 1.4;
   background: rgba(255, 255, 255, .05); border: 1px solid #5ca0ff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
@@ -350,7 +350,10 @@
 .mn-join b img { width: 16px; height: 16px; }
 .mn-join b img[hidden] { display: none; }
 .mn-join > span { color: rgba(255, 255, 255, .7); }
-.mn-tiles--3 { margin-top: 8px; }
+.mn-tiles--3 { margin-top: 6px; }
+.mn-tiles--3 .mn-tile { height: 116px; }
+.mn-tiles--3 .mn-tile img { width: 40px; height: 40px; margin-bottom: 4px; }
+.mn-tiles--3 .mn-tile.is-badge img { width: 48px; height: 48px; margin: -4px 0 0; }
 .mn-tiles--3 .mn-tile { flex: 1; width: auto; }
 .mn-tiles--3 .mn-tile b { font-size: 22px; }
 .mn-tiles--3 .mn-tile.is-badge b { font-size: 20px; }

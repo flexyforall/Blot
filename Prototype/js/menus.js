@@ -162,7 +162,7 @@
   var C = 'assets/clubs/';
   var CLUBS = [
     { name: 'Yerevan Courtyard', badge: C + 'dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
-      about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00. No pressure to grind, but show up for the league weekend.' },
+      about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00.' },
     { name: 'Gyumri Regulards', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
       about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
     { name: 'Ararat Evenings', badge: A + 'ach-firsttrick.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
@@ -190,12 +190,20 @@
     '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel mn_panel--art">' +
     '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head"><span class="mn-club_badge"><img class="mn-club_glow" src="' + C + 'badge-glow.svg" alt=""><img data-c="badge" alt=""></span>' +
     '<p class="mn-card_name mn-club_name" data-c="name"></p><p class="mn-card_since mn-side_sub"><span data-c="n"></span>/50 members</p></div>' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
-    '<div class="mn-main">' +
-    '<div class="mn-pane mn-clubpage"><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
+    '<div class="mn-main">' + tabs([['about', 'About'], ['trophies', 'Trophies']]) +
+    '<button class="mn-close" type="button" data-club-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
+    '<div class="mn-pane mn-clubpage" data-pane="about"><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
     '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div><div class="mn-tiles mn-tiles--3">' +
     '<div class="mn-tile is-badge"><img src="' + A + 'badge-novice.webp" alt=""><b data-c="club"></b><span>Division</span></div>' +
     '<div class="mn-tile"><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b><span>Games played this week</span></div>' +
-    '<div class="mn-tile"><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b><span>Week points</span></div></div></div></div></div></div>';
+    '<div class="mn-tile"><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b><span>Week points</span></div></div></div>' +
+    // Trophies: not drawn in Figma yet, so the club's cups in the achievement-row style
+    '<div class="mn-pane mn-list" data-pane="trophies" hidden>' +
+    [['trophy.webp', 'League champion', 'Spring league 2026', '1st'], ['place-2.webp', 'Weekend cup', 'September 2026', '2nd'],
+     ['place-3.webp', 'City derby', 'Yerevan vs Gyumri', '3rd']].map(function (t) {
+      return '<div class="mn-ach"><img class="mn-ach_badge" src="' + A + t[0] + '" alt=""><div class="mn-ach_text"><b>' + t[1] + '</b><span>' + t[2] +
+        '</span></div><span class="mn-reward mn-reward--small">' + t[3] + '</span></div>';
+    }).join('') + '</div></div></div></div>';
 
   html += tasksHtml + premiumHtml + clubsHtml;
 
@@ -317,6 +325,8 @@
     var can = c.open && c.n < 50;
     join.disabled = !can;
     join.querySelector('.mn-cta_label').textContent = can ? 'Ask to join' : (c.n >= 50 ? 'Club is full' : 'Invite only');
+    page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'about'); });
+    page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'about'; });
     open('club');
   }
 
