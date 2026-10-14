@@ -88,7 +88,7 @@
   position: relative; isolation: isolate;
   border: 1px solid transparent; border-radius: 8px; padding: 10px 0 0; text-align: center; overflow: hidden;
   /* the border runs from our blue at the top to cyan at the bottom */
-  background: linear-gradient(#04142a, #04142a) padding-box, linear-gradient(180deg, #5ca0ff 0%, #5ca0ff 45%, #6fdcff 100%) border-box;
+  background: linear-gradient(#04142a, #04142a) padding-box, linear-gradient(180deg, #5ca0ff 0%, #44e0ff 100%) border-box;   /* Figma Frame 2121453405 stroke */
   box-shadow: 0 2px 20px rgba(0, 60, 143, .4), 0 6px 18px -6px rgba(80, 200, 255, .35);
 }
 /* the diamond tile only over the top half, fading out above the divider (Figma 1914:43502) */
@@ -96,8 +96,9 @@
   content: ""; position: absolute; left: 0; right: 0; top: 0; height: 90px; z-index: -1;
   background: url("../assets/menus/tile-diamond-btn.webp") 0 -15px / 175px 98px;
   box-shadow: inset 0 4px 4px rgba(0, 0, 0, .5);
-  -webkit-mask: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .6) 55%, rgba(0, 0, 0, 0) 100%);
-  mask: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .6) 55%, rgba(0, 0, 0, 0) 100%);
+  height: 75px;
+  -webkit-mask: linear-gradient(180deg, #000 0, #000 38px, transparent 75px);
+  mask: linear-gradient(180deg, #000 0, #000 38px, transparent 75px);
 }
 .mn-rank_label { font-size: 12px; font-weight: 500; line-height: 1.4; }
 .mn-rank_place { font-size: 32px; line-height: 1.4; text-shadow: 0 4px 0 rgba(0, 0, 0, .8); padding-bottom: 2px; }
@@ -275,6 +276,14 @@
   box-shadow: inset 0 0 12px #0b6eff;
 }
 .mn-big b { font-size: 24px; line-height: 24px; color: #f0f3f9; font-weight: 600; }
+/* Streak tab: Longest streak / Days played are secondary, so they sit quieter than the week above */
+.mn-pair .mn-big {
+  border-color: rgba(135, 181, 245, .25);
+  background: rgba(255, 255, 255, .04);
+  box-shadow: none;
+}
+.mn-pair .mn-big b { color: rgba(240, 243, 249, .8); }
+.mn-pair .mn-big span { color: rgba(255, 255, 255, .5); }
 .mn-big span { font-size: 10px; line-height: 1.35; color: rgba(255, 255, 255, .7); }
 .mn-ach--shield { height: 66px; padding: 8px 16px; margin-top: 16px; }
 .mn-reward--small { height: 32px; }

@@ -1,6 +1,9 @@
 /* Bond mode of the stage select (Figma 1952:1246): the pair on the left, "Your bonds" on the right. */
 .bd { display: none; position: absolute; inset: 0; font-family: "Poppins", sans-serif; font-weight: 600; color: #fff; }
 .stsel.is-bond .bd { display: block; }
+/* the layer spans the screen, but only its panels take taps, so the header (back arrow, tabs) stays clickable */
+.bd { pointer-events: none; }
+.bd-main, .bd-friends, .bd-ghost { pointer-events: auto; }
 .stsel.is-bond .st-track, .stsel.is-bond .st-play, .stsel.is-bond .st-cost { display: none; }
 .bd p { margin: 0; }
 .bd button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
