@@ -128,6 +128,13 @@
 }
 .bd-record span { color: rgba(255, 255, 255, .45); display: flex; align-items: center; gap: 6px; }
 .bd-record b { color: #fff; font-size: 20px; font-weight: 700; line-height: 1.2; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.bd-record b { display: inline-block; min-width: 1ch; }
+.bd-record b.is-popping { animation: bd-num .6s cubic-bezier(.34, 1.8, .64, 1); }
+@keyframes bd-num {
+  0% { transform: scale(.3) translateY(6px); opacity: 0; }
+  45% { transform: scale(1.45); opacity: 1; color: #bff5ff; text-shadow: 0 0 12px rgba(68, 224, 255, .9), 0 4px 4px rgba(0, 0, 0, .5); }
+  100% { transform: none; }
+}
 .bd-record i { width: 1px; height: 16px; background: rgba(255, 255, 255, .1); }
 .bd .bd-play {
   position: relative; flex: 1; height: 44px; border: 1px solid #5ca0ff; border-radius: 4px; background: #031f47; overflow: hidden;

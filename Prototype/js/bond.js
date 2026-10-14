@@ -77,7 +77,7 @@
     mateImg.src = B + f.img + '.webp';
     nameEl.textContent = f.name;
     subEl.textContent = 'Bond level ' + f.level;
-    root.querySelectorAll('[data-rec]').forEach(function (el, k) { el.textContent = f.rec[k]; });
+    popStats(f.rec);
     main.classList.remove('is-bonding');
     void main.offsetWidth;
     main.classList.add('is-bonded', 'is-bonding');
@@ -85,6 +85,29 @@
     bond.t = setTimeout(function () { main.classList.remove('is-bonding'); }, 1600);
     sfx('whoosh', 0.5);
     setTimeout(function () { sfx('shimmer', 0.7); sfx('coin', 0.5); }, 380);
+  }
+  // the record numbers pop in one after another as the stats slide up, each counting up from 0
+  var popTimers = [];
+  function popStats(rec) {
+    popTimers.forEach(clearTimeout); popTimers = [];
+    var reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    root.querySelectorAll('[data-rec]').forEach(function (el, k) {
+      var to = rec[k];
+      if (reduced) { el.textContent = to; return; }
+      el.textContent = '0';
+      el.classList.remove('is-popping');
+      popTimers.push(setTimeout(function () {
+        void el.offsetWidth;
+        el.classList.add('is-popping');
+        var t0 = performance.now(), dur = 520;
+        (function step(now) {
+          var p = Math.min(1, (now - t0) / dur);
+          el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(step);
+        })(t0);
+        sfx('pop', 0.35);
+      }, 620 + k * 160));
+    });
   }
   function unbond() {
     current = -1;
