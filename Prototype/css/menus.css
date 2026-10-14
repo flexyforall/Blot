@@ -85,13 +85,24 @@
 
 /* leaderboard: your ranking */
 .mn-rank {
-  border: 1px solid #5ca0ff; border-radius: 8px; padding: 10px 0; text-align: center; overflow: hidden;
-  background: url("../assets/menus/tile-diamond-btn.webp") 0 -15px / 175px 98px, #04142a;
-  box-shadow: 0 2px 20px rgba(0, 60, 143, .4);
+  position: relative; isolation: isolate;
+  border: 1px solid transparent; border-radius: 8px; padding: 10px 0 0; text-align: center; overflow: hidden;
+  /* the border runs from our blue at the top to cyan at the bottom */
+  background: linear-gradient(#04142a, #04142a) padding-box, linear-gradient(180deg, #5ca0ff 0%, #5ca0ff 45%, #6fdcff 100%) border-box;
+  box-shadow: 0 2px 20px rgba(0, 60, 143, .4), 0 6px 18px -6px rgba(80, 200, 255, .35);
+}
+/* the diamond tile only over the top half, fading out above the divider (Figma 1914:43502) */
+.mn-rank::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 90px; z-index: -1;
+  background: url("../assets/menus/tile-diamond-btn.webp") 0 -15px / 175px 98px;
+  box-shadow: inset 0 4px 4px rgba(0, 0, 0, .5);
+  -webkit-mask: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .6) 55%, rgba(0, 0, 0, 0) 100%);
+  mask: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, .6) 55%, rgba(0, 0, 0, 0) 100%);
 }
 .mn-rank_label { font-size: 12px; font-weight: 500; line-height: 1.4; }
-.mn-rank_place { font-size: 32px; line-height: 1.4; text-shadow: 0 4px 0 rgba(0, 0, 0, .8); border-bottom: 1px solid rgba(255, 255, 255, .15); margin-bottom: 8px; }
-.mn-rank_cups { display: flex; align-items: center; justify-content: center; gap: 1px; font-size: 16px; color: #eff3fa; text-shadow: 0 2px 0 #000; }
+.mn-rank_place { font-size: 32px; line-height: 1.4; text-shadow: 0 4px 0 rgba(0, 0, 0, .8); padding-bottom: 2px; }
+.mn-rank_cups { display: flex; align-items: center; justify-content: center; gap: 1px; font-size: 16px; color: #eff3fa; text-shadow: 0 2px 0 #000;
+  padding: 10px 0 12px; border-top: 1px solid rgba(255, 255, 255, .1); background: rgba(2, 10, 24, .55); }
 .mn-rank_cups img { width: 22px; height: 22px; transform: rotate(11.22deg); filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5)); margin-right: 2px; }
 
 /* ---- right column */
