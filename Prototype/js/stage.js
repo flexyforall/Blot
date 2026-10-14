@@ -6,7 +6,7 @@
     { id: 'courtyard', name: 'Courtyard', cost: 2000 },
     { id: 'cafe', name: 'Café', cost: 10000 },
     { id: 'backroom', name: 'Backroom', cost: 20000 },
-    { id: 'mansion', name: 'Mansion', cost: 50000, locked: true },
+    { id: 'mansion', name: 'Mansion', cost: 50000 },
     { id: 'arena', name: 'Arena Challengers', cost: 100000, locked: true }
   ];
   // Figma geometry: cards 162x178 (selected 220x229), 56px apart, centred on y = 200.5
@@ -66,9 +66,23 @@
     });
     // the new price shows once the cost line has faded out
     clearTimeout(layout.t);
-    if (costLine.classList.contains('is-swapping')) layout.t = setTimeout(function () { costEl.textContent = fmt(STAGES[selected].cost); }, 110);
-    else costEl.textContent = fmt(STAGES[selected].cost);
+    if (costLine.classList.contains('is-swapping')) layout.t = setTimeout(renderCost, 110);
+    else renderCost();
   }
+
+  // Can't afford the room (Figma 1914:44104): the play button goes grey and inactive, and the line
+  // under it says how many more chips are needed.
+  var preEl = screen.querySelector('[data-cost-pre]');
+  function renderCost() {
+    var cost = STAGES[selected].cost;
+    var have = window.BlotWallet ? BlotWallet.get() : Infinity;
+    var poor = cost > have;
+    screen.classList.toggle('is-poor', poor);
+    playBtn.disabled = poor;
+    preEl.textContent = poor ? 'Need' : 'This game will cost you';
+    costEl.textContent = fmt(poor ? cost - have : cost);
+  }
+  document.addEventListener('screen:show', function (e) { if (e.detail === 'play') renderCost(); });
 
   function choose(i) {
     if (i === selected) return;
