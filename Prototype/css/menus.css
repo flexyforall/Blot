@@ -277,8 +277,8 @@
 }
 .mn-big b { font-size: 24px; line-height: 24px; color: #f0f3f9; font-weight: 600; }
 /* Streak tab: Longest streak / Days played are secondary, so they sit quieter than the week above */
-.mn-pair .mn-big {   /* styled like an inactive tab */
-  border: 1px solid transparent; background: #061427;
+.mn-pair .mn-big {   /* styled like an inactive tab, with a soft blue edge */
+  border: 1px solid rgba(92, 160, 255, .35); background: #061427;
   box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 6px 12px rgba(0, 0, 0, .5);
 }
 .mn-pair .mn-big b { color: rgba(240, 243, 249, .8); }
