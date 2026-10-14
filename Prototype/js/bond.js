@@ -18,6 +18,7 @@
   root.className = 'bd';
   root.innerHTML =
     '<div class="bd-main" data-bd-main>' +
+      '<div class="bd-side bd-side--l"></div><div class="bd-side bd-side--l"></div><div class="bd-side bd-side--r"></div><div class="bd-side bd-side--r"></div>' +
       '<div class="bd-glow"></div>' +
       '<div class="bd-pair">' +
         '<div class="bd-me"><img src="' + B + 'me.webp" alt=""></div>' +
@@ -25,10 +26,10 @@
           '<button class="bd-add" type="button" data-bd-add aria-label="Выбрать бонд"><img src="' + B + 'plus.svg" alt=""></button>' +
           '<img class="bd-mate_img" alt="">' +
         '</div>' +
-        '<div class="bd-link"><img class="bd-link_off" src="' + B + 'link-off.svg" alt=""><img class="bd-link_on" src="' + B + 'link.svg" alt="">' +
+        '<div class="bd-link"><img class="bd-link_off" src="' + B + 'link-off.svg" alt=""><img class="bd-link_on" src="' + B + 'link40.svg" alt="">' +
           '<i class="bd-ring"></i><i class="bd-ring bd-ring--2"></i><span class="bd-sparks"></span></div>' +
         '<div class="bd-names"><p class="bd-title">Artexcb &amp; <span data-bd-name>...</span></p>' +
-          '<p class="bd-sub" data-bd-sub>Select bond to start playing</p></div>' +
+          '<p class="bd-sub"><span data-bd-sub>Select bond to start playing</span></p></div>' +
       '</div>' +
       '<div class="bd-bottom">' +
         '<div class="bd-record"><span>Matches <b data-rec>24</b></span><i></i><span>Wins <b data-rec>16</b></span><i></i><span>Best streak <b data-rec>4</b></span></div>' +

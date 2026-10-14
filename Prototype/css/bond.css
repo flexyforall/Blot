@@ -41,18 +41,31 @@
 @keyframes bd-storm { to { transform: rotate(360deg); } }
 @keyframes bd-storm-back { from { transform: rotate(0) scale(1.1); } to { transform: rotate(-360deg) scale(1.1); } }
 @keyframes bd-swell { from { scale: .94; } to { scale: 1.08; } }
-.bd-pair { position: absolute; left: 157px; top: 59px; width: 227px; height: 184px; transition: top .55s cubic-bezier(.22, 1, .36, 1); }
-.bd-main.is-bonded .bd-pair { top: 26px; }
+.bd-pair { position: absolute; left: 157px; top: 59px; width: 227px; height: 184px; transition: top .55s cubic-bezier(.22, 1, .36, 1), left .55s cubic-bezier(.22, 1, .36, 1); }
+.bd-main.is-bonded .bd-pair { left: 155px; top: 29px; }
+/* diamond tiles fading in from the left and right edges (Figma 1958:1272), drawn twice for strength */
+.bd-side {
+  position: absolute; top: 0; width: 209px; height: 329px; pointer-events: none;
+  background: url("../assets/menus/card-tile.webp") 0 0 / 100% 100% no-repeat;
+  box-shadow: inset 0 1px 12px 8px #124995;
+  -webkit-mask: url("../assets/bond/side-mask.svg") -100px -25px / 314px 379px no-repeat;
+  mask: url("../assets/bond/side-mask.svg") -100px -25px / 314px 379px no-repeat;
+}
+.bd-side--l { left: 0; }
+.bd-side--r { left: 328px; transform: scaleX(-1); }
 .bd-me, .bd-mate {
   position: absolute; width: 109px; height: 109px; box-sizing: border-box; border-radius: 8px; overflow: hidden;
 }
+/* bonded: both cards settle at 96px (Figma 1951:1032) */
+.bd-main.is-bonded .bd-me { left: 21.97px; top: 8px; width: 96px; height: 96px; }
+.bd-main.is-bonded .bd-mate { left: 108.7px; top: 7.66px; width: 96px; height: 96px; }
 .bd-me img, .bd-mate_img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.bd-me { left: 12.9px; top: 12.9px; transform: rotate(-9deg); z-index: 2; border: 2px solid #5ca0ff; box-shadow: 0 0 20px rgba(0, 87, 209, .5); }
+.bd-me { left: 12.9px; top: 12.9px; transition: left .5s ease, top .5s ease, width .5s ease, height .5s ease; transform: rotate(-9deg); z-index: 2; border: 2px solid #5ca0ff; box-shadow: 0 0 20px rgba(0, 87, 209, .5); }
 .bd-mate {
   left: 107.6px; top: 10.6px; transform: rotate(9deg); z-index: 1;
   display: grid; place-items: center; background: #031936; border: 1px solid rgba(255, 255, 255, .1);
   box-shadow: inset 0 4px 12px rgba(0, 0, 0, .5);
-  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, left .5s ease, top .5s ease, width .5s ease, height .5s ease;
 }
 .bd .bd-mate_img { display: none; pointer-events: none; }
 .bd-main.is-bonded .bd-mate { cursor: pointer; border: 2px solid #5ca0ff; box-shadow: 0 0 20px rgba(0, 87, 209, .5); }
@@ -73,13 +86,15 @@
 .bd-mate.is-hot { transform: rotate(9deg) scale(1.08); border-color: #44e0ff; box-shadow: inset 0 0 26px rgba(68, 224, 255, .6), 0 0 28px rgba(68, 224, 255, .7); }
 
 /* the link between the two cards */
-.bd-link { position: absolute; left: 91px; top: 85px; width: 48px; height: 48px; z-index: 3; }
+.bd-link { position: absolute; left: 91px; top: 85px; width: 48px; height: 48px; z-index: 3; transition: left .5s ease, top .5s ease, width .5s ease, height .5s ease; }
+.bd-main.is-bonded .bd-link { left: 96.5px; top: 71.5px; width: 40px; height: 40px; }
 .bd-link::before {
   content: ""; position: absolute; inset: 0; border-radius: 50%; background: #01193a; border: 1px solid rgba(255, 255, 255, .1);
   transform: rotate(7deg); transition: border-color .3s ease, box-shadow .3s ease;
 }
 .bd-main.is-bonded .bd-link::before { border-color: #55b3fe; box-shadow: inset 0 0 4px 2px #44e0ff, 0 0 14px rgba(68, 224, 255, .45); }
-.bd-link img { position: absolute; left: 7px; top: 7px; width: 34px; height: 34px; }
+.bd-link img { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; }
+.bd-link .bd-link_on { width: 31.6px; height: 31.6px; margin: -15.8px 0 0 -15.8px; }
 .bd-link_on { opacity: 0; transform: scale(.4) rotate(-40deg); transition: opacity .25s ease, transform .4s cubic-bezier(.34, 1.8, .64, 1); }
 .bd-main.is-bonded .bd-link_on { opacity: 1; transform: none; }
 .bd-main.is-bonded .bd-link_off { opacity: 0; }
@@ -91,12 +106,15 @@
   transform: rotate(var(--a)) translateX(10px);
 }
 
-.bd-names { position: absolute; left: 0; right: 0; top: 140.8px; display: flex; flex-direction: column; align-items: center; gap: 2px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); white-space: nowrap; }
+.bd-names { position: absolute; left: 0; right: 0; top: 140.8px; transition: top .5s ease; display: flex; flex-direction: column; align-items: center; gap: 2px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); white-space: nowrap; }
 .bd-title { font-size: 20px; line-height: 1.4; color: #eff3fa; }
 .bd-title span { color: rgba(239, 243, 250, .5); }
 .bd-main.is-bonded .bd-title span { color: #eff3fa; }
 .bd-sub { font-size: 12px; line-height: 1.4; color: rgba(255, 255, 255, .7); }
-.bd-main.is-bonded .bd-sub { background: linear-gradient(0deg, #5ca0ff, #44e0ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+.bd-main.is-bonded .bd-names { top: 122px; gap: 4px; }
+/* "Bond level" sits in a pill */
+.bd-main.is-bonded .bd-sub { padding: 4px 8px; border: 1px solid #5ca0ff; border-radius: 100px; background: rgba(135, 181, 245, .1); }
+.bd-main.is-bonded .bd-sub span { background: linear-gradient(0deg, #5ca0ff, #44e0ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
 
 /* record and PLAY NOW, only once a bond is chosen */
 .bd-bottom {
@@ -108,8 +126,8 @@
   display: flex; align-items: center; gap: 16px; padding: 0 16px; border-radius: 6px; white-space: nowrap;
   background: rgba(0, 0, 0, .2); border: 1px solid rgba(255, 255, 255, .1); font-size: 12px; line-height: 1.2;
 }
-.bd-record span { color: rgba(255, 255, 255, .45); display: flex; align-items: center; gap: 8px; }
-.bd-record b { color: #fff; font-size: 14px; font-weight: 700; }
+.bd-record span { color: rgba(255, 255, 255, .45); display: flex; align-items: center; gap: 6px; }
+.bd-record b { color: #fff; font-size: 20px; font-weight: 700; line-height: 1.2; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
 .bd-record i { width: 1px; height: 16px; background: rgba(255, 255, 255, .1); }
 .bd .bd-play {
   position: relative; flex: 1; height: 44px; border: 1px solid #5ca0ff; border-radius: 4px; background: #031f47; overflow: hidden;
