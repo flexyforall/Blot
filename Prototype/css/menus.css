@@ -263,9 +263,9 @@
 .mn-counter b { display: inline-block; font-variant-numeric: tabular-nums; }
 .mn-counter b.is-tick { animation: mn-tick .14s ease-out; }
 .mn-counter b.is-landed { animation: mn-land .6s cubic-bezier(.34, 1.8, .64, 1); }
-@keyframes mn-tick { 0% { transform: translateY(-45%); opacity: .2; filter: blur(1.5px); } 100% { transform: none; opacity: 1; filter: none; } }
+@keyframes mn-tick { 0% { transform: translateY(45%); opacity: .2; filter: blur(1.5px); } 100% { transform: none; opacity: 1; filter: none; } }
 @keyframes mn-land {
-  0% { transform: translateY(-40%) scale(.8); opacity: .3; }
+  0% { transform: translateY(40%) scale(.8); opacity: .3; }
   45% { transform: scale(1.35); opacity: 1; color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9); }
   100% { transform: none; }
 }
