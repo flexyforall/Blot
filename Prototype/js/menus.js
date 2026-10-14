@@ -206,6 +206,41 @@
 
   function open(name) {
     host.querySelectorAll('.mn').forEach(function (m) { m.hidden = m.getAttribute('data-menu') !== name; });
+    var m = name && host.querySelector('[data-menu="' + name + '"]');
+    if (m) animateIn(m);
+  }
+  // entrance micro-animations for whatever is visible in a menu (also after a tab switch)
+  var ITEMS = '.mn-card_who > *, .mn-level, .mn-card_edit, .mn-rank, .mn-side:not([hidden]) .mn-side_head > *, .mn-side:not([hidden]) > :not(.mn-side_head),' +
+    ' .mn-tab, .mn-tools > *, .mn-main > .mn-close, .mn-title, .mn-prem_title, .mn-pane:not([hidden]) > :not(.mn-tiles):not(.mn-streak):not(.mn-pair),' +
+    ' .mn-pane:not([hidden]) .mn-tiles > *, .mn-pane:not([hidden]) .mn-pair > *, .mn-pane:not([hidden]) .mn-day,' +
+    ' .mn-set > *, .mn-links > *, .mn-group > *, .mn-opts > *, .mn-toggle, .mn-perk, .mn-buy, .mn-buy_crown';
+  var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lightTimers = [];
+  function animateIn(root, onlyPane) {
+    if (REDUCED) return;
+    var els = Array.prototype.slice.call(root.querySelectorAll(ITEMS)).filter(function (el) {
+      return el.offsetParent !== null && (!onlyPane || el.closest('.mn-pane, .mn-side'));
+    });
+    els.forEach(function (el, i) {
+      el.classList.remove('mn-in'); void el.offsetWidth;
+      el.style.setProperty('--d', Math.min(i * 0.035, 0.6) + 's');
+      el.classList.add('mn-in');
+    });
+    root.querySelectorAll('.mn-pane:not([hidden]) .mn-streak').forEach(lightStreak);
+  }
+  // the streak's played days close one after another, each with a sound; the last (today) rings out
+  function lightStreak(row) {
+    lightTimers.forEach(clearTimeout); lightTimers = [];
+    var days = Array.prototype.slice.call(row.querySelectorAll('.mn-day')).filter(function (d) { return d.hasAttribute('data-on') || d.classList.contains('is-on'); });
+    days.forEach(function (d) { d.setAttribute('data-on', ''); d.classList.remove('is-on', 'is-lighting'); d.querySelector('img').src = A + 'flame-off.svg'; });
+    days.forEach(function (d, k) {
+      lightTimers.push(setTimeout(function () {
+        d.classList.add('is-on', 'is-lighting');
+        d.querySelector('img').src = A + 'flame-on.svg';
+        var snd = window.BlotSound && BlotSound.sfx;
+        if (snd) { if (k === days.length - 1) { snd('coin', 0.6); snd('shimmer', 0.5); } else snd('pop', 0.45); }
+      }, 450 + k * 220));
+    });
   }
   function shut() { open(null); }
 
@@ -230,12 +265,14 @@
     if (tab && tab.closest('[data-menu="clubs"]')) {
       tab.parentNode.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
       host.querySelector('[data-clubs]').classList.toggle('is-open-only', tab.getAttribute('data-tab') === 'open');
+      animateIn(tab.closest('.mn_panel'), true);
       return;
     }
     if (tab) {
       var main = tab.closest('.mn_panel');
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
       main.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== tab.getAttribute('data-tab'); });
+      animateIn(main, true);
       return;
     }
     var opt = t.closest('.mn-opt');

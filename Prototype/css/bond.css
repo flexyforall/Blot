@@ -257,3 +257,9 @@
 @media (prefers-reduced-motion: reduce) {
   .bd *, .bd *::before, .bd *::after, .bd-main::after { animation: none !important; transition: none !important; }
 }
+/* friends rise in one after another when the Bond tab opens */
+.bd-enter .bd-friends_head, .bd-enter .bd-row { animation: bd-in .42s cubic-bezier(.22, 1, .36, 1) backwards; }
+.bd-enter .bd-row { animation-delay: calc(.18s + var(--i) * .05s); }
+.bd-enter .bd-me { animation: bd-in .5s cubic-bezier(.34, 1.5, .64, 1) .1s backwards; }
+.bd-enter .bd-mate { animation: bd-in .5s cubic-bezier(.34, 1.5, .64, 1) .18s backwards; }
+.bd-enter .bd-names { animation: bd-in .45s ease .26s backwards; }
