@@ -665,3 +665,45 @@
 .mc-msg.is-mine { align-self: flex-end; }
 .mc-msg.is-mine > div { border-radius: 10px 10px 2px 10px; background: linear-gradient(180deg, rgba(11, 110, 255, .35), rgba(11, 110, 255, .2)); border-color: rgba(92, 160, 255, .55); }
 .mc-chat .mc-say { margin-bottom: 0; }
+
+/* ---- Club lobby before joining (Figma 2014:1852): the top three in a video scene behind the panel */
+.mn_panel.cl-panel { background: #05101f; border-color: rgba(255, 255, 255, .2); border-radius: 10px; }
+.cl-stage { position: absolute; left: 19px; top: -4px; width: 779px; height: 359px; overflow: hidden; transition: opacity .35s ease, filter .35s ease; }
+.cl-stage > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cl-video { opacity: 0; transition: opacity .25s ease; }
+.cl-panel.is-playing .cl-video--intro { opacity: 1; }
+.cl-panel.is-looping .cl-video--loop { opacity: 1; transition: opacity .5s ease; }   /* the loop fades in over the intro's last frame */
+.cl-panel.is-over .cl-stage { opacity: .35; filter: blur(2px); }
+/* the scene fades into the panel on the left (three stacked gradients in Figma) and darkens at the bottom */
+.cl-fade { position: absolute; left: 0; top: 0; width: 263px; height: 345px; pointer-events: none;
+  background: linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)), linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)), linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)); }
+.cl-bottom { position: absolute; left: 0; top: 291px; width: 804px; height: 54px; pointer-events: none; background: linear-gradient(0deg, rgba(0, 0, 51, .45), rgba(0, 0, 51, 0)); }
+.cl-card .mn-side_head { padding-top: 8px; gap: 0; }
+.cl-badge { width: 72px; height: 72px; margin-bottom: -3px; }
+.mn-side_head .cl-badge img { width: 72px; height: 72px; }
+.mn .cl-name { font-size: 18px; padding-top: 0; white-space: nowrap; }
+.cl-motto { font-size: 12px; color: rgba(255, 255, 255, .7); margin-top: 2px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.cl-stats {
+  position: absolute; left: 1px; right: 1px; top: 140px; margin: 0 8px; padding: 12px; box-sizing: border-box; border-radius: 6px; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; border: 1px solid #5ca0ff;
+  background: linear-gradient(180deg, rgba(6, 20, 39, .55), rgba(6, 20, 39, .8)), url("../assets/menus/tile-diamond-btn.webp") -40px 0 / 298px 168px, #061427;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .6), inset 0 0 12px rgba(11, 110, 255, .25), inset 0 6px 12px rgba(0, 0, 0, .5);
+}
+.cl-stats > div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cl-stats b { font-size: 16px; line-height: 24px; font-weight: 700; color: #fff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.cl-stats span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
+.cl-tabs { position: absolute; left: 233px; width: 555px; top: 16px; display: flex; justify-content: center; }
+.mn .cl-close { right: 16px; top: 16px; }
+.cl-join { position: absolute; left: 613px; top: 293px; }
+.mn .cl-join .mn-cta { width: 175px; height: 36px; }
+.cl-join .mn-cta_label { font-size: 14px; }
+/* other tabs float over the dimmed scene */
+.mn-pane.cl-pane { left: 233px; right: 16px; top: 64px; bottom: 60px; }
+.cl-pane.mn-list { gap: 6px; padding-bottom: 4px; }
+.cl-pane.mn-clubpage { gap: 8px; }
+.cl-week { gap: 8px; }
+.cl-week span { flex: 1; display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 6px; font-size: 12px; color: rgba(255, 255, 255, .7);
+  background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); }
+.cl-week b { font-size: 16px; color: #fff; }
+.cl-week img { width: 24px; height: 24px; }
+.cl-stats b span { font: inherit; color: inherit; text-shadow: inherit; }

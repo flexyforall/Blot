@@ -161,17 +161,17 @@
   // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
   var C = 'assets/clubs/';
   var CLUBS = [
-    { name: 'Yerevan Courtyard', badge: C + 'crest-dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
+    { name: 'Yerevan Courtyard', motto: '“Who Dares Wins”', rpos: '19/48', badge: C + 'crest-dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
       about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00.' },
-    { name: 'Gyumri Regulards', badge: C + 'crest-eagle.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
+    { name: 'Gyumri Regulards', motto: '“Slow and Steady”', rpos: '7/48', badge: C + 'crest-eagle.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
       about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
-    { name: 'Ararat Evenings', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, req: true, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
+    { name: 'Ararat Evenings', motto: '“Home Is the Table”', rpos: '12/48', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, req: true, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
       about: 'Armenians abroad who miss the evening game. Mostly European time zones, invite only.' },
-    { name: 'Sevan Sharks', badge: C + 'crest-spade.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
+    { name: 'Sevan Sharks', motto: '“Smell the Contract”', rpos: '4/48', badge: C + 'crest-spade.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
       about: 'Competitive club for league weekends. Bring your best partner.' },
-    { name: 'Vanadzor Aces', badge: C + 'crest-eagle.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
+    { name: 'Vanadzor Aces', motto: '“Everyone Starts Somewhere”', rpos: '41/48', badge: C + 'crest-eagle.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
       about: 'Brand new club, everyone welcome.' },
-    { name: 'Night Owls', badge: C + 'crest-stag.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
+    { name: 'Night Owls', motto: '“After Midnight”', rpos: '2/48', badge: C + 'crest-stag.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
       about: 'Late games after midnight. Full for now.' }
   ];
   // the list: your club is pinned on top with Open, the rest say View; clubs taking requests count as joinable
@@ -194,24 +194,41 @@
     '<div class="mn-main">' + tabs([['all', 'All'], ['open', 'Open to join']]).replace('mn-tab is-active" type="button" data-tab="all"', 'mn-tab" type="button" data-tab="all"').replace('mn-tab" type="button" data-tab="open"', 'mn-tab is-active" type="button" data-tab="open"') +
     '<div class="mn-tools"><button class="mn-search" type="button" aria-label="Поиск"><img src="' + C + 'search.svg" alt=""></button>' + close() + '</div>' +
     '<div class="mn-pane mn-list mn-clubs is-open-only" data-clubs>' + clubRows() + '</div></div></div></div>' +
-    '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel mn_panel--art">' +
-    '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head"><span class="mn-club_badge"><img class="mn-club_glow" src="' + C + 'badge-glow.svg" alt=""><img data-c="badge" alt=""></span>' +
-    '<p class="mn-card_name mn-club_name" data-c="name"></p><p class="mn-card_since mn-side_sub"><span data-c="n"></span>/50 members</p></div>' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
-    '<div class="mn-main">' + tabs([['about', 'About'], ['trophies', 'Trophies']]) +
-    '<button class="mn-close" type="button" data-club-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
-    '<div class="mn-pane mn-clubpage" data-pane="about"><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
-    '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div><div class="mn-tiles mn-tiles--3">' +
-    '<div class="mn-tile is-badge"><img src="' + A + 'badge-novice.webp" alt=""><b data-c="club"></b><span>Division</span></div>' +
-    '<div class="mn-tile"><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b><span>Games played this week</span></div>' +
-    '<div class="mn-tile"><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b><span>Week points</span></div></div></div>' +
-    // Trophies: not drawn in Figma yet, so the club's cups in the achievement-row style
-    '<div class="mn-pane mn-list" data-pane="trophies" hidden>' +
-    [['trophy.webp', 'League champion', 'Spring league 2026', '1st'], ['place-2.webp', 'Weekend cup', 'September 2026', '2nd'],
-     ['place-3.webp', 'City derby', 'Yerevan vs Gyumri', '3rd']].map(function (t) {
-      return '<div class="mn-ach"><img class="mn-ach_badge" src="' + A + t[0] + '" alt=""><div class="mn-ach_text"><b>' + t[1] + '</b><span>' + t[2] +
-        '</span></div><span class="mn-reward mn-reward--small">' + t[3] + '</span></div>';
-    }).join('') + '</div></div></div></div>';
-
+    // a club's page before you join (Figma 2014:1852): its top three players stand in the lobby. On open the camera
+    // pushes through the curtains to them (intro clip), then a quiet loop keeps them alive. The other tabs float
+    // over a dimmed scene
+    '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel cl-panel" data-club-panel>' +
+      '<div class="cl-stage"><img class="cl-poster" src="' + C + 'lobby-start.webp" alt="">' +
+        '<video class="cl-video cl-video--intro" data-cl-intro muted playsinline preload="auto"><source src="' + C + 'lobby-intro.webm" type="video/webm"><source src="' + C + 'lobby-intro.mp4" type="video/mp4"></video>' +
+        '<video class="cl-video cl-video--loop" data-cl-loop muted playsinline loop preload="auto"><source src="' + C + 'lobby-loop.webm" type="video/webm"><source src="' + C + 'lobby-loop.mp4" type="video/mp4"></video></div>' +
+      '<div class="cl-fade"></div><div class="cl-bottom"></div>' +
+      '<div class="mn-card mn-card--side cl-card"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
+        '<span class="mn-club_badge cl-badge"><img data-c="badge" alt=""></span><p class="mn-card_name cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
+        '<div class="cl-stats"><div><b><span data-c="n"></span>/50</b><span>Players</span></div><div><b data-c="divname"></b><span>Division</span></div>' +
+        '<div><b data-c="rpos"></b><span>Division ranking</span></div></div></div></div>' +
+      '<div class="cl-tabs">' + tabs([['lobby', 'Lobby'], ['rankings', 'Rankings'], ['community', 'Community'], ['about', 'About']]) + '</div>' +
+      '<button class="mn-close cl-close" type="button" data-club-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
+      '<div class="mn-pane cl-pane" data-pane="lobby"></div>' +
+      // Rankings: the club's best players, the three from the scene on the podium
+      '<div class="mn-pane cl-pane mn-list mn-list--rows" data-pane="rankings" hidden>' +
+        [['lb-vardan7', 'Vardan', 'Founder', '28,164'], ['lb-sonaspade', 'Sona', 'Officer', '22,432'], ['lb-aramace', 'Aram', 'Officer', '20,591'],
+         ['lb-mikabluff', 'Narek', 'Member', '16,763'], ['lb-narenoir', 'Nare', 'Member', '14,876'], ['avatar-cowboy', 'Garik', 'Member', '13,402']].map(function (r, i) {
+          var place = i < 3 ? '<img class="mn-place" src="' + A + 'place-' + (i + 1) + '.webp" alt="' + (i + 1) + '">' : '<span class="mn-place mn-place--n">' + (i + 1) + '</span>';
+          return '<div class="mn-row">' + place + '<img class="mn-row_avatar" src="' + A + r[0] + '.webp" alt=""><span class="mc-lname"><b>' + r[1] + '</b><span>' + r[2] + '</span></span>' +
+            '<span class="mn-score">' + r[3] + '<img src="' + A + 'trophy.webp" alt=""></span></div>';
+        }).join('') + '</div>' +
+      // Community: what the club has been up to
+      '<div class="mn-pane cl-pane mn-list" data-pane="community" hidden>' +
+        [['lb-aramace', 'Aram', 'made a 250 contract', '2m'], ['lb-sonaspade', 'Sona', 'and Vardan won the Friday table +480', '1h'],
+         ['lb-mikabluff', 'Narek', 'reached Contender II', '5h'], ['lb-narenoir', 'Nare', 'joined the club', '1d'], ['lb-vardan7', 'Vardan', 'set the weekly quest: 500 contracts', '2d']].map(function (f) {
+          return '<div class="mc-feed"><img src="' + A + f[0] + '.webp" alt=""><p><b>' + f[1] + '</b> ' + f[2] + '</p><span>' + f[3] + '</span></div>';
+        }).join('') + '</div>' +
+      // About: the club in words, how to get in, its week
+      '<div class="mn-pane cl-pane mn-clubpage" data-pane="about" hidden><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
+        '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div>' +
+        '<div class="mc-pair cl-week"><span><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b> games this week</span><span><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b> week points</span></div></div>' +
+      '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div>' +
+    '</div></div>';
 
   // ---- Club states (Figma 1958:4255): Create a club, My club (Home / Roster / Quests / League) and the
   // Sunday digest. Joining an open club or creating one makes it yours: from then on the sword icon opens it
@@ -404,6 +421,7 @@
   lobby.appendChild(host);
 
   function open(name) {
+    if (name !== 'club' && typeof stopLobby === 'function' && clubPanel) stopLobby();
     if (name === 'clubs') host.querySelector('[data-clubs]').innerHTML = clubRows(myClub);
     host.querySelectorAll('.mn').forEach(function (m) { m.hidden = m.getAttribute('data-menu') !== name; });
     var m = name && host.querySelector('[data-menu="' + name + '"]');
@@ -554,6 +572,7 @@
     }
     if (tab) {
       if (tab.closest('[data-menu="myclub"]')) chat(false);
+      if (tab.closest('[data-menu="club"]')) clubPanel.classList.toggle('is-over', tab.getAttribute('data-tab') !== 'lobby');
       var main = tab.closest('.mn_panel');
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
       main.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== tab.getAttribute('data-tab'); });
@@ -717,14 +736,31 @@
     sfx('pop', 0.4);
   });
 
+  // the lobby scene: the intro clip once (through the curtains to the three), then the loop; both muted for autoplay
+  var clubPanel = host.querySelector('[data-club-panel]');
+  var intro = clubPanel.querySelector('[data-cl-intro]'), loopV = clubPanel.querySelector('[data-cl-loop]');
+  function playLobby() {
+    clubPanel.classList.remove('is-looping', 'is-playing');
+    loopV.pause(); loopV.currentTime = 0;
+    try { intro.currentTime = 0; } catch (e) {}
+    var p = intro.play();
+    if (p && p.catch) p.catch(function () { toLoop(); });
+    intro.onplaying = function () { clubPanel.classList.add('is-playing'); };
+  }
+  function toLoop() {
+    clubPanel.classList.add('is-looping', 'is-playing');
+    var p = loopV.play(); if (p && p.catch) p.catch(function () {});
+  }
+  intro.addEventListener('ended', toLoop);
+  function stopLobby() { intro.pause(); loopV.pause(); }
+
   function showClub(c) {
     viewing = c;
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
-    var words = c.name.split(' ');
-    page.querySelector('[data-c="name"]').innerHTML = words.slice(0, -1).join(' ') + '<br>' + words[words.length - 1];
-    set('n', c.n); set('about', c.about); set('lvl', c.lvl); set('club', c.club); set('games', c.games); set('pts', c.pts);
+    set('name', c.name); set('motto', c.motto || ''); set('n', c.n); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—');
+    set('about', c.about); set('lvl', c.lvl); set('games', c.games); set('pts', c.pts);
     var full = c.n >= 50, mine = c === myClub;
     set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');
     page.querySelector('[data-c="check"]').hidden = !(mine || (c.open && !full) || c.requested);
@@ -733,9 +769,11 @@
     join.disabled = !mine && (full || c.requested || (!c.open && !c.req));
     join.querySelector('.mn-cta_label').textContent = mine ? 'Open my club' : full ? 'Club is full' : c.open ? 'Join the club' :
       c.req ? (c.requested ? 'Request sent' : 'Ask to join') : 'Invite only';
-    page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'about'); });
-    page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'about'; });
+    page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'lobby'); });
+    page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'lobby'; });
+    page.querySelector('[data-club-panel]').classList.remove('is-over');
     open('club');
+    playLobby();
   }
 
   window.BlotMenus = { open: open, close: shut };
