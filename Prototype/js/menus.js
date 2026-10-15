@@ -195,17 +195,18 @@
     '<div class="mn-tools"><button class="mn-search" type="button" aria-label="Поиск"><img src="' + C + 'search.svg" alt=""></button>' + close() + '</div>' +
     '<div class="mn-pane mn-list mn-clubs is-open-only" data-clubs>' + clubRows() + '</div></div></div></div>' +
     // a club's page before you join (Figma 2014:1852): its top three players stand in the lobby. On open the camera
-    // pushes through the curtains to them (intro clip), then all three settle into their poses (pose clip) and the
-    // scene rests on its last frame. The other tabs float over a dimmed scene
+    // curtains open, the camera glides in and all three settle into their poses (one clip); the clip's last half second
+    // dissolves into the clean still from Figma, so the scene always rests on a crisp frame. The other tabs float over a
+    // dimmed scene
     '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel cl-panel" data-club-panel>' +
       '<div class="cl-stage"><img class="cl-poster" src="' + C + 'lobby-start.webp" alt="">' +
-        '<video class="cl-video cl-video--intro" data-cl-intro muted playsinline preload="auto"><source src="' + C + 'lobby-intro.webm" type="video/webm"><source src="' + C + 'lobby-intro.mp4" type="video/mp4"></video>' +
-        '<video class="cl-video cl-video--loop" data-cl-loop muted playsinline preload="auto"><source src="' + C + 'lobby-pose.webm" type="video/webm"><source src="' + C + 'lobby-pose.mp4" type="video/mp4"></video></div>' +
+        '<video class="cl-video" data-cl-video muted playsinline preload="auto"><source src="' + C + 'lobby.webm" type="video/webm"><source src="' + C + 'lobby.mp4" type="video/mp4"></video>' +
+        '<img class="cl-still" src="' + C + 'lobby-end.webp" alt=""></div>' +
       '<div class="cl-fade"></div><div class="cl-bottom"></div>' +
       '<div class="mn-card mn-card--side cl-card"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
         '<span class="mn-club_badge cl-badge"><img data-c="badge" alt=""></span><p class="mn-card_name cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
-        '<div class="cl-stats"><div><b><span data-c="n"></span>/50</b><span>Players</span></div><div><b data-c="divname"></b><span>Division</span></div>' +
-        '<div><b data-c="rpos"></b><span>Division ranking</span></div></div></div></div>' +
+        '<div class="cl-stats"><div><b class="cl-num" data-c="players"></b><span>Players</span></div><div><b class="cl-div" data-c="divname"></b><span>Division</span></div>' +
+        '<div><b class="cl-num" data-c="rpos"></b><span>Division ranking</span></div></div></div></div>' +
       '<div class="cl-tabs">' + tabs([['lobby', 'Lobby'], ['rankings', 'Rankings'], ['community', 'Community'], ['about', 'About']]) + '</div>' +
       '<button class="mn-close cl-close" type="button" data-club-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
       '<div class="mn-pane cl-pane" data-pane="lobby"></div>' +
@@ -458,11 +459,12 @@
     var parts = el.getAttribute('data-final').split('/'), to = +parts[0], tail = parts[1] ? '/' + parts[1] : '';
     el.classList.remove('is-tick', 'is-landed');
     if (!to) { el.textContent = parts.join('/'); return; }
-    var n = 1, total = to - 1, step = 0, snd = window.BlotSound && BlotSound.sfx;
+    // big numbers count in strides so a run never takes more than about a dozen ticks
+    var n = 1, inc = Math.max(1, Math.ceil((to - 1) / 12)), total = Math.max(1, Math.ceil((to - 1) / inc)), step = 0, snd = window.BlotSound && BlotSound.sfx;
     el.textContent = n + tail;
     (function tick() {
       el._t = setTimeout(function () {
-        if (n < to) n++;
+        if (n < to) n = Math.min(to, n + inc);
         step++;
         el.textContent = n + tail;
         el.classList.remove('is-tick'); void el.offsetWidth;
@@ -736,31 +738,42 @@
     sfx('pop', 0.4);
   });
 
-  // the lobby scene: the intro clip (through the curtains to the three), then the pose clip, which stops on its last
-  // frame; both muted for autoplay
+  // the lobby scene: one clip, muted for autoplay; near its end the still takes over
   var clubPanel = host.querySelector('[data-club-panel]');
-  var intro = clubPanel.querySelector('[data-cl-intro]'), loopV = clubPanel.querySelector('[data-cl-loop]');
+  var lobbyV = clubPanel.querySelector('[data-cl-video]');
   function playLobby() {
-    clubPanel.classList.remove('is-looping', 'is-playing');
-    loopV.pause(); loopV.currentTime = 0;
-    try { intro.currentTime = 0; } catch (e) {}
-    var p = intro.play();
-    if (p && p.catch) p.catch(function () { toLoop(); });
-    intro.onplaying = function () { clubPanel.classList.add('is-playing'); };
+    clubPanel.classList.remove('is-playing', 'is-settled');
+    try { lobbyV.currentTime = 0; } catch (e) {}
+    var p = lobbyV.play();
+    if (p && p.catch) p.catch(settle);   // no autoplay: straight to the still
   }
-  function toLoop() {
-    clubPanel.classList.add('is-looping', 'is-playing');
-    var p = loopV.play(); if (p && p.catch) p.catch(function () {});
+  function settle() { clubPanel.classList.add('is-settled'); }
+  lobbyV.addEventListener('playing', function () { clubPanel.classList.add('is-playing'); });
+  lobbyV.addEventListener('timeupdate', function () { if (lobbyV.duration && lobbyV.currentTime > lobbyV.duration - 0.5) settle(); });
+  lobbyV.addEventListener('ended', settle);
+  function stopLobby() { lobbyV.pause(); }
+
+  // the three numbers on the card come in one after another: players and ranking count up, the division lights up
+  var statTimers = [];
+  function statsIn(page) {
+    statTimers.forEach(clearTimeout); statTimers = [];
+    var nums = page.querySelectorAll('.cl-num'), div = page.querySelector('.cl-div');
+    nums.forEach(function (el) { clearTimeout(el._t); el.removeAttribute('data-final'); el.classList.remove('is-tick', 'is-landed'); });
+    div.classList.remove('is-lit');
+    if (REDUCED) return;
+    [nums[0], div, nums[1]].forEach(function (el) { el.classList.add('is-wait'); });   // hidden until its turn
+    function go(el, fn, at) { statTimers.push(setTimeout(function () { el.classList.remove('is-wait'); fn(); }, at)); }
+    go(nums[0], function () { countUp(nums[0]); }, 250);
+    go(div, function () { void div.offsetWidth; div.classList.add('is-lit'); if (window.BlotSound) BlotSound.sfx('shimmer', 0.35); }, 1500);
+    go(nums[1], function () { countUp(nums[1]); }, 1900);
   }
-  intro.addEventListener('ended', toLoop);
-  function stopLobby() { intro.pause(); loopV.pause(); }
 
   function showClub(c) {
     viewing = c;
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
-    set('name', c.name); set('motto', c.motto || ''); set('n', c.n); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—');
+    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—');
     set('about', c.about); set('lvl', c.lvl); set('games', c.games); set('pts', c.pts);
     var full = c.n >= 50, mine = c === myClub;
     set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');
@@ -775,6 +788,7 @@
     page.querySelector('[data-club-panel]').classList.remove('is-over');
     open('club');
     playLobby();
+    statsIn(page);
   }
 
   window.BlotMenus = { open: open, close: shut };

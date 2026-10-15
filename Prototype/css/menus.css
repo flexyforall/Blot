@@ -671,8 +671,9 @@
 .cl-stage { position: absolute; left: 19px; top: -4px; width: 779px; height: 359px; overflow: hidden; transition: opacity .35s ease, filter .35s ease; }
 .cl-stage > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cl-video { opacity: 0; transition: opacity .25s ease; }
-.cl-panel.is-playing .cl-video--intro { opacity: 1; }
-.cl-panel.is-looping .cl-video--loop { opacity: 1; transition: opacity .6s ease; }   /* the pose clip fades in over the intro's last frame */
+.cl-panel.is-playing .cl-video { opacity: 1; }
+.cl-still { opacity: 0; transition: opacity .5s ease; }
+.cl-panel.is-settled .cl-still { opacity: 1; }
 .cl-panel.is-over .cl-stage { opacity: .35; filter: blur(2px); }
 /* the scene fades into the panel on the left (three stacked gradients in Figma) and darkens at the bottom */
 .cl-fade { position: absolute; left: 0; top: 0; width: 263px; height: 345px; pointer-events: none;
@@ -708,3 +709,15 @@
 .cl-week b { font-size: 16px; color: #fff; }
 .cl-week img { width: 24px; height: 24px; }
 .cl-stats b span { font: inherit; color: inherit; text-shadow: inherit; }
+/* the card's three numbers come in with the Tasks counter effects */
+.cl-stats b.cl-num { display: inline-block; font-variant-numeric: tabular-nums; }
+.cl-stats b.cl-num.is-tick { animation: mn-tick .14s ease-out; }
+.cl-stats b.cl-num.is-landed { animation: mn-land .6s cubic-bezier(.34, 1.8, .64, 1); }
+.cl-stats b.cl-div { display: inline-block; }
+.cl-stats b.cl-div.is-lit { animation: cl-lit .9s cubic-bezier(.22, 1, .36, 1); }
+@keyframes cl-lit {
+  0% { opacity: 0; transform: scale(.7); filter: blur(3px); letter-spacing: .3em; }
+  45% { opacity: 1; transform: scale(1.12); color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9); filter: none; }
+  100% { transform: none; letter-spacing: normal; }
+}
+.cl-stats b.is-wait { visibility: hidden; }
