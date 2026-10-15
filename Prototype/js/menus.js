@@ -165,7 +165,7 @@
       about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00.' },
     { name: 'Gyumri Regulards', badge: C + 'crest-eagle.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
       about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
-    { name: 'Ararat Evenings', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
+    { name: 'Ararat Evenings', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, req: true, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
       about: 'Armenians abroad who miss the evening game. Mostly European time zones, invite only.' },
     { name: 'Sevan Sharks', badge: C + 'crest-spade.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
       about: 'Competitive club for league weekends. Bring your best partner.' },
@@ -174,12 +174,19 @@
     { name: 'Night Owls', badge: C + 'crest-stag.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
       about: 'Late games after midnight. Full for now.' }
   ];
-  function clubRows() {
-    return CLUBS.map(function (c, i) {
-      return '<div class="mn-ach mn-club" data-club-row="' + i + '"' + (c.open ? ' data-open' : '') + '><img class="mn-ach_badge" src="' + c.badge + '" alt="">' +
+  // the list: your club is pinned on top with Open, the rest say View; clubs taking requests count as joinable
+  function clubRows(mine) {
+    var rows = CLUBS.map(function (c, i) {
+      if (c === mine) return '';
+      return '<div class="mn-ach mn-club" data-club-row="' + i + '"' + (c.open || c.req ? ' data-open' : '') + '><img class="mn-ach_badge" src="' + c.badge + '" alt="">' +
         '<div class="mn-ach_text"><b>' + c.name + '</b><span>' + c.rank + '<i class="mn-dot"></i>' + c.n + '/50 members<i class="mn-dot"></i>' + c.city + '</span></div>' +
+        (c.requested ? '<span class="mc-chip">Requested</span>' : '') +
         '<button class="mn-btn mn-view" type="button" data-club="' + i + '">View</button></div>';
     }).join('');
+    if (mine) rows = '<div class="mn-ach mn-club is-mine" data-open><img class="mn-ach_badge" src="' + mine.badge + '" alt=""' + (mine.filter ? ' style="filter:' + mine.filter + '"' : '') + '>' +
+      '<div class="mn-ach_text"><b>' + mine.name + '</b><span>Your club<i class="mn-dot"></i>' + mine.n + '/50 members</span></div>' +
+      '<button class="mn-btn mn-view" type="button" data-my-club>Open</button></div>' + rows;
+    return rows;
   }
   var clubsHtml = '<div class="mn" data-menu="clubs" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--art">' +
     '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head"><img class="mn-side_big" src="' + A + 'swords.webp" alt="">' +
@@ -240,20 +247,22 @@
     blueBtn('Create', ' data-create') + '</div></div>' +
     '<div class="mn-main"><button class="mn-close" type="button" data-create-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
     '<div class="mn-pane mc-form">' +
-      '<label class="mc-field"><span class="mn-label">Club name</span><input class="mc-input" data-new-input maxlength="22" placeholder="e.g. Kond Corner"></label>' +
+      '<label class="mc-field"><span class="mn-label">Club name<span class="mc-count" data-new-count>0/22</span></span><input class="mc-input" data-new-input maxlength="22" placeholder="e.g. Kond Corner">' +
+        '<span class="mc-hint" data-new-hint>At least 3 characters. Other players see it in the league.</span></label>' +
       '<div class="mc-field"><span class="mn-label">Crest</span><div class="mc-crests">' + CRESTS.map(function (c, i) {
         return '<button class="mn-opt mc-crest' + (i === 1 ? ' is-active' : '') + '" type="button" data-crest="' + i + '">' + crestImg(i) + '</button>';
       }).join('') + '</div></div>' +
       '<div class="mc-pair"><input class="mc-input" placeholder="Region" value="Yerevan"><input class="mc-input" placeholder="Language" value="Armenian"></div>' +
       '<div class="mc-seg" data-seg><button class="is-active" type="button">Open</button><button type="button">Request to join</button><button type="button">Invite only</button></div>' +
       '<p class="mc-note">Clubs hold 20 to 50 players. Creating one unlocks at Career Level 8.</p>' +
+      '<button class="mc-leave" type="button" data-leave hidden>Leave club</button>' +
     '</div></div></div></div>';
 
   var feed = [['lb-aramace', 'Aram', 'made a 250 contract', '2m'], ['lb-mikabluff', 'Narek', 'anyone up for a duo?', '14m']];
   var members = [['lb-aramace', 'Aram', 'Founder', 'online', '2,140'], ['lb-vardan7', 'Narek', 'Officer', 'online', '1,890'],
     [null, 'Artexcb', 'Member', 'you', '1,240'], ['lb-sonaspade', 'Sona', 'Member', 'yesterday', '980'],
     ['lb-vardan7', 'Vardan', 'Member', '3d ago', '760'], ['lb-narenoir', 'Nare', 'Member', 'last week', '410']];
-  var league = [[1, 'Kond Corner', 'crest-spade.webp', 'Promote', '18,900'], [2, 'Gyumri Regulards', 'crest-eagle.webp', 'Promote', '15,240'],
+  var league = [[1, 'Kentron Kings', 'crest-spade.webp', 'Promote', '18,900'], [2, 'Gyumri Regulards', 'crest-eagle.webp', 'Promote', '15,240'],
     [3, null, null, '', '12,480'], ['gap'], [9, 'Nor Nork Nights', 'crest-stag.webp', 'Relegate', '4,100'], [10, 'Ararat Evenings', 'crest-stag.webp', 'Relegate', '3,050']];
   function feedRow(f) {
     return '<div class="mc-feed"><img src="' + (f[0] ? A + f[0] + '.webp' : B + 'me.webp') + '" alt=""><p><b>' + f[1] + '</b> ' + f[2] + '</p><span>' + f[3] + '</span></div>';
@@ -265,14 +274,16 @@
       '<div class="mn-side" data-pane="quests" hidden>' + ring('64%').replace('<span class="mc-ring">', '<span class="mc-ring" style="--p:64">') +
         '<p class="mn-card_name">Club quests</p><p class="mn-card_since mn-side_sub">Resets Monday 05:00</p></div><span class="mc-chip">Everyone shares it</span></div>' +
       '<div class="mn-side" data-pane="league" hidden>' + ring('3rd').replace('<span class="mc-ring">', '<span class="mc-ring" style="--p:80">') +
-        '<p class="mn-card_name">League position</p><p class="mn-card_since mn-side_sub">Group 7 of <span data-m="divname"></span> Division</p></div><span class="mc-chip">12,480 points</span></div>' +
+        '<p class="mn-card_name">League position</p><p class="mn-card_since mn-side_sub">Group 7 of <span data-m="divname"></span> Division</p>' +
+        '<p class="mc-goal">2,760 points to promotion</p></div><span class="mc-chip">12,480 points</span></div>' +
     '</div>' +
-    '<div class="mn-main">' + tabs([['home', 'Home'], ['roster', 'Roster'], ['quests', 'Quests'], ['league', 'League']]) + close() +
+    '<div class="mn-main">' + tabs([['home', 'Home'], ['roster', 'Roster'], ['quests', 'Quests'], ['league', 'League']]) +
+      '<div class="mn-tools"><button class="mn-search" type="button" data-find aria-label="Найти клубы"><img src="' + C + 'search.svg" alt=""></button>' + close() + '</div>' +
       // Home: the club table, the feed (the Sunday digest lands here) and a message box
       '<div class="mn-pane mc-home" data-pane="home">' +
-        '<div class="mc-table">' + ic('table') + '<div class="mn-ach_text"><b>Club table</b><span>3 members are playing right now</span></div>' + blueBtn('Sit down', ' data-sit') + '</div>' +
+        '<div class="mc-table">' + ic('table') + '<div class="mn-ach_text"><b>Club table</b><span class="mc-who"><span class="mc-stack"><img src="' + A + 'lb-aramace.webp" alt=""><img src="' + A + 'lb-mikabluff.webp" alt=""><img src="' + A + 'lb-sonaspade.webp" alt=""></span>Aram, Narek and Sona are playing</span></div>' + blueBtn('Sit down', ' data-sit') + '</div>' +
         '<p class="mc-h">Club feed</p><div class="mc-feeds" data-feed>' +
-          '<button class="mc-feed mc-feed--digest" type="button" data-digest><i>' + ic('bell') + '</i><p><b>Week 14 digest</b> your club finished 3rd</p><span>1h</span></button>' +
+          '<button class="mc-feed mc-feed--digest is-unread" type="button" data-digest><i>' + ic('bell') + '</i><p><b>Week 14 digest</b> your club finished 3rd</p><span>1h</span></button>' +
           feed.map(feedRow).join('') + '</div>' +
         '<form class="mc-say" data-say><input class="mc-input" data-say-input placeholder="Message the club"><button type="submit" aria-label="Отправить">' + ic('send') + '</button></form>' +
       '</div>' +
@@ -284,17 +295,22 @@
             '<span class="mc-pts"><img src="' + C + 'bolt.webp" alt="">' + m[4] + '</span></div>';
         }).join('') + '</div>' +
       '<div class="mn-pane mn-list mc-list" data-pane="quests" hidden>' +
-        [['Fulfil 500 contracts together', 'Every member counts, strong or new', 320, 500], ['Capture 8,000 defensive points', 'Defence counts the same as declaring', 6100, 8000]].map(function (q) {
+        [['Fulfil 500 contracts together', 'Every member counts, strong or new', 320, 500, 46, '180 to go, about 2 evenings'], ['Capture 8,000 defensive points', 'Defence counts the same as declaring', 6100, 8000, 820, '1,900 to go']].map(function (q) {
           return '<div class="mc-quest"><div class="mc-quest_top">' + ic('cards') + '<div class="mn-ach_text"><b>' + q[0] + '</b><span>' + q[1] + '</span></div>' + loot(400, 10) + '</div>' +
-            '<div class="mc-quest_bar"><span class="mc-bar"><i style="--w:' + Math.round(q[2] / q[3] * 100) + '%"></i></span><span>' + q[2].toLocaleString('en') + ' / ' + q[3].toLocaleString('en') + '</span></div></div>';
+            '<div class="mc-quest_bar"><span class="mc-bar"><i style="--w:' + Math.round(q[2] / q[3] * 100) + '%"></i><i class="mc-bar_me" style="--w:' + Math.round(q[4] / q[3] * 100) + '%"></i></span><span>' + q[2].toLocaleString('en') + ' / ' + q[3].toLocaleString('en') + '</span></div>' +
+            '<p class="mc-share"><i></i>Your part: ' + q[4].toLocaleString('en') + '<span>' + q[5] + '</span></p></div>';
         }).join('') +
         '<p class="mc-note">Club quests are collective. A strong player carrying a new one helps the whole club, so nobody is resented for it.</p></div>' +
       '<div class="mn-pane mn-list mc-list" data-pane="league" hidden><div class="mc-head"><p class="mc-h">Weekly Club League</p><span class="mc-chip">Ends Sun 23:59</span></div>' +
         league.map(function (r) {
-          if (r[0] === 'gap') return '<p class="mc-gap">ranks 4 – 8</p>';
+          if (r[0] === 'gap') return '<button class="mc-gap" type="button" data-ranks>Show ranks 4 – 8</button><div class="mc-mid" data-mid hidden>' +
+            [[4, 'Sevan Sharks', 'crest-spade.webp', '11,900'], [5, 'Night Owls', 'crest-stag.webp', '10,200'], [6, 'Vanadzor Aces', 'crest-eagle.webp', '8,400'],
+             [7, 'Arabkir Aces', 'crest-dragon.webp', '7,100'], [8, 'Shirak Stars', 'crest-eagle.webp', '5,600']].map(function (m) {
+              return '<div class="mc-row mc-row--league"><span class="mc-place">' + m[0] + '</span><img class="mc-crest_s" src="' + C + m[2] + '" alt=""><b class="mc-name">' + m[1] + '</b><span class="mc-score">' + m[3] + '</span></div>';
+            }).join('') + '</div>';
           var me = !r[1];
           return '<div class="mc-row mc-row--league' + (me ? ' is-me' : '') + '"><span class="mc-place">' + r[0] + '</span><img class="mc-crest_s" ' + (me ? 'data-m="badge"' : 'src="' + C + r[2] + '"') + ' alt="">' +
-            '<b class="mc-name"' + (me ? ' data-m="name"' : '') + '>' + (r[1] || '') + '</b>' + (r[3] ? '<span class="mc-tag mc-tag--' + r[3].toLowerCase() + '">' + r[3] + '</span>' : '') + '<span class="mc-score">' + r[4] + '</span></div>';
+            (me ? '<span class="mc-name mc-name--me"><b data-m="name"></b><span>2,760 points to promotion</span></span>' : '<b class="mc-name">' + r[1] + '</b>') + (r[3] ? '<span class="mc-tag mc-tag--' + r[3].toLowerCase() + '">' + r[3] + '</span>' : '') + '<span class="mc-score">' + r[4] + '</span></div>';
         }).join('') +
         '<p class="mc-note">Top 2 promote, bottom 2 relegate. Points come from playing only.</p></div>' +
     '</div></div></div>';
@@ -321,9 +337,13 @@
   lobby.appendChild(host);
 
   function open(name) {
+    if (name === 'clubs') host.querySelector('[data-clubs]').innerHTML = clubRows(myClub);
     host.querySelectorAll('.mn').forEach(function (m) { m.hidden = m.getAttribute('data-menu') !== name; });
     var m = name && host.querySelector('[data-menu="' + name + '"]');
-    if (m) animateIn(m);
+    if (m) {   // a menu always opens at its top, whatever was scrolled the last time it was shown
+      m.querySelectorAll('.mn_panel, .mn-main, .mn-pane').forEach(function (el) { el.scrollTop = 0; el.scrollLeft = 0; });
+      animateIn(m);
+    }
   }
   // entrance micro-animations for whatever is visible in a menu (also after a tab switch)
   var ITEMS = '.mn-card_who > *, .mn-level, .mn-card_edit, .mn-rank, .mn-side:not([hidden]) .mn-side_head > *, .mn-side:not([hidden]) > :not(.mn-side_head),' +
@@ -406,14 +426,42 @@
     if (seg) { seg.parentNode.querySelectorAll('button').forEach(function (b) { b.classList.toggle('is-active', b === seg); }); return; }
     if (t.closest('[data-create]')) { finishCreate(); return; }
     if (t.closest('[data-sit]')) { shut(); if (window.BlotNav) BlotNav.show('play'); return; }
-    if (t.closest('[data-digest]')) { open('digest'); return; }
+    if (t.closest('[data-digest]')) { digestSeen(); open('digest'); return; }
+    if (t.closest('[data-my-club]')) { showMyClub(); return; }
+    if (t.closest('[data-find]')) { open('clubs'); return; }
+    var more = t.closest('[data-ranks]');
+    if (more) {
+      var mid = more.nextElementSibling;
+      mid.hidden = !mid.hidden;
+      more.textContent = (mid.hidden ? 'Show' : 'Hide') + ' ranks 4 – 8';
+      if (!mid.hidden) animateIn(mid);
+      return;
+    }
+    var leave = t.closest('[data-leave]');
+    if (leave) {   // two taps: the first asks, the second leaves
+      if (!leave.classList.contains('is-confirm')) { leave.classList.add('is-confirm'); leave.textContent = 'Tap again to leave ' + myClub.name; return; }
+      myClub = null; editing = false; updateDots(); open('clubs'); sfx('whoosh', 0.4);
+      return;
+    }
     if (t.closest('[data-digest-back]')) { showMyClub(true); return; }
     if (t.closest('[data-menu-close]')) { shut(); return; }
     var view = t.closest('[data-club]');
     if (view) { showClub(CLUBS[+view.getAttribute('data-club')]); return; }
     if (t.closest('[data-club-back]')) { open('clubs'); return; }
     var join = t.closest('[data-join]');
-    if (join && !join.disabled) { setMyClub(viewing); showMyClub(); sfx('coin', 0.5); sfx('shimmer', 0.4); return; }
+    if (join && !join.disabled) {
+      if (viewing === myClub) { showMyClub(); return; }
+      if (viewing.req) {   // a request, not a join: the button settles on Request sent
+        viewing.requested = true; showClub(viewing); sfx('pop', 0.45);
+        return;
+      }
+      if (myClub && !join.classList.contains('is-confirm')) {   // already in a club: confirm the switch first
+        join.classList.add('is-confirm'); join.querySelector('.mn-cta_label').textContent = 'Tap to leave yours';
+        return;
+      }
+      setMyClub(viewing); welcome(viewing); showMyClub(); sfx('coin', 0.5); sfx('shimmer', 0.4);
+      return;
+    }
     var tab = t.closest('.mn-tab');
     if (tab && tab.closest('[data-menu="clubs"]')) {
       tab.parentNode.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
@@ -473,6 +521,26 @@
     host.querySelectorAll('[data-m="div"]').forEach(function (el) { el.textContent = c.club; });
     host.querySelectorAll('[data-m="divname"]').forEach(function (el) { el.textContent = c.club.replace(/ [IV]+$/, ''); });
   }
+  // a system line greets you in the feed after joining or founding a club
+  function welcome(c, founded) {
+    var list = host.querySelector('[data-feed]');
+    list.querySelectorAll('.mc-feed--sys').forEach(function (r) { r.remove(); });
+    var row = document.createElement('div');
+    row.className = 'mc-feed mc-feed--sys';
+    row.innerHTML = '<i>' + ic('users') + '</i><p><b>' + (founded ? 'You founded ' : 'Welcome to ') + c.name.replace(/[<>&]/g, '') + '</b> ' +
+      (founded ? 'invite friends from the Roster tab' : 'say hi below, the club table is open') + '</p><span>now</span>';
+    list.insertBefore(row, list.firstChild);
+    unread = true; updateDots();
+  }
+  // the Sunday digest stays marked until it is opened: on the sword icon, the Home tab and its feed row
+  var unread = false;
+  function updateDots() {
+    var on = !!myClub && unread;
+    lobby.querySelector('.lb-icon[aria-label="Турниры"]').classList.toggle('has-dot', on);
+    host.querySelector('[data-menu="myclub"] [data-tab="home"]').classList.toggle('has-dot', on);
+    host.querySelector('[data-digest]').classList.toggle('is-unread', on);
+  }
+  function digestSeen() { unread = false; updateDots(); }
   function showMyClub(keepTab) {
     var page = host.querySelector('[data-menu="myclub"]');
     if (!keepTab) {
@@ -489,9 +557,15 @@
     form.querySelectorAll('[data-crest]').forEach(function (b) { b.classList.toggle('is-active', +b.getAttribute('data-crest') === i); });
     form.querySelector('[data-new-crest]').innerHTML = crestImg(i);
   }
+  // the name is checked as you type: a counter, a hint, and Create only lights up once it is long enough
   function previewName() {
-    var v = nameInput.value.trim();
+    var v = nameInput.value.trim(), ok = v.length >= 3, taken = CLUBS.some(function (c) { return c !== myClub && c.name.toLowerCase() === v.toLowerCase(); });
     form.querySelector('[data-new-name]').textContent = v || 'New club';
+    form.querySelector('[data-new-count]').textContent = nameInput.value.length + '/22';
+    var hint = form.querySelector('[data-new-hint]');
+    hint.textContent = taken ? 'A club with this name already exists' : !v ? 'At least 3 characters. Other players see it in the league.' : ok ? 'Looks good' : (3 - v.length) + ' more to go';
+    hint.className = 'mc-hint' + (taken ? ' is-bad' : ok ? ' is-ok' : '');
+    form.querySelector('[data-create]').disabled = !ok || taken;
   }
   function startCreate(edit) {
     editing = edit;
@@ -502,6 +576,8 @@
     pickCrest(idx); previewName();
     form.querySelector('[data-new-sub]').textContent = edit ? 'Club settings' : 'Preview';
     form.querySelector('[data-create] .mn-cta_label').textContent = edit ? 'Save' : 'Create';
+    var leave = form.querySelector('[data-leave]');
+    leave.hidden = !edit; leave.classList.remove('is-confirm'); leave.textContent = 'Leave club';
     open('clubnew');
   }
   nameInput.addEventListener('input', function () { nameInput.classList.remove('is-shake'); previewName(); });
@@ -510,7 +586,9 @@
     if (!name) { nameInput.focus(); sfx('click', 0.3); nameInput.classList.remove('is-shake'); void nameInput.offsetWidth; nameInput.classList.add('is-shake'); return; }
     var c = editing ? myClub : { n: 1, club: 'New Face II' };
     c.name = name; c.badge = C + CRESTS[newCrest][0]; c.filter = CRESTS[newCrest][1];
-    setMyClub(c); showMyClub();
+    setMyClub(c);
+    if (!editing) { CLUBS.unshift(c); c.rank = c.club; c.city = 'Yerevan'; c.open = true; c.lvl = 8; c.games = 0; c.pts = '0'; c.about = 'A brand new club.'; welcome(c, true); }
+    showMyClub();
     sfx('coin', 0.5); sfx('shimmer', 0.4);
   }
   // a message to the club lands at the top of the feed
@@ -536,12 +614,14 @@
     var words = c.name.split(' ');
     page.querySelector('[data-c="name"]').innerHTML = words.slice(0, -1).join(' ') + '<br>' + words[words.length - 1];
     set('n', c.n); set('about', c.about); set('lvl', c.lvl); set('club', c.club); set('games', c.games); set('pts', c.pts);
-    set('status', c.n >= 50 ? 'Club is full' : c.open ? 'Open to join' : 'Invite only');
-    page.querySelector('[data-c="check"]').hidden = !(c.open && c.n < 50);
+    var full = c.n >= 50, mine = c === myClub;
+    set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');
+    page.querySelector('[data-c="check"]').hidden = !(mine || (c.open && !full) || c.requested);
     var join = page.querySelector('[data-join]');
-    var can = c.open && c.n < 50;
-    join.disabled = !can;
-    join.querySelector('.mn-cta_label').textContent = can ? 'Join the club' : (c.n >= 50 ? 'Club is full' : 'Invite only');
+    join.classList.remove('is-confirm');
+    join.disabled = !mine && (full || c.requested || (!c.open && !c.req));
+    join.querySelector('.mn-cta_label').textContent = mine ? 'Open my club' : full ? 'Club is full' : c.open ? 'Join the club' :
+      c.req ? (c.requested ? 'Request sent' : 'Ask to join') : 'Invite only';
     page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'about'); });
     page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'about'; });
     open('club');

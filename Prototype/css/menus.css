@@ -533,3 +533,51 @@
 .mc-line.is-hot { border-color: #5ca0ff; background: linear-gradient(90deg, rgba(11, 110, 255, .2), rgba(11, 110, 255, .05)); }
 .mc-line.is-hot .mc-ic { color: #9dffb8; }
 .mc-digest .mc-line { margin-right: -44px; }
+
+/* ---- Clubs UX pass: unread marks, who is playing, your share, validation, leaving */
+.lobby .lb-icon.has-dot::after, .mn .mn-tab.has-dot::after { content: none; }
+.lobby .lb-icon.has-dot .lb-icon_img { filter: drop-shadow(0 0 4px rgba(255, 200, 80, .5)); }
+.lobby .lb-icon.has-dot { overflow: visible; }
+.lobby .lb-icon.has-dot .lb-icon_bg::after, .mn .mn-tab.has-dot { position: relative; }
+.lobby .lb-icon.has-dot .lb-icon_bg::after {
+  content: ""; position: absolute; right: -4px; top: -4px; width: 10px; height: 10px; border-radius: 50%;
+  background: #ff5a4f; border: 2px solid #0d1827; box-shadow: 0 0 6px rgba(255, 90, 79, .8); animation: mc-ping 1.8s ease-in-out infinite;
+}
+.mn .mn-tab.has-dot { padding-right: 20px; }
+.mn .mn-tab.has-dot::before { content: ""; position: absolute; right: 8px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: #ff5a4f; box-shadow: 0 0 5px rgba(255, 90, 79, .8); }
+@keyframes mc-ping { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+.mc-feed--digest { position: relative; }
+.mc-feed--digest:not(.is-unread) { border-color: rgba(255, 255, 255, .1) !important; background: rgba(255, 255, 255, .05) !important; }
+.mc-feed--digest:not(.is-unread) b { color: #f0f3f9; }
+.mc-feed--digest.is-unread > span::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #ff5a4f; margin-right: 6px; vertical-align: middle; }
+.mc-feed--sys { border: 1px solid rgba(90, 220, 140, .4); background: linear-gradient(90deg, rgba(90, 220, 140, .14), rgba(255, 255, 255, .03)); }
+.mc-feed--sys i { background: rgba(90, 220, 140, .18); }
+.mc-feed--sys .mc-ic { width: 15px; height: 15px; color: #9dffb8; }
+.mc-feed--sys b { color: #9dffb8; }
+.mc-feeds { -webkit-mask-image: linear-gradient(180deg, #000 80%, transparent); mask-image: linear-gradient(180deg, #000 80%, transparent); }
+.mc-who { display: flex; align-items: center; gap: 6px; }
+.mc-stack { display: flex; }
+.mc-stack img { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #0d1f3a; object-fit: cover; }
+.mc-stack img + img { margin-left: -5px; }
+.mc-bar { position: relative; }
+.mc-bar i.mc-bar_me { position: absolute; left: 0; top: 0; background: linear-gradient(90deg, #44e0ff, #bff5ff); box-shadow: 0 0 6px rgba(68, 224, 255, .7); }
+.mc-share { display: flex; align-items: center; gap: 6px; margin-top: -4px; font-size: 10px; color: #8cdcff; }
+.mc-share i { width: 8px; height: 8px; border-radius: 2px; background: #44e0ff; }
+.mc-share span { margin-left: auto; color: rgba(255, 255, 255, .5); }
+.mn .mc-gap { align-self: center; height: 22px; padding: 0 10px; border-radius: 100px; font-size: 10px; color: #8cc4ff; border: 1px dashed rgba(92, 160, 255, .4); }
+.mc-mid { display: flex; flex-direction: column; gap: 6px; }
+.mc-mid[hidden] { display: none; }
+.mc-name--me { display: flex; flex-direction: column; flex: 1; }
+.mc-name--me b { font-size: 13px; }
+.mc-name--me span { font-size: 10px; font-weight: 500; color: #9dffb8; }
+.mc-goal { margin-top: 6px; font-size: 11px; font-weight: 600; color: #9dffb8; }
+.mn-label { display: flex; justify-content: space-between; }
+.mc-count { color: rgba(255, 255, 255, .4); font-size: 11px; }
+.mc-hint { font-size: 10px; line-height: 1.3; color: rgba(255, 255, 255, .5); margin-top: -2px; }
+.mc-hint.is-ok { color: #9dffb8; }
+.mc-hint.is-bad { color: #ff9c92; }
+.mc-form { gap: 8px; }
+.mn .mc-leave { align-self: flex-start; height: 28px; padding: 0 12px; border-radius: 4px; font-size: 12px; color: #ff9c92; border: 1px solid rgba(255, 107, 90, .4); background: rgba(255, 107, 90, .08); }
+.mn .mc-leave.is-confirm { color: #fff; background: #a3271d; border-color: #ff6b5a; }
+.mn-club.is-mine { border-color: #5ca0ff; background: linear-gradient(90deg, rgba(11, 110, 255, .2), rgba(11, 110, 255, .05)); }
+.mn-club .mc-chip { margin-right: -4px; }

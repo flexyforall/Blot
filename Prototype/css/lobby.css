@@ -20,7 +20,7 @@
   background: #0a061d;
   font-family: "Poppins", sans-serif;
   font-weight: 600;
-  overflow: hidden;
+  overflow: hidden; overflow: clip;   /* clip, not hidden: a hidden box can still be scrolled sideways by focus or scrollIntoView */
 }
 .lobby p { margin: 0; }
 .lobby img { display: block; max-width: none; }
