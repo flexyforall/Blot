@@ -195,12 +195,12 @@
     '<div class="mn-tools"><button class="mn-search" type="button" aria-label="Поиск"><img src="' + C + 'search.svg" alt=""></button>' + close() + '</div>' +
     '<div class="mn-pane mn-list mn-clubs is-open-only" data-clubs>' + clubRows() + '</div></div></div></div>' +
     // a club's page before you join (Figma 2014:1852): its top three players stand in the lobby. On open the camera
-    // pushes through the curtains to them (intro clip), then a quiet loop keeps them alive. The other tabs float
-    // over a dimmed scene
+    // pushes through the curtains to them (intro clip), then all three settle into their poses (pose clip) and the
+    // scene rests on its last frame. The other tabs float over a dimmed scene
     '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel cl-panel" data-club-panel>' +
       '<div class="cl-stage"><img class="cl-poster" src="' + C + 'lobby-start.webp" alt="">' +
         '<video class="cl-video cl-video--intro" data-cl-intro muted playsinline preload="auto"><source src="' + C + 'lobby-intro.webm" type="video/webm"><source src="' + C + 'lobby-intro.mp4" type="video/mp4"></video>' +
-        '<video class="cl-video cl-video--loop" data-cl-loop muted playsinline loop preload="auto"><source src="' + C + 'lobby-loop.webm" type="video/webm"><source src="' + C + 'lobby-loop.mp4" type="video/mp4"></video></div>' +
+        '<video class="cl-video cl-video--loop" data-cl-loop muted playsinline preload="auto"><source src="' + C + 'lobby-pose.webm" type="video/webm"><source src="' + C + 'lobby-pose.mp4" type="video/mp4"></video></div>' +
       '<div class="cl-fade"></div><div class="cl-bottom"></div>' +
       '<div class="mn-card mn-card--side cl-card"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
         '<span class="mn-club_badge cl-badge"><img data-c="badge" alt=""></span><p class="mn-card_name cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
@@ -736,7 +736,8 @@
     sfx('pop', 0.4);
   });
 
-  // the lobby scene: the intro clip once (through the curtains to the three), then the loop; both muted for autoplay
+  // the lobby scene: the intro clip (through the curtains to the three), then the pose clip, which stops on its last
+  // frame; both muted for autoplay
   var clubPanel = host.querySelector('[data-club-panel]');
   var intro = clubPanel.querySelector('[data-cl-intro]'), loopV = clubPanel.querySelector('[data-cl-loop]');
   function playLobby() {

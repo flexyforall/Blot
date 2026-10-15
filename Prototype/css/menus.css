@@ -672,20 +672,21 @@
 .cl-stage > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cl-video { opacity: 0; transition: opacity .25s ease; }
 .cl-panel.is-playing .cl-video--intro { opacity: 1; }
-.cl-panel.is-looping .cl-video--loop { opacity: 1; transition: opacity .5s ease; }   /* the loop fades in over the intro's last frame */
+.cl-panel.is-looping .cl-video--loop { opacity: 1; transition: opacity .6s ease; }   /* the pose clip fades in over the intro's last frame */
 .cl-panel.is-over .cl-stage { opacity: .35; filter: blur(2px); }
 /* the scene fades into the panel on the left (three stacked gradients in Figma) and darkens at the bottom */
 .cl-fade { position: absolute; left: 0; top: 0; width: 263px; height: 345px; pointer-events: none;
   background: linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)), linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)), linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)); }
-.cl-bottom { position: absolute; left: 0; top: 291px; width: 804px; height: 54px; pointer-events: none; background: linear-gradient(0deg, rgba(0, 0, 51, .45), rgba(0, 0, 51, 0)); }
+.cl-bottom { position: absolute; left: 0; top: 291px; width: 804px; height: 54px; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .98)); }   /* Figma strip: black, 0 to 98% */
 .cl-card .mn-side_head { padding-top: 8px; gap: 0; }
 .cl-badge { width: 72px; height: 72px; margin-bottom: -3px; }
 .mn-side_head .cl-badge img { width: 72px; height: 72px; }
 .mn .cl-name { font-size: 18px; padding-top: 0; white-space: nowrap; }
 .cl-motto { font-size: 12px; color: rgba(255, 255, 255, .7); margin-top: 2px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
 .cl-stats {
-  position: absolute; left: 1px; right: 1px; top: 140px; margin: 0 8px; padding: 12px; box-sizing: border-box; border-radius: 6px; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; gap: 8px; border: 1px solid #5ca0ff;
+  /* 8px from the card's sides and bottom, as in Figma (the side box is inset 7 / 7 / 15 inside the card) */
+  position: absolute; left: 1px; right: 1px; bottom: -7px; height: 174px; padding: 12px; box-sizing: border-box; border-radius: 6px; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid #5ca0ff;
   background: linear-gradient(180deg, rgba(6, 20, 39, .55), rgba(6, 20, 39, .8)), url("../assets/menus/tile-diamond-btn.webp") -40px 0 / 298px 168px, #061427;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .6), inset 0 0 12px rgba(11, 110, 255, .25), inset 0 6px 12px rgba(0, 0, 0, .5);
 }
