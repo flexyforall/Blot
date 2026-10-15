@@ -721,6 +721,34 @@
 .mn-pane.cl-pane { left: 324px; right: 16px; top: 64px; bottom: 16px; }
 .cl-pane.mn-list { gap: 6px; padding-bottom: 4px; }
 .cl-pane.mn-clubpage { gap: 8px; }
+/* Rankings (Figma 2017:3087): the club column steps aside, one wide card over the darkened scene */
+.cl-info { transition: opacity .25s ease; }
+.cl-panel.is-rank .cl-info { opacity: 0; visibility: hidden; }
+.cl-panel.is-rank .cl-stage { opacity: .18; filter: blur(3px) saturate(.6); }
+.mn-pane.cl-rank {
+  left: 16px; right: auto; top: 64px; bottom: auto; width: 815px; height: 313px; box-sizing: border-box; padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden;
+  border-radius: 8px; border: 1px solid rgba(255, 255, 255, .08); background: linear-gradient(180deg, #0d1828 0%, #00193b 57.3%);
+}
+.cl-rank_head { display: flex; align-items: center; justify-content: space-between; height: 32px; }
+.cl-rank_h { font-size: 22px; font-weight: 600; color: #fff; text-shadow: 0 6px 6px rgba(0, 0, 0, .5); }
+.cl-seg { display: flex; gap: 8px; }
+.mn .cl-seg button {
+  height: 32px; padding: 0 12px; border-radius: 4px; box-sizing: border-box; font: inherit; font-size: 14px; font-weight: 500; color: rgba(255, 255, 255, .6);
+  background: #061427; border: 1px solid rgba(168, 204, 255, .25); box-shadow: inset 0 3px 12px rgba(0, 0, 0, .5); cursor: pointer;
+}
+.mn .cl-seg button.is-active { color: #fff; background: #061c38; border-color: rgba(168, 204, 255, .8); }
+.cl-rank_list { position: static; display: flex; flex-direction: column; gap: 6px; padding-bottom: 0; overflow: visible; }
+.cl-rank_list[hidden] { display: none; }
+.cl-rank_row { height: 44px; box-sizing: border-box; padding: 0 6px 0 8px; gap: 12px; border-radius: 8px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
+.cl-rank_row .mn-row_avatar { margin-right: -4px; }
+.cl-rank_stat {
+  width: 186px; height: 30px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; border-radius: 4px;
+  background: linear-gradient(90deg, rgba(0, 12, 28, .85), rgba(0, 12, 28, .55)), url("../assets/menus/tile-diamond-btn.webp") -20px -3px / 119px 67px, #000c1c;
+  border: 1px solid rgba(92, 160, 255, .25);
+}
+.cl-rank_stat > span { display: flex; align-items: center; gap: 4px; font-size: 8px; color: rgba(255, 255, 255, .6); white-space: nowrap; }
+.cl-rank_stat b { font-size: 12px; font-weight: 600; color: #fff; }
+.mn-score.cl-rank_score img { left: 57px; top: -1px; width: 28px; height: 28px; transform: none; }
 .cl-week { gap: 8px; }
 .cl-week span { flex: 1; display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 6px; font-size: 12px; color: rgba(255, 255, 255, .7);
   background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); }

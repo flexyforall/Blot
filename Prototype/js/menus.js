@@ -212,13 +212,19 @@
         '<div><b class="cl-odo" data-roll="players"></b><span>Players</span></div></div>' +
         '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
       '<div class="mn-pane cl-pane" data-pane="lobby"></div>' +
-      // Rankings: the club's best players, the three from the scene on the podium
-      '<div class="mn-pane cl-pane mn-list mn-list--rows" data-pane="rankings" hidden>' +
-        [['lb-vardan7', 'Vardan', 'Founder', '28,164'], ['lb-sonaspade', 'Sona', 'Officer', '22,432'], ['lb-aramace', 'Aram', 'Officer', '20,591'],
-         ['lb-mikabluff', 'Narek', 'Member', '16,763'], ['lb-narenoir', 'Nare', 'Member', '14,876'], ['avatar-cowboy', 'Garik', 'Member', '13,402']].map(function (r, i) {
-          var place = i < 3 ? '<img class="mn-place" src="' + A + 'place-' + (i + 1) + '.webp" alt="' + (i + 1) + '">' : '<span class="mn-place mn-place--n">' + (i + 1) + '</span>';
-          return '<div class="mn-row">' + place + '<img class="mn-row_avatar" src="' + A + r[0] + '.webp" alt=""><span class="mc-lname"><b>' + r[1] + '</b><span>' + r[2] + '</span></span>' +
-            '<span class="mn-score">' + r[3] + '<img src="' + A + 'trophy.webp" alt=""></span></div>';
+      // Rankings (Figma 2017:3087): one wide "Top players" card over the darkened scene, all time or this week
+      '<div class="mn-pane cl-pane cl-rank" data-pane="rankings" hidden><div class="cl-rank_head"><p class="cl-rank_h">Top players</p>' +
+        '<div class="cl-seg"><button class="is-active" type="button" data-period="all">All time</button><button type="button" data-period="week">This week</button></div></div>' +
+        [['all', [['aramace', 'AramAce', '1,128', '71%', '28,623'], ['narenoir', 'NareNoir', '554', '78%', '22,432'], ['mikabluff', 'MikaBluff', '784', '75%', '20,591'],
+                  ['sonaspade', 'SonaSpade', '812', '70%', '16,763'], ['vardan7', 'Vardan7', '1,329', '64%', '14,876']]],
+         ['week', [['narenoir', 'NareNoir', '31', '81%', '2,140'], ['vardan7', 'Vardan7', '42', '67%', '1,985'], ['aramace', 'AramAce', '27', '74%', '1,712'],
+                   ['mikabluff', 'MikaBluff', '22', '73%', '1,406'], ['sonaspade', 'SonaSpade', '19', '68%', '1,118']]]].map(function (set) {
+          return '<div class="mn-list cl-rank_list" data-period-list="' + set[0] + '"' + (set[0] === 'all' ? '' : ' hidden') + '>' + set[1].map(function (r, i) {
+            var place = i < 3 ? '<img class="mn-place" src="' + A + 'place-' + (i + 1) + '.webp" alt="' + (i + 1) + '">' : '<span class="mn-place mn-place--n">' + (i + 1) + '</span>';
+            return '<div class="mn-row cl-rank_row">' + place + '<img class="mn-row_avatar" src="' + A + 'lb-' + r[0] + '.webp" alt=""><span class="mn-row_name">' + r[1] + '</span>' +
+              '<span class="cl-rank_stat"><span>Matches won: <b>' + r[2] + '</b></span><span>Winrate <b>' + r[3] + '</b></span></span>' +
+              '<span class="mn-score cl-rank_score">' + r[4] + '<img src="' + C + 'bolt.webp" alt=""></span></div>';
+          }).join('') + '</div>';
         }).join('') + '</div>' +
       // Community: what the club has been up to
       '<div class="mn-pane cl-pane mn-list" data-pane="community" hidden>' +
@@ -576,11 +582,22 @@
     }
     if (tab) {
       if (tab.closest('[data-menu="myclub"]')) chat(false);
-      if (tab.closest('[data-menu="club"]')) clubPanel.classList.toggle('is-over', tab.getAttribute('data-tab') !== 'lobby');
+      if (tab.closest('[data-menu="club"]')) {
+        clubPanel.classList.toggle('is-over', tab.getAttribute('data-tab') !== 'lobby');
+        clubPanel.classList.toggle('is-rank', tab.getAttribute('data-tab') === 'rankings');
+      }
       var main = tab.closest('.mn_panel');
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
       main.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== tab.getAttribute('data-tab'); });
       animateIn(main, true);
+      return;
+    }
+    var period = t.closest('[data-period]');
+    if (period) {
+      var rank = period.closest('.cl-rank');
+      rank.querySelectorAll('[data-period]').forEach(function (b) { b.classList.toggle('is-active', b === period); });
+      rank.querySelectorAll('[data-period-list]').forEach(function (l) { l.hidden = l.getAttribute('data-period-list') !== period.getAttribute('data-period'); });
+      animateIn(rank, true);
       return;
     }
     var opt = t.closest('.mn-opt');
@@ -815,7 +832,7 @@
       c.req ? (c.requested ? 'Request sent' : 'Ask to join') : 'Invite only';
     page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'lobby'); });
     page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'lobby'; });
-    page.querySelector('[data-club-panel]').classList.remove('is-over');
+    page.querySelector('[data-club-panel]').classList.remove('is-over', 'is-rank');
     open('club');
     playLobby();
     statsIn(page, c);
