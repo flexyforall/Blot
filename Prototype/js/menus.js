@@ -215,15 +215,15 @@
       // Rankings (Figma 2017:3087): one wide "Top players" card over the darkened scene, all time or this week
       '<div class="mn-pane cl-pane cl-rank" data-pane="rankings" hidden><div class="cl-rank_head"><p class="cl-rank_h">Top players</p>' +
         '<div class="cl-seg"><button class="is-active" type="button" data-period="all">All time</button><button type="button" data-period="week">This week</button></div></div>' +
-        [['all', [['aramace', 'AramAce', '1,128', '71%', '28,623'], ['narenoir', 'NareNoir', '554', '78%', '22,432'], ['mikabluff', 'MikaBluff', '784', '75%', '20,591'],
-                  ['sonaspade', 'SonaSpade', '812', '70%', '16,763'], ['vardan7', 'Vardan7', '1,329', '64%', '14,876']]],
+        [['all', [['aramace', 'AramAce', '1,128', '67%', '28,623'], ['narenoir', 'NareNoir', '987', '78%', '22,432'], ['mikabluff', 'MikaBluff', '852', '77%', '20,591'],
+                  ['sonaspade', 'SonaSpade', '1,286', '64%', '16,763'], ['vardan7', 'Vardan7', '1,032', '71%', '14,876']]],
          ['week', [['narenoir', 'NareNoir', '31', '81%', '2,140'], ['vardan7', 'Vardan7', '42', '67%', '1,985'], ['aramace', 'AramAce', '27', '74%', '1,712'],
                    ['mikabluff', 'MikaBluff', '22', '73%', '1,406'], ['sonaspade', 'SonaSpade', '19', '68%', '1,118']]]].map(function (set) {
           return '<div class="mn-list cl-rank_list" data-period-list="' + set[0] + '"' + (set[0] === 'all' ? '' : ' hidden') + '>' + set[1].map(function (r, i) {
             var place = i < 3 ? '<img class="mn-place" src="' + A + 'place-' + (i + 1) + '.webp" alt="' + (i + 1) + '">' : '<span class="mn-place mn-place--n">' + (i + 1) + '</span>';
             return '<div class="mn-row cl-rank_row">' + place + '<img class="mn-row_avatar" src="' + A + 'lb-' + r[0] + '.webp" alt=""><span class="mn-row_name">' + r[1] + '</span>' +
               '<span class="cl-rank_stat"><span>Matches won: <b>' + r[2] + '</b></span><span>Winrate <b>' + r[3] + '</b></span></span>' +
-              '<span class="mn-score cl-rank_score">' + r[4] + '<img src="' + C + 'bolt.webp" alt=""></span></div>';
+              '<span class="mn-score cl-rank_score"><b>' + r[4] + '</b><img src="' + C + 'bolt.webp" alt=""></span></div>';
           }).join('') + '</div>';
         }).join('') + '</div>' +
       // Community: what the club has been up to
