@@ -161,17 +161,17 @@
   // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
   var C = 'assets/clubs/';
   var CLUBS = [
-    { name: 'Yerevan Courtyard', motto: '“Who Dares Wins”', rpos: '19/48', badge: C + 'crest-dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
+    { name: 'Yerevan Courtyard', wrank: 196, motto: '“Who Dares Wins”', rpos: '19/48', badge: C + 'crest-dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
       about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00.' },
-    { name: 'Gyumri Regulards', motto: '“Slow and Steady”', rpos: '7/48', badge: C + 'crest-eagle.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
+    { name: 'Gyumri Regulards', wrank: 412, motto: '“Slow and Steady”', rpos: '7/48', badge: C + 'crest-eagle.webp', rank: 'Hotshot IV', n: 12, city: 'Gyumri', open: true, lvl: 4, club: 'Contender I', games: 18, pts: '5,960',
       about: 'Small and friendly. We play Saturdays and teach anyone new to Blot.' },
-    { name: 'Ararat Evenings', motto: '“Home Is the Table”', rpos: '12/48', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, req: true, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
+    { name: 'Ararat Evenings', wrank: 288, motto: '“Home Is the Table”', rpos: '12/48', badge: C + 'crest-stag.webp', rank: 'Hotshot IV', n: 24, city: 'Diaspora', open: false, req: true, lvl: 12, club: 'Hotshot III', games: 31, pts: '9,140',
       about: 'Armenians abroad who miss the evening game. Mostly European time zones, invite only.' },
-    { name: 'Sevan Sharks', motto: '“Smell the Contract”', rpos: '4/48', badge: C + 'crest-spade.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
+    { name: 'Sevan Sharks', wrank: 74, motto: '“Smell the Contract”', rpos: '4/48', badge: C + 'crest-spade.webp', rank: 'Contender II', n: 37, city: 'Sevan', open: true, lvl: 15, club: 'Contender II', games: 56, pts: '15,320',
       about: 'Competitive club for league weekends. Bring your best partner.' },
-    { name: 'Vanadzor Aces', motto: '“Everyone Starts Somewhere”', rpos: '41/48', badge: C + 'crest-eagle.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
+    { name: 'Vanadzor Aces', wrank: 951, motto: '“Everyone Starts Somewhere”', rpos: '41/48', badge: C + 'crest-eagle.webp', rank: 'New Face II', n: 9, city: 'Vanadzor', open: true, lvl: 1, club: 'New Face II', games: 7, pts: '1,880',
       about: 'Brand new club, everyone welcome.' },
-    { name: 'Night Owls', motto: '“After Midnight”', rpos: '2/48', badge: C + 'crest-stag.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
+    { name: 'Night Owls', wrank: 31, motto: '“After Midnight”', rpos: '2/48', badge: C + 'crest-stag.webp', rank: 'Hotshot I', n: 50, city: 'Diaspora', open: false, lvl: 20, club: 'Hotshot I', games: 64, pts: '18,050',
       about: 'Late games after midnight. Full for now.' }
   ];
   // the list: your club is pinned on top with Open, the rest say View; clubs taking requests count as joinable
@@ -201,7 +201,9 @@
     '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel cl-panel" data-club-panel>' +
       '<div class="cl-stage"><img class="cl-poster" src="' + C + 'lobby-start.webp" alt="">' +
         '<video class="cl-video" data-cl-video muted playsinline preload="auto"><source src="' + C + 'lobby.webm" type="video/webm"><source src="' + C + 'lobby.mp4" type="video/mp4"></video>' +
-        '<img class="cl-still" src="' + C + 'lobby-end.webp" alt=""></div>' +
+        '<img class="cl-still" src="' + C + 'lobby-end.webp" alt="">' +
+        // the spotlight keeps living after the clip: two swaying beams, dust drifting up through them, a pool on the floor
+        '<div class="cl-light"><i class="cl-beam"></i><i class="cl-beam cl-beam--2"></i><i class="cl-dust"></i><i class="cl-pool"></i></div></div>' +
       '<div class="cl-fade"></div><div class="cl-bottom"></div>' +
       '<div class="mn-card mn-card--side cl-card"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
         '<span class="mn-club_badge cl-badge"><img data-c="badge" alt=""></span><p class="mn-card_name cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
@@ -228,6 +230,7 @@
       '<div class="mn-pane cl-pane mn-clubpage" data-pane="about" hidden><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
         '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div>' +
         '<div class="mc-pair cl-week"><span><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b> games this week</span><span><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b> week points</span></div></div>' +
+      '<div class="cl-week-rank"><b class="cl-num" data-c="wrank"></b><span>Weekly ranking</span></div>' +
       '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div>' +
     '</div></div>';
 
@@ -456,17 +459,18 @@
   function countUp(el) {
     clearTimeout(el._t);
     if (!el.hasAttribute('data-final')) el.setAttribute('data-final', el.textContent);
-    var parts = el.getAttribute('data-final').split('/'), to = +parts[0], tail = parts[1] ? '/' + parts[1] : '';
+    var parts = el.getAttribute('data-final').split('/'), head = parts[0].charAt(0) === '#' ? '#' : '',
+      to = +parts[0].slice(head.length), tail = parts[1] ? '/' + parts[1] : '';
     el.classList.remove('is-tick', 'is-landed');
     if (!to) { el.textContent = parts.join('/'); return; }
     // big numbers count in strides so a run never takes more than about a dozen ticks
     var n = 1, inc = Math.max(1, Math.ceil((to - 1) / 12)), total = Math.max(1, Math.ceil((to - 1) / inc)), step = 0, snd = window.BlotSound && BlotSound.sfx;
-    el.textContent = n + tail;
+    el.textContent = head + n + tail;
     (function tick() {
       el._t = setTimeout(function () {
         if (n < to) n = Math.min(to, n + inc);
         step++;
-        el.textContent = n + tail;
+        el.textContent = head + n + tail;
         el.classList.remove('is-tick'); void el.offsetWidth;
         if (n < to) { el.classList.add('is-tick'); if (snd) snd('click', 0.22 + step * 0.02); tick(); }
         else { el.classList.add('is-landed'); if (snd) { snd('pop', 0.5); snd('coin', 0.45); } }
@@ -757,15 +761,16 @@
   var statTimers = [];
   function statsIn(page) {
     statTimers.forEach(clearTimeout); statTimers = [];
-    var nums = page.querySelectorAll('.cl-num'), div = page.querySelector('.cl-div');
-    nums.forEach(function (el) { clearTimeout(el._t); el.removeAttribute('data-final'); el.classList.remove('is-tick', 'is-landed'); });
+    var nums = page.querySelectorAll('.cl-stats .cl-num'), div = page.querySelector('.cl-div'), week = page.querySelector('.cl-week-rank .cl-num');
+    [nums[0], nums[1], week].forEach(function (el) { clearTimeout(el._t); el.removeAttribute('data-final'); el.classList.remove('is-tick', 'is-landed'); });
     div.classList.remove('is-lit');
     if (REDUCED) return;
-    [nums[0], div, nums[1]].forEach(function (el) { el.classList.add('is-wait'); });   // hidden until its turn
+    [nums[0], div, nums[1], week].forEach(function (el) { el.classList.add('is-wait'); });   // hidden until its turn
     function go(el, fn, at) { statTimers.push(setTimeout(function () { el.classList.remove('is-wait'); fn(); }, at)); }
     go(nums[0], function () { countUp(nums[0]); }, 250);
     go(div, function () { void div.offsetWidth; div.classList.add('is-lit'); if (window.BlotSound) BlotSound.sfx('shimmer', 0.35); }, 1500);
     go(nums[1], function () { countUp(nums[1]); }, 1900);
+    go(week, function () { countUp(week); }, 3300);
   }
 
   function showClub(c) {
@@ -773,7 +778,7 @@
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
-    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—');
+    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—'); set('wrank', '#' + (c.wrank || 0));
     set('about', c.about); set('lvl', c.lvl); set('games', c.games); set('pts', c.pts);
     var full = c.n >= 50, mine = c === myClub;
     set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');
