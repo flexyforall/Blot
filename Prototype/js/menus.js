@@ -183,7 +183,7 @@
   }
   var clubsHtml = '<div class="mn" data-menu="clubs" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--art">' +
     '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head"><img class="mn-side_big" src="' + A + 'swords.webp" alt="">' +
-    '<p class="mn-card_name">Clubs</p><p class="mn-card_since mn-side_sub">20 to 50 players</p></div>' + blueBtn('Create club') + '</div></div>' +
+    '<p class="mn-card_name">Clubs</p><p class="mn-card_since mn-side_sub">20 to 50 players</p></div>' + blueBtn('Create club', ' data-create-open') + '</div></div>' +
     '<div class="mn-main">' + tabs([['all', 'All'], ['open', 'Open to join']]).replace('mn-tab is-active" type="button" data-tab="all"', 'mn-tab" type="button" data-tab="all"').replace('mn-tab" type="button" data-tab="open"', 'mn-tab is-active" type="button" data-tab="open"') +
     '<div class="mn-tools"><button class="mn-search" type="button" aria-label="Поиск"><img src="' + C + 'search.svg" alt=""></button>' + close() + '</div>' +
     '<div class="mn-pane mn-list mn-clubs is-open-only" data-clubs>' + clubRows() + '</div></div></div></div>' +
@@ -205,7 +205,115 @@
         '</span></div><span class="mn-reward mn-reward--small">' + t[3] + '</span></div>';
     }).join('') + '</div></div></div></div>';
 
-  html += tasksHtml + premiumHtml + clubsHtml;
+
+  // ---- Club states (Figma 1958:4255): Create a club, My club (Home / Roster / Quests / League) and the
+  // Sunday digest. Joining an open club or creating one makes it yours: from then on the sword icon opens it
+  var B = 'assets/bond/', LF = 'assets/lobby/figma/';
+  var ICON = {   // line icons from the wireframe, drawn in the menus' white
+    table: '<path d="M3 5h18v14H3zM3 10h18M9 10v9"/>',
+    users: '<circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5M16 5a3 3 0 0 1 0 6M18 14c1.6.6 2.7 2.3 3 5"/>',
+    cards: '<rect x="7" y="4" width="11" height="15" rx="2"/><path d="M4.5 7.5 3.6 17a2 2 0 0 0 1.8 2.2L12 20"/><path d="M12.5 9.5l-1.5 2 1.5 2 1.5-2z"/>',
+    trend: '<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+    bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0"/>',
+    send: '<path d="M4 12l16-8-6 16-2.5-6.5z"/>',
+    up: '<path d="M12 19V5M6 11l6-6 6 6"/>'
+  };
+  function ic(n) { return '<svg class="mc-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' + ICON[n] + '</svg>'; }
+  function loot(chips, gems) {
+    return '<span class="mc-loot"><span><img src="' + LF + 'chip.webp" alt="">' + chips + '</span><span><img src="' + A + 'gem.webp" alt="">' + gems + '</span></span>';
+  }
+  function crestHead(sub, extra) {
+    return '<div class="mn-side_head"><span class="mn-club_badge"><img class="mn-club_glow" src="' + C + 'badge-glow.svg" alt=""><img data-m="badge" alt=""></span>' +
+      '<p class="mn-card_name mn-club_name" data-m="name"></p><p class="mn-card_since mn-side_sub">' + sub + '</p>' + (extra || '') + '</div>';
+  }
+  function ring(label) {
+    return '<div class="mn-side_head"><span class="mc-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/><circle class="mc-ring_on" cx="50" cy="50" r="44" pathLength="100"/></svg><b>' + label + '</b></span>';
+  }
+  var CRESTS = [['crest-spade.webp', ''], ['crest-dragon.webp', ''], ['crest-eagle.webp', ''], ['crest-stag.webp', ''],
+    ['crest-dragon.webp', 'hue-rotate(130deg)'], ['crest-spade.webp', 'hue-rotate(200deg) saturate(1.3)']];
+  function crestImg(i) { return '<img src="' + C + CRESTS[i][0] + '" alt=""' + (CRESTS[i][1] ? ' style="filter:' + CRESTS[i][1] + '"' : '') + '>'; }
+
+  var createHtml = '<div class="mn" data-menu="clubnew" hidden><div class="mn_dim" data-create-back></div><div class="mn_panel mn_panel--art">' +
+    '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
+    '<span class="mn-club_badge"><img class="mn-club_glow" src="' + C + 'badge-glow.svg" alt=""><span data-new-crest>' + crestImg(1) + '</span></span>' +
+    '<p class="mn-card_name mn-club_name" data-new-name>New club</p><p class="mn-card_since mn-side_sub" data-new-sub>Preview</p></div>' +
+    blueBtn('Create', ' data-create') + '</div></div>' +
+    '<div class="mn-main"><button class="mn-close" type="button" data-create-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
+    '<div class="mn-pane mc-form">' +
+      '<label class="mc-field"><span class="mn-label">Club name</span><input class="mc-input" data-new-input maxlength="22" placeholder="e.g. Kond Corner"></label>' +
+      '<div class="mc-field"><span class="mn-label">Crest</span><div class="mc-crests">' + CRESTS.map(function (c, i) {
+        return '<button class="mn-opt mc-crest' + (i === 1 ? ' is-active' : '') + '" type="button" data-crest="' + i + '">' + crestImg(i) + '</button>';
+      }).join('') + '</div></div>' +
+      '<div class="mc-pair"><input class="mc-input" placeholder="Region" value="Yerevan"><input class="mc-input" placeholder="Language" value="Armenian"></div>' +
+      '<div class="mc-seg" data-seg><button class="is-active" type="button">Open</button><button type="button">Request to join</button><button type="button">Invite only</button></div>' +
+      '<p class="mc-note">Clubs hold 20 to 50 players. Creating one unlocks at Career Level 8.</p>' +
+    '</div></div></div></div>';
+
+  var feed = [['lb-aramace', 'Aram', 'made a 250 contract', '2m'], ['lb-mikabluff', 'Narek', 'anyone up for a duo?', '14m']];
+  var members = [['lb-aramace', 'Aram', 'Founder', 'online', '2,140'], ['lb-vardan7', 'Narek', 'Officer', 'online', '1,890'],
+    [null, 'Artexcb', 'Member', 'you', '1,240'], ['lb-sonaspade', 'Sona', 'Member', 'yesterday', '980'],
+    ['lb-vardan7', 'Vardan', 'Member', '3d ago', '760'], ['lb-narenoir', 'Nare', 'Member', 'last week', '410']];
+  var league = [[1, 'Kond Corner', 'crest-spade.webp', 'Promote', '18,900'], [2, 'Gyumri Regulards', 'crest-eagle.webp', 'Promote', '15,240'],
+    [3, null, null, '', '12,480'], ['gap'], [9, 'Nor Nork Nights', 'crest-stag.webp', 'Relegate', '4,100'], [10, 'Ararat Evenings', 'crest-stag.webp', 'Relegate', '3,050']];
+  function feedRow(f) {
+    return '<div class="mc-feed"><img src="' + (f[0] ? A + f[0] + '.webp' : B + 'me.webp') + '" alt=""><p><b>' + f[1] + '</b> ' + f[2] + '</p><span>' + f[3] + '</span></div>';
+  }
+  var myClubHtml = '<div class="mn" data-menu="myclub" hidden><div class="mn_dim" data-menu-close></div><div class="mn_panel mn_panel--art">' +
+    '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div>' +
+      '<div class="mn-side" data-pane="home">' + crestHead('<span data-m="div"></span> · <span data-m="n"></span>/50') + '<span class="mc-chip">Your rank: 4th</span></div>' +
+      '<div class="mn-side" data-pane="roster" hidden>' + crestHead('<span data-m="n"></span> of 50 members') + '<button class="mn-btn mc-manage" type="button" data-manage>Manage club</button></div>' +
+      '<div class="mn-side" data-pane="quests" hidden>' + ring('64%').replace('<span class="mc-ring">', '<span class="mc-ring" style="--p:64">') +
+        '<p class="mn-card_name">Club quests</p><p class="mn-card_since mn-side_sub">Resets Monday 05:00</p></div><span class="mc-chip">Everyone shares it</span></div>' +
+      '<div class="mn-side" data-pane="league" hidden>' + ring('3rd').replace('<span class="mc-ring">', '<span class="mc-ring" style="--p:80">') +
+        '<p class="mn-card_name">League position</p><p class="mn-card_since mn-side_sub">Group 7 of <span data-m="divname"></span> Division</p></div><span class="mc-chip">12,480 points</span></div>' +
+    '</div>' +
+    '<div class="mn-main">' + tabs([['home', 'Home'], ['roster', 'Roster'], ['quests', 'Quests'], ['league', 'League']]) + close() +
+      // Home: the club table, the feed (the Sunday digest lands here) and a message box
+      '<div class="mn-pane mc-home" data-pane="home">' +
+        '<div class="mc-table">' + ic('table') + '<div class="mn-ach_text"><b>Club table</b><span>3 members are playing right now</span></div>' + blueBtn('Sit down', ' data-sit') + '</div>' +
+        '<p class="mc-h">Club feed</p><div class="mc-feeds" data-feed>' +
+          '<button class="mc-feed mc-feed--digest" type="button" data-digest><i>' + ic('bell') + '</i><p><b>Week 14 digest</b> your club finished 3rd</p><span>1h</span></button>' +
+          feed.map(feedRow).join('') + '</div>' +
+        '<form class="mc-say" data-say><input class="mc-input" data-say-input placeholder="Message the club"><button type="submit" aria-label="Отправить">' + ic('send') + '</button></form>' +
+      '</div>' +
+      '<div class="mn-pane mn-list mc-list" data-pane="roster" hidden><div class="mc-head"><p class="mc-h">Members</p><span class="mc-chip">Sorted by contribution</span></div>' +
+        members.map(function (m) {
+          return '<div class="mc-row' + (m[3] === 'you' ? ' is-me' : '') + '"><img class="mc-av" src="' + (m[0] ? A + m[0] + '.webp' : B + 'me.webp') + '" alt="">' +
+            '<div class="mn-ach_text"><b>' + m[1] + (m[3] === 'you' ? ' <em>(you)</em>' : '') + '</b><span>' + m[2] + '<i class="mn-dot"></i>' +
+            (m[3] === 'online' ? '<i class="mc-online"></i>online' : m[3] === 'you' ? 'playing now' : m[3]) + '</span></div>' +
+            '<span class="mc-pts"><img src="' + C + 'bolt.webp" alt="">' + m[4] + '</span></div>';
+        }).join('') + '</div>' +
+      '<div class="mn-pane mn-list mc-list" data-pane="quests" hidden>' +
+        [['Fulfil 500 contracts together', 'Every member counts, strong or new', 320, 500], ['Capture 8,000 defensive points', 'Defence counts the same as declaring', 6100, 8000]].map(function (q) {
+          return '<div class="mc-quest"><div class="mc-quest_top">' + ic('cards') + '<div class="mn-ach_text"><b>' + q[0] + '</b><span>' + q[1] + '</span></div>' + loot(400, 10) + '</div>' +
+            '<div class="mc-quest_bar"><span class="mc-bar"><i style="--w:' + Math.round(q[2] / q[3] * 100) + '%"></i></span><span>' + q[2].toLocaleString('en') + ' / ' + q[3].toLocaleString('en') + '</span></div></div>';
+        }).join('') +
+        '<p class="mc-note">Club quests are collective. A strong player carrying a new one helps the whole club, so nobody is resented for it.</p></div>' +
+      '<div class="mn-pane mn-list mc-list" data-pane="league" hidden><div class="mc-head"><p class="mc-h">Weekly Club League</p><span class="mc-chip">Ends Sun 23:59</span></div>' +
+        league.map(function (r) {
+          if (r[0] === 'gap') return '<p class="mc-gap">ranks 4 – 8</p>';
+          var me = !r[1];
+          return '<div class="mc-row mc-row--league' + (me ? ' is-me' : '') + '"><span class="mc-place">' + r[0] + '</span><img class="mc-crest_s" ' + (me ? 'data-m="badge"' : 'src="' + C + r[2] + '"') + ' alt="">' +
+            '<b class="mc-name"' + (me ? ' data-m="name"' : '') + '>' + (r[1] || '') + '</b>' + (r[3] ? '<span class="mc-tag mc-tag--' + r[3].toLowerCase() + '">' + r[3] + '</span>' : '') + '<span class="mc-score">' + r[4] + '</span></div>';
+        }).join('') +
+        '<p class="mc-note">Top 2 promote, bottom 2 relegate. Points come from playing only.</p></div>' +
+    '</div></div></div>';
+
+  var digestHtml = '<div class="mn" data-menu="digest" hidden><div class="mn_dim" data-digest-back></div><div class="mn_panel mn_panel--art">' +
+    '<div class="mn-card mn-card--side"><div class="mn-card_tile"></div><div class="mn-side">' +
+      '<div class="mn-side_head"><span class="mn-club_badge"><img class="mn-club_glow" src="' + C + 'badge-glow.svg" alt=""><img data-m="badge" alt=""></span>' +
+      '<p class="mn-card_name">Week 14</p><p class="mn-card_since mn-side_sub">Sunday digest</p></div><span class="mc-chip">One message a week</span></div></div>' +
+    '<div class="mn-main"><button class="mn-close" type="button" data-digest-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
+      '<div class="mn-pane mc-digest"><p class="mc-title">Your club finished 3rd</p><div class="mn-tiles mn-tiles--3 mc-tiles">' +
+        '<div class="mn-tile is-cup"><img src="' + A + 'trophy.webp" alt=""><b>3rd of 10</b><span>Placement</span></div>' +
+        '<div class="mn-tile"><img src="' + C + 'bolt.webp" alt=""><b>1,240</b><span>Your points</span></div>' +
+        '<div class="mn-tile is-badge"><img src="' + A + 'badge-novice.webp" alt=""><b>4th</b><span>Your rank</span></div></div>' +
+        '<div class="mc-line is-hot">' + ic('trend') + '<div class="mn-ach_text"><b>Promoted to <span data-m="divname"></span> Division</b><span>Next week you play Group 4</span></div><span class="mc-chip mc-chip--up">' + ic('up') + 'Up 1</span></div>' +
+        '<div class="mc-line">' + ic('bell') + '<div class="mn-ach_text"><b>League rewards</b><span>Claim from the Rewards tab, no timer</span></div>' + loot(400, 10) + '</div>' +
+        '<p class="mc-note">Sent once, Sunday night. Club notifications can be turned off on their own.</p>' +
+    '</div></div></div></div>';
+
+  html += tasksHtml + premiumHtml + clubsHtml + createHtml + myClubHtml + digestHtml;
 
   var host = document.createElement('div');
   host.className = 'mn-host';
@@ -284,13 +392,28 @@
   lobby.addEventListener('click', function (e) {
     var t = e.target;
     var opener = t.closest('[data-menu-open]');
-    if (opener) { open(opener.getAttribute('data-menu-open')); return; }
+    if (opener) {
+      var which = opener.getAttribute('data-menu-open');
+      if (which === 'clubs' && myClub) showMyClub(); else open(which);
+      return;
+    }
+    if (t.closest('[data-create-open]')) { startCreate(false); return; }
+    if (t.closest('[data-manage]')) { startCreate(true); return; }
+    if (t.closest('[data-create-back]')) { if (editing) showMyClub(); else open('clubs'); return; }
+    var crest = t.closest('[data-crest]');
+    if (crest) { pickCrest(+crest.getAttribute('data-crest')); return; }
+    var seg = t.closest('[data-seg] button');
+    if (seg) { seg.parentNode.querySelectorAll('button').forEach(function (b) { b.classList.toggle('is-active', b === seg); }); return; }
+    if (t.closest('[data-create]')) { finishCreate(); return; }
+    if (t.closest('[data-sit]')) { shut(); if (window.BlotNav) BlotNav.show('play'); return; }
+    if (t.closest('[data-digest]')) { open('digest'); return; }
+    if (t.closest('[data-digest-back]')) { showMyClub(true); return; }
     if (t.closest('[data-menu-close]')) { shut(); return; }
     var view = t.closest('[data-club]');
     if (view) { showClub(CLUBS[+view.getAttribute('data-club')]); return; }
     if (t.closest('[data-club-back]')) { open('clubs'); return; }
     var join = t.closest('[data-join]');
-    if (join && !join.disabled) { join.disabled = true; join.querySelector('.mn-cta_label').textContent = 'Request sent'; return; }
+    if (join && !join.disabled) { setMyClub(viewing); showMyClub(); sfx('coin', 0.5); sfx('shimmer', 0.4); return; }
     var tab = t.closest('.mn-tab');
     if (tab && tab.closest('[data-menu="clubs"]')) {
       tab.parentNode.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
@@ -334,7 +457,79 @@
     resetEl.textContent = h + ':' + (m < 10 ? '0' : '') + m + ':' + (sec < 10 ? '0' : '') + sec;
   }, 1000);
 
+  // ---- your club: joining or creating one fills the My club and digest pages
+  var myClub = null, viewing = null, editing = false, newCrest = 1;
+  function sfx(n, v) { if (window.BlotSound && BlotSound.sfx) BlotSound.sfx(n, v); }
+  function setMyClub(c) {
+    myClub = c;
+    host.querySelectorAll('[data-m="badge"]').forEach(function (img) { img.src = c.badge; img.style.filter = c.filter || ''; });
+    host.querySelectorAll('[data-m="name"]').forEach(function (el) {
+      if (el.classList.contains('mn-club_name')) {
+        var w = c.name.split(' ');
+        el.innerHTML = w.length > 1 ? w.slice(0, -1).join(' ') + '<br>' + w[w.length - 1] : c.name;
+      } else el.textContent = c.name;
+    });
+    host.querySelectorAll('[data-m="n"]').forEach(function (el) { el.textContent = c.n; });
+    host.querySelectorAll('[data-m="div"]').forEach(function (el) { el.textContent = c.club; });
+    host.querySelectorAll('[data-m="divname"]').forEach(function (el) { el.textContent = c.club.replace(/ [IV]+$/, ''); });
+  }
+  function showMyClub(keepTab) {
+    var page = host.querySelector('[data-menu="myclub"]');
+    if (!keepTab) {
+      page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'home'); });
+      page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'home'; });
+    }
+    open('myclub');
+  }
+  // Create a club (also Manage club, prefilled): the card on the left previews the name and crest
+  var form = host.querySelector('[data-menu="clubnew"]');
+  var nameInput = form.querySelector('[data-new-input]');
+  function pickCrest(i) {
+    newCrest = i;
+    form.querySelectorAll('[data-crest]').forEach(function (b) { b.classList.toggle('is-active', +b.getAttribute('data-crest') === i); });
+    form.querySelector('[data-new-crest]').innerHTML = crestImg(i);
+  }
+  function previewName() {
+    var v = nameInput.value.trim();
+    form.querySelector('[data-new-name]').textContent = v || 'New club';
+  }
+  function startCreate(edit) {
+    editing = edit;
+    nameInput.value = edit ? myClub.name : '';
+    nameInput.classList.remove('is-shake');
+    var idx = 1;
+    if (edit) CRESTS.forEach(function (c, i) { if (myClub.badge === C + c[0] && (myClub.filter || '') === c[1]) idx = i; });
+    pickCrest(idx); previewName();
+    form.querySelector('[data-new-sub]').textContent = edit ? 'Club settings' : 'Preview';
+    form.querySelector('[data-create] .mn-cta_label').textContent = edit ? 'Save' : 'Create';
+    open('clubnew');
+  }
+  nameInput.addEventListener('input', function () { nameInput.classList.remove('is-shake'); previewName(); });
+  function finishCreate() {
+    var name = nameInput.value.trim();
+    if (!name) { nameInput.focus(); sfx('click', 0.3); nameInput.classList.remove('is-shake'); void nameInput.offsetWidth; nameInput.classList.add('is-shake'); return; }
+    var c = editing ? myClub : { n: 1, club: 'New Face II' };
+    c.name = name; c.badge = C + CRESTS[newCrest][0]; c.filter = CRESTS[newCrest][1];
+    setMyClub(c); showMyClub();
+    sfx('coin', 0.5); sfx('shimmer', 0.4);
+  }
+  // a message to the club lands at the top of the feed
+  host.querySelector('[data-say]').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = this.querySelector('[data-say-input]'), v = input.value.trim();
+    if (!v) return;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = feedRow([null, 'Artexcb', v.replace(/[<>&]/g, ''), 'now']);
+    var row = wrap.firstChild;
+    row.classList.add('mn-in');
+    var list = host.querySelector('[data-feed]');
+    list.insertBefore(row, list.firstChild);
+    input.value = '';
+    sfx('pop', 0.4);
+  });
+
   function showClub(c) {
+    viewing = c;
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
@@ -346,7 +541,7 @@
     var join = page.querySelector('[data-join]');
     var can = c.open && c.n < 50;
     join.disabled = !can;
-    join.querySelector('.mn-cta_label').textContent = can ? 'Ask to join' : (c.n >= 50 ? 'Club is full' : 'Invite only');
+    join.querySelector('.mn-cta_label').textContent = can ? 'Join the club' : (c.n >= 50 ? 'Club is full' : 'Invite only');
     page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'about'); });
     page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'about'; });
     open('club');
