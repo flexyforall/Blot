@@ -709,58 +709,19 @@
 .cl-week b { font-size: 16px; color: #fff; }
 .cl-week img { width: 24px; height: 24px; }
 .cl-stats b span { font: inherit; color: inherit; text-shadow: inherit; }
-/* the card's three numbers come in with the Tasks counter effects */
-.cl-stats b.cl-num { display: inline-block; font-variant-numeric: tabular-nums; }
-.cl-stats b.cl-num.is-tick { animation: mn-tick .14s ease-out; }
-.cl-stats b.cl-num.is-landed { animation: mn-land .6s cubic-bezier(.34, 1.8, .64, 1); }
-.cl-stats b.cl-div { display: inline-block; }
-.cl-stats b.cl-div.is-lit { animation: cl-lit .9s cubic-bezier(.22, 1, .36, 1); }
-@keyframes cl-lit {
-  0% { opacity: 0; transform: scale(.7); filter: blur(3px); letter-spacing: .3em; }
-  45% { opacity: 1; transform: scale(1.12); color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9); filter: none; }
-  100% { transform: none; letter-spacing: normal; }
-}
-.cl-stats b.is-wait { visibility: hidden; }
 /* weekly ranking over the scene, bottom left (Figma 2017:2096) */
 .cl-week-rank { position: absolute; left: 241px; top: 279px; display: flex; flex-direction: column; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
 .cl-week-rank b { font-size: 28px; line-height: 32px; font-weight: 700; font-style: italic; color: #fff; display: inline-block; font-variant-numeric: tabular-nums; }
-.cl-week-rank span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
-.cl-week-rank b.is-tick { animation: mn-tick .14s ease-out; }
-.cl-week-rank b.is-landed { animation: mn-land .6s cubic-bezier(.34, 1.8, .64, 1); transform-origin: left center; }
-.cl-week-rank b.is-wait { visibility: hidden; }
+.cl-week-rank > span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
+.cl-odo { display: inline-flex; align-items: flex-start; height: 32px; }
+.cl-odo .odo { display: inline-block; height: 32px; overflow: hidden; }
+.cl-odo .odo_s { display: flex; flex-direction: column; }
+.cl-odo .odo_s i { display: block; height: 32px; line-height: 32px; font-style: italic; text-align: center; }
+.cl-odo .odo.is-set { animation: odo-set .35s cubic-bezier(.34, 1.8, .64, 1); }
+.cl-odo.is-landed { animation: odo-glow .7s ease; }
+@keyframes odo-set { 40% { transform: translateY(-3px); } }
+@keyframes odo-glow { 40% { color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9), 0 4px 4px rgba(0, 0, 0, .5); } }
 .cl-panel.is-over .cl-week-rank { opacity: 0; transition: opacity .25s ease; }
-
-/* ---- the living spotlight over the club scene (code, not video): beams sway and breathe, dust floats up */
-.cl-stage > .cl-light { pointer-events: none; opacity: 0; transition: opacity 1.2s ease; mix-blend-mode: screen; }
-.cl-panel.is-settled .cl-light { opacity: 1; }
-.cl-light > i { position: absolute; display: block; }
-.cl-beam {
-  left: 65.3%; top: -8%; width: 300px; height: 112%; margin-left: -150px; transform-origin: 50% 0;
-  clip-path: polygon(41% 0, 59% 0, 100% 100%, 0 100%); filter: blur(8px);
-  background: linear-gradient(180deg, rgba(110, 170, 255, .42) 0%, rgba(60, 120, 255, .2) 45%, rgba(40, 90, 255, 0) 92%);
-  animation: cl-sway 7s ease-in-out infinite alternate, cl-breathe 3.6s ease-in-out infinite;
-}
-.cl-beam--2 { width: 180px; margin-left: -90px; filter: blur(5px); opacity: .7;
-  background: linear-gradient(180deg, rgba(170, 215, 255, .5) 0%, rgba(90, 150, 255, .18) 50%, rgba(60, 120, 255, 0) 85%);
-  animation: cl-sway 5.2s ease-in-out -2s infinite alternate-reverse, cl-breathe 2.7s ease-in-out -1s infinite; }
-@keyframes cl-sway { from { transform: rotate(-3.5deg); } to { transform: rotate(3.5deg); } }
-@keyframes cl-breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
-.cl-dust {
-  left: 51%; top: 0; width: 28%; height: 90%;
-  -webkit-mask-image: radial-gradient(60% 75% at 50% 35%, #000 30%, transparent 75%); mask-image: radial-gradient(60% 75% at 50% 35%, #000 30%, transparent 75%);
-  background-image:
-    radial-gradient(1.4px 1.4px at 12% 20%, rgba(200, 230, 255, .9), transparent 60%), radial-gradient(1px 1px at 33% 64%, rgba(200, 230, 255, .8), transparent 60%),
-    radial-gradient(1.6px 1.6px at 58% 38%, rgba(220, 240, 255, .9), transparent 60%), radial-gradient(1px 1px at 76% 82%, rgba(200, 230, 255, .7), transparent 60%),
-    radial-gradient(1.2px 1.2px at 88% 14%, rgba(200, 230, 255, .8), transparent 60%), radial-gradient(1px 1px at 45% 92%, rgba(200, 230, 255, .7), transparent 60%),
-    radial-gradient(1.3px 1.3px at 22% 47%, rgba(220, 240, 255, .8), transparent 60%), radial-gradient(1px 1px at 67% 8%, rgba(200, 230, 255, .7), transparent 60%);
-  background-size: 120px 160px; animation: cl-dust 14s linear infinite, cl-breathe 4.4s ease-in-out infinite;
-}
-@keyframes cl-dust { from { background-position: 0 0; } to { background-position: 30px -320px; } }
-.cl-pool {
-  left: 65.3%; top: 74%; width: 420px; height: 90px; margin-left: -210px; border-radius: 50%; filter: blur(14px);
-  background: radial-gradient(closest-side, rgba(70, 130, 255, .35), rgba(40, 90, 255, 0)); animation: cl-breathe 3.6s ease-in-out infinite;
-}
-@media (prefers-reduced-motion: reduce) { .cl-light > i { animation: none; } }
 
 /* tabs on the club scene: the resting tabs keep a faint stroke (Figma) */
 .mn .cl-tabs .mn-tab:not(.is-active) { border-color: rgba(168, 204, 255, .25) !important; }

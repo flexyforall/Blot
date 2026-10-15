@@ -201,14 +201,12 @@
     '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel cl-panel" data-club-panel>' +
       '<div class="cl-stage"><img class="cl-poster" src="' + C + 'lobby-start.webp" alt="">' +
         '<video class="cl-video" data-cl-video muted playsinline preload="auto"><source src="' + C + 'lobby.webm" type="video/webm"><source src="' + C + 'lobby.mp4" type="video/mp4"></video>' +
-        '<img class="cl-still" src="' + C + 'lobby-end.webp" alt="">' +
-        // the spotlight keeps living after the clip: two swaying beams, dust drifting up through them, a pool on the floor
-        '<div class="cl-light"><i class="cl-beam"></i><i class="cl-beam cl-beam--2"></i><i class="cl-dust"></i><i class="cl-pool"></i></div></div>' +
+        '<img class="cl-still" src="' + C + 'lobby-end.webp" alt=""></div>' +
       '<div class="cl-fade"></div><div class="cl-bottom"></div>' +
       '<div class="mn-card mn-card--side cl-card"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
         '<span class="mn-club_badge cl-badge"><img data-c="badge" alt=""></span><p class="mn-card_name cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
-        '<div class="cl-stats"><div><b class="cl-num" data-c="players"></b><span>Players</span></div><div><b class="cl-div" data-c="divname"></b><span>Division</span></div>' +
-        '<div><b class="cl-num" data-c="rpos"></b><span>Division ranking</span></div></div></div></div>' +
+        '<div class="cl-stats"><div><b data-c="players"></b><span>Players</span></div><div><b data-c="divname"></b><span>Division</span></div>' +
+        '<div><b data-c="rpos"></b><span>Division ranking</span></div></div></div></div>' +
       '<div class="cl-tabs">' + tabs([['lobby', 'Lobby'], ['rankings', 'Rankings'], ['community', 'Community'], ['about', 'About']]) + '</div>' +
       '<button class="mn-close cl-close" type="button" data-club-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
       '<div class="mn-pane cl-pane" data-pane="lobby"></div>' +
@@ -230,7 +228,7 @@
       '<div class="mn-pane cl-pane mn-clubpage" data-pane="about" hidden><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
         '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div>' +
         '<div class="mc-pair cl-week"><span><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b> games this week</span><span><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b> week points</span></div></div>' +
-      '<div class="cl-week-rank"><b class="cl-num" data-c="wrank"></b><span>Weekly ranking</span></div>' +
+      '<div class="cl-week-rank"><b class="cl-odo" data-wrank></b><span>Weekly ranking</span></div>' +
       '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div>' +
     '</div></div>';
 
@@ -444,7 +442,7 @@
   function animateIn(root, onlyPane) {
     if (REDUCED) return;
     var els = Array.prototype.slice.call(root.querySelectorAll(ITEMS)).filter(function (el) {
-      return el.offsetParent !== null && (!onlyPane || el.closest('.mn-pane, .mn-side'));
+      return el.offsetParent !== null && !el.closest('.cl-card') && (!onlyPane || el.closest('.mn-pane, .mn-side'));
     });
     els.forEach(function (el, i) {
       el.classList.remove('mn-in'); void el.offsetWidth;
@@ -757,20 +755,27 @@
   lobbyV.addEventListener('ended', settle);
   function stopLobby() { lobbyV.pause(); }
 
-  // the three numbers on the card come in one after another: players and ranking count up, the division lights up
-  var statTimers = [];
-  function statsIn(page) {
-    statTimers.forEach(clearTimeout); statTimers = [];
-    var nums = page.querySelectorAll('.cl-stats .cl-num'), div = page.querySelector('.cl-div'), week = page.querySelector('.cl-week-rank .cl-num');
-    [nums[0], nums[1], week].forEach(function (el) { clearTimeout(el._t); el.removeAttribute('data-final'); el.classList.remove('is-tick', 'is-landed'); });
-    div.classList.remove('is-lit');
-    if (REDUCED) return;
-    [nums[0], div, nums[1], week].forEach(function (el) { el.classList.add('is-wait'); });   // hidden until its turn
-    function go(el, fn, at) { statTimers.push(setTimeout(function () { el.classList.remove('is-wait'); fn(); }, at)); }
-    go(nums[0], function () { countUp(nums[0]); }, 250);
-    go(div, function () { void div.offsetWidth; div.classList.add('is-lit'); if (window.BlotSound) BlotSound.sfx('shimmer', 0.35); }, 1500);
-    go(nums[1], function () { countUp(nums[1]); }, 1900);
-    go(week, function () { countUp(week); }, 3300);
+  // the weekly ranking rolls in like an odometer: every digit spins up from below and stops on its value, left to right
+  var rollTimers = [];
+  function weekRoll(page, n) {
+    rollTimers.forEach(clearTimeout); rollTimers = [];
+    var el = page.querySelector('[data-wrank]'), digits = String(n || 0).split('');
+    var reel = '0123456789'.repeat(3).split('').map(function (d) { return '<i>' + d + '</i>'; }).join('');
+    el.innerHTML = '#' + digits.map(function () { return '<span class="odo"><span class="odo_s">' + reel + '</span></span>'; }).join('');
+    var strips = el.querySelectorAll('.odo_s');
+    if (REDUCED) { strips.forEach(function (st, i) { st.style.transform = 'translateY(' + (-(20 + +digits[i]) * 32) + 'px)'; }); return; }
+    var snd = window.BlotSound && BlotSound.sfx;
+    rollTimers.push(setTimeout(function () {
+      strips.forEach(function (st, i) {
+        var dur = 1.1 + i * 0.35;
+        st.style.transition = 'transform ' + dur + 's cubic-bezier(.15, .75, .25, 1)';
+        st.style.transform = 'translateY(' + (-(20 + +digits[i]) * 32) + 'px)';   // two full turns, then the digit
+        rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.35); st.parentNode.classList.add('is-set'); }, dur * 1000 - 120));
+      });
+      var last = (1.1 + (digits.length - 1) * 0.35) * 1000;
+      for (var t = 80; t < last - 300; t += 110) rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.15); }, t));
+      rollTimers.push(setTimeout(function () { el.classList.remove('is-landed'); void el.offsetWidth; el.classList.add('is-landed'); if (snd) { snd('pop', 0.5); snd('coin', 0.45); } }, last));
+    }, 600));
   }
 
   function showClub(c) {
@@ -778,7 +783,7 @@
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
-    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—'); set('wrank', '#' + (c.wrank || 0));
+    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—');
     set('about', c.about); set('lvl', c.lvl); set('games', c.games); set('pts', c.pts);
     var full = c.n >= 50, mine = c === myClub;
     set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');
@@ -793,7 +798,7 @@
     page.querySelector('[data-club-panel]').classList.remove('is-over');
     open('club');
     playLobby();
-    statsIn(page);
+    weekRoll(page, c.wrank);
   }
 
   window.BlotMenus = { open: open, close: shut };
