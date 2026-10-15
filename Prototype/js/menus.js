@@ -208,8 +208,8 @@
       '<button class="cl-hbtn cl-close" type="button" data-menu-close aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
       // the club on the left of the scene: crest, name, motto, its numbers, join
       '<div class="cl-info"><div class="cl-id"><img class="cl-badge" data-c="badge" alt=""><p class="cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
-        '<div class="cl-stats"><div><b data-c="divname"></b><span>Division</span></div><div><b class="cl-odo" data-wrank></b><span>Ranking</span></div>' +
-        '<div><b data-c="players"></b><span>Players</span></div></div>' +
+        '<div class="cl-stats"><div><b class="cl-div" data-c="divname"></b><span>Division</span></div><div><b class="cl-odo" data-roll="rank"></b><span>Ranking</span></div>' +
+        '<div><b class="cl-odo" data-roll="players"></b><span>Players</span></div></div>' +
         '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
       '<div class="mn-pane cl-pane" data-pane="lobby"></div>' +
       // Rankings: the club's best players, the three from the scene on the podium
@@ -755,31 +755,47 @@
   lobbyV.addEventListener('ended', settle);
   function stopLobby() { lobbyV.pause(); }
 
-  // the weekly ranking rolls in like an odometer: every digit spins up from below and stops on its value, left to right
+  // the stats come in one after another: the division lights up, then the ranking and the players roll like odometers,
+  // every digit spinning up from below to its value (whatever is not a digit, "#" or "/50", stays put)
   var rollTimers = [];
-  function weekRoll(page, n) {
-    rollTimers.forEach(clearTimeout); rollTimers = [];
-    var el = page.querySelector('[data-wrank]'), digits = String(n || 0).split('');
+  function rollIn(el, text, at) {
+    var m = String(text).match(/^(\D*)(\d+)(.*)$/) || ['', '', '0', ''], digits = m[2].split('');
     var reel = '0123456789'.repeat(3).split('').map(function (d) { return '<i>' + d + '</i>'; }).join('');
-    el.innerHTML = '<span class="odo_h">#</span>' + digits.map(function () { return '<span class="odo"><span class="odo_s">' + reel + '</span></span>'; }).join('');
+    el.innerHTML = (m[1] ? '<em class="odo_h">' + m[1] + '</em>' : '') + digits.map(function () { return '<em class="odo"><em class="odo_s">' + reel + '</em></em>'; }).join('') +
+      (m[3] ? '<em class="odo_h">' + m[3] + '</em>' : '');
     var strips = el.querySelectorAll('.odo_s'), H = parseFloat(getComputedStyle(el).lineHeight) || 24;
-    // each reel is as wide as its final digit (proportional figures, like the static "#196" in Figma)
-    var probe = document.createElement('i'); probe.style.cssText = 'position:absolute;visibility:hidden;font-style:italic'; el.appendChild(probe);
-    strips.forEach(function (st, i) { probe.textContent = digits[i]; st.parentNode.style.width = probe.getBoundingClientRect().width / (el.getBoundingClientRect().width / el.offsetWidth || 1) + 'px'; });
+    // each reel is as wide as its final digit (proportional figures)
+    var probe = document.createElement('i'); probe.style.cssText = 'position:absolute;visibility:hidden'; el.appendChild(probe);
+    var k = el.getBoundingClientRect().width / el.offsetWidth || 1;
+    strips.forEach(function (st, i) { probe.textContent = digits[i]; st.parentNode.style.width = probe.getBoundingClientRect().width / k + 'px'; });
     probe.remove();
+    el.classList.remove('is-landed');
     if (REDUCED) { strips.forEach(function (st, i) { st.style.transform = 'translateY(' + (-(20 + +digits[i]) * H) + 'px)'; }); return; }
+    el.classList.add('is-wait');
     var snd = window.BlotSound && BlotSound.sfx;
     rollTimers.push(setTimeout(function () {
+      el.classList.remove('is-wait');
       strips.forEach(function (st, i) {
-        var dur = 1.1 + i * 0.35;
+        var dur = 1 + i * 0.3;
         st.style.transition = 'transform ' + dur + 's cubic-bezier(.15, .75, .25, 1)';
         st.style.transform = 'translateY(' + (-(20 + +digits[i]) * H) + 'px)';   // two full turns, then the digit
-        rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.35); st.parentNode.classList.add('is-set'); }, dur * 1000 - 120));
+        rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.3); st.parentNode.classList.add('is-set'); }, dur * 1000 - 120));
       });
-      var last = (1.1 + (digits.length - 1) * 0.35) * 1000;
-      for (var t = 80; t < last - 300; t += 110) rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.15); }, t));
-      rollTimers.push(setTimeout(function () { el.classList.remove('is-landed'); void el.offsetWidth; el.classList.add('is-landed'); if (snd) { snd('pop', 0.5); snd('coin', 0.45); } }, last));
-    }, 600));
+      var last = (1 + (digits.length - 1) * 0.3) * 1000;
+      for (var t = 80; t < last - 300; t += 120) rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.12); }, t));
+      rollTimers.push(setTimeout(function () { void el.offsetWidth; el.classList.add('is-landed'); if (snd) { snd('pop', 0.45); snd('coin', 0.35); } }, last));
+    }, at));
+  }
+  function statsIn(page, c) {
+    rollTimers.forEach(clearTimeout); rollTimers = [];
+    var div = page.querySelector('.cl-div');
+    div.classList.remove('is-lit');
+    if (!REDUCED) {
+      div.classList.add('is-wait');
+      rollTimers.push(setTimeout(function () { div.classList.remove('is-wait'); void div.offsetWidth; div.classList.add('is-lit'); if (window.BlotSound) BlotSound.sfx('shimmer', 0.3); }, 450));
+    }
+    rollIn(page.querySelector('[data-roll="rank"]'), '#' + (c.wrank || 0), 750);
+    rollIn(page.querySelector('[data-roll="players"]'), c.n + '/50', 1150);
   }
 
   function showClub(c) {
@@ -787,7 +803,7 @@
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
-    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, ''));
+    set('name', c.name); set('motto', c.motto || ''); set('divname', c.club.replace(/ [IV]+$/, ''));
     set('about', c.about); set('lvl', c.lvl); set('games', c.games); set('pts', c.pts);
     var full = c.n >= 50, mine = c === myClub;
     set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');
@@ -802,7 +818,7 @@
     page.querySelector('[data-club-panel]').classList.remove('is-over');
     open('club');
     playLobby();
-    weekRoll(page, c.wrank);
+    statsIn(page, c);
   }
 
   window.BlotMenus = { open: open, close: shut };

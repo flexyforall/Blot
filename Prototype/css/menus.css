@@ -695,16 +695,24 @@
 .cl-stats { align-self: stretch; display: flex; justify-content: center; align-items: flex-start; gap: 40px; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, .16); border-bottom: 1px solid rgba(255, 255, 255, .16); }
 .cl-stats > div { display: flex; flex-direction: column; align-items: center; }
 .cl-stats b { font-size: 16px; line-height: 24px; font-weight: 600; color: #fff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); white-space: nowrap; }
-.cl-stats span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
+.cl-stats > div > span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
 .cl-join { margin-top: 8px; }
 .mn .cl-join .mn-cta { width: 175px; height: 36px; }
 .cl-join .mn-cta_label { font-size: 14px; }
 /* the ranking rolls like an odometer: "#" and one reel per digit on one 24px line */
 .cl-stats b.cl-odo { display: inline-flex; align-items: flex-start; height: 24px; }
+.cl-odo em { font-style: normal; color: inherit; }
 .cl-odo .odo_h { display: block; height: 24px; }
 .cl-odo .odo { display: block; height: 24px; overflow: hidden; padding: 0 4px; margin: 0 -4px; box-sizing: content-box; }
 .cl-odo .odo_s { display: flex; flex-direction: column; }
-.cl-odo .odo_s i { display: block; height: 24px; line-height: 24px; font-style: normal; font-size: 16px; color: #fff; text-shadow: none; }
+.cl-odo .odo_s i { display: block; height: 24px; line-height: 24px; font-style: normal; }
+.cl-stats b.is-wait { visibility: hidden; }
+.cl-stats b.cl-div.is-lit { animation: cl-lit .9s cubic-bezier(.22, 1, .36, 1); }
+@keyframes cl-lit {
+  0% { opacity: 0; transform: scale(.7); filter: blur(3px); letter-spacing: .3em; }
+  45% { opacity: 1; transform: scale(1.12); color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9); filter: none; }
+  100% { transform: none; letter-spacing: normal; }
+}
 .cl-odo .odo.is-set { animation: odo-set .35s cubic-bezier(.34, 1.8, .64, 1); }
 .cl-odo.is-landed { animation: odo-glow .7s ease; }
 @keyframes odo-set { 40% { transform: translateY(-3px); } }
