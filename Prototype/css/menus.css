@@ -743,8 +743,8 @@
 .cl-rank_row { position: relative; height: 44px; box-sizing: border-box; padding: 6px 6px 6px 8px; gap: 12px; border-radius: 8px; background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); }
 .cl-rank_row .mn-row_avatar { margin-right: -4px; }
 .cl-rank_row .mn-row_name { flex: 1; font-weight: 600; line-height: 1.4; }
-/* matches won / winrate: plain text, 200px wide, 32px left of the score (Figma 2017:3858) */
-.cl-rank_stat { position: absolute; right: 128px; top: 50%; transform: translateY(-50%); width: 200px; display: flex; align-items: center; justify-content: space-between; }
+/* matches won / winrate: plain text, 200px wide, 16px left of the score (Figma 2017:3575) */
+.cl-rank_stat { position: absolute; right: 112px; top: 50%; transform: translateY(-50%); width: 200px; display: flex; align-items: center; justify-content: space-between; }
 .cl-rank_stat > span { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, .6); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); white-space: nowrap; }
 .cl-rank_stat b { padding: 0 2px; font-size: 12px; font-weight: 600; color: #fff; }
 .mn-score.cl-rank_score { flex: none; height: 30px; padding: 0 0 0 4px; border-color: #fff; }
