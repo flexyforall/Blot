@@ -713,10 +713,12 @@
 .cl-week-rank { position: absolute; left: 241px; top: 279px; display: flex; flex-direction: column; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
 .cl-week-rank b { font-size: 28px; line-height: 32px; font-weight: 700; font-style: italic; color: #fff; display: inline-block; font-variant-numeric: tabular-nums; }
 .cl-week-rank > span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
-.cl-odo { display: inline-flex; align-items: flex-start; height: 32px; }
-.cl-odo .odo { display: inline-block; height: 32px; overflow: hidden; }
+/* "#" and the digit reels share one 32px line; each reel clips only top and bottom so the italic glyphs keep their slant */
+.cl-week-rank b.cl-odo { position: relative; display: inline-flex; align-items: flex-start; height: 32px; line-height: 32px; }
+.cl-odo .odo_h { display: block; height: 32px; line-height: 32px; }
+.cl-odo .odo { display: block; height: 32px; overflow: hidden; padding: 0 6px; margin: 0 -6px; box-sizing: content-box; }
 .cl-odo .odo_s { display: flex; flex-direction: column; }
-.cl-odo .odo_s i { display: block; height: 32px; line-height: 32px; font-style: italic; text-align: center; }
+.cl-odo .odo_s i { display: block; height: 32px; line-height: 32px; font-style: italic; }
 .cl-odo .odo.is-set { animation: odo-set .35s cubic-bezier(.34, 1.8, .64, 1); }
 .cl-odo.is-landed { animation: odo-glow .7s ease; }
 @keyframes odo-set { 40% { transform: translateY(-3px); } }

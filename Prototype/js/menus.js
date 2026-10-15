@@ -761,8 +761,12 @@
     rollTimers.forEach(clearTimeout); rollTimers = [];
     var el = page.querySelector('[data-wrank]'), digits = String(n || 0).split('');
     var reel = '0123456789'.repeat(3).split('').map(function (d) { return '<i>' + d + '</i>'; }).join('');
-    el.innerHTML = '#' + digits.map(function () { return '<span class="odo"><span class="odo_s">' + reel + '</span></span>'; }).join('');
+    el.innerHTML = '<span class="odo_h">#</span>' + digits.map(function () { return '<span class="odo"><span class="odo_s">' + reel + '</span></span>'; }).join('');
     var strips = el.querySelectorAll('.odo_s');
+    // each reel is as wide as its final digit (proportional figures, like the static "#196" in Figma)
+    var probe = document.createElement('i'); probe.style.cssText = 'position:absolute;visibility:hidden;font-style:italic'; el.appendChild(probe);
+    strips.forEach(function (st, i) { probe.textContent = digits[i]; st.parentNode.style.width = probe.getBoundingClientRect().width / (el.getBoundingClientRect().width / el.offsetWidth || 1) + 'px'; });
+    probe.remove();
     if (REDUCED) { strips.forEach(function (st, i) { st.style.transform = 'translateY(' + (-(20 + +digits[i]) * 32) + 'px)'; }); return; }
     var snd = window.BlotSound && BlotSound.sfx;
     rollTimers.push(setTimeout(function () {
