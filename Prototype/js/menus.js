@@ -198,17 +198,19 @@
     // curtains open, the camera glides in and all three settle into their poses (one clip); the clip's last half second
     // dissolves into the clean still from Figma, so the scene always rests on a crisp frame. The other tabs float over a
     // dimmed scene
-    '<div class="mn" data-menu="club" hidden><div class="mn_dim" data-club-back></div><div class="mn_panel cl-panel" data-club-panel>' +
+    '<div class="mn" data-menu="club" hidden><div class="mn_panel cl-panel" data-club-panel>' +
       '<div class="cl-stage"><img class="cl-poster" src="' + C + 'lobby-start.webp" alt="">' +
         '<video class="cl-video" data-cl-video muted playsinline preload="auto"><source src="' + C + 'lobby.webm" type="video/webm"><source src="' + C + 'lobby.mp4" type="video/mp4"></video>' +
         '<img class="cl-still" src="' + C + 'lobby-end.webp" alt=""></div>' +
-      '<div class="cl-fade"></div><div class="cl-bottom"></div>' +
-      '<div class="mn-card mn-card--side cl-card"><div class="mn-card_tile"></div><div class="mn-side"><div class="mn-side_head">' +
-        '<span class="mn-club_badge cl-badge"><img data-c="badge" alt=""></span><p class="mn-card_name cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
-        '<div class="cl-stats"><div><b data-c="players"></b><span>Players</span></div><div><b data-c="divname"></b><span>Division</span></div>' +
-        '<div><b data-c="rpos"></b><span>Division ranking</span></div></div></div></div>' +
+      // header: back to the club list, the tabs, close
+      '<button class="cl-hbtn cl-back" type="button" data-club-back aria-label="Назад"><img src="' + C + 'arrow-left.svg" alt=""></button>' +
       '<div class="cl-tabs">' + tabs([['lobby', 'Lobby'], ['rankings', 'Rankings'], ['community', 'Community'], ['about', 'About']]) + '</div>' +
-      '<button class="mn-close cl-close" type="button" data-club-back aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
+      '<button class="cl-hbtn cl-close" type="button" data-menu-close aria-label="Закрыть"><img src="' + A + 'x.svg" alt=""></button>' +
+      // the club on the left of the scene: crest, name, motto, its numbers, join
+      '<div class="cl-info"><div class="cl-id"><img class="cl-badge" data-c="badge" alt=""><p class="cl-name" data-c="name"></p><p class="cl-motto" data-c="motto"></p></div>' +
+        '<div class="cl-stats"><div><b data-c="divname"></b><span>Division</span></div><div><b class="cl-odo" data-wrank></b><span>Ranking</span></div>' +
+        '<div><b data-c="players"></b><span>Players</span></div></div>' +
+        '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div></div>' +
       '<div class="mn-pane cl-pane" data-pane="lobby"></div>' +
       // Rankings: the club's best players, the three from the scene on the podium
       '<div class="mn-pane cl-pane mn-list mn-list--rows" data-pane="rankings" hidden>' +
@@ -228,8 +230,6 @@
       '<div class="mn-pane cl-pane mn-clubpage" data-pane="about" hidden><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
         '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div>' +
         '<div class="mc-pair cl-week"><span><img src="' + A + 'swords.webp" alt=""><b data-c="games"></b> games this week</span><span><img src="' + C + 'bolt.webp" alt=""><b data-c="pts"></b> week points</span></div></div>' +
-      '<div class="cl-week-rank"><b class="cl-odo" data-wrank></b><span>Weekly ranking</span></div>' +
-      '<div class="cl-join">' + blueBtn('Ask to join', ' data-join') + '</div>' +
     '</div></div>';
 
   // ---- Club states (Figma 1958:4255): Create a club, My club (Home / Roster / Quests / League) and the
@@ -442,7 +442,7 @@
   function animateIn(root, onlyPane) {
     if (REDUCED) return;
     var els = Array.prototype.slice.call(root.querySelectorAll(ITEMS)).filter(function (el) {
-      return el.offsetParent !== null && !el.closest('.cl-card') && (!onlyPane || el.closest('.mn-pane, .mn-side'));
+      return el.offsetParent !== null && !el.closest('.cl-info') && (!onlyPane || el.closest('.mn-pane, .mn-side'));
     });
     els.forEach(function (el, i) {
       el.classList.remove('mn-in'); void el.offsetWidth;
@@ -762,18 +762,18 @@
     var el = page.querySelector('[data-wrank]'), digits = String(n || 0).split('');
     var reel = '0123456789'.repeat(3).split('').map(function (d) { return '<i>' + d + '</i>'; }).join('');
     el.innerHTML = '<span class="odo_h">#</span>' + digits.map(function () { return '<span class="odo"><span class="odo_s">' + reel + '</span></span>'; }).join('');
-    var strips = el.querySelectorAll('.odo_s');
+    var strips = el.querySelectorAll('.odo_s'), H = parseFloat(getComputedStyle(el).lineHeight) || 24;
     // each reel is as wide as its final digit (proportional figures, like the static "#196" in Figma)
     var probe = document.createElement('i'); probe.style.cssText = 'position:absolute;visibility:hidden;font-style:italic'; el.appendChild(probe);
     strips.forEach(function (st, i) { probe.textContent = digits[i]; st.parentNode.style.width = probe.getBoundingClientRect().width / (el.getBoundingClientRect().width / el.offsetWidth || 1) + 'px'; });
     probe.remove();
-    if (REDUCED) { strips.forEach(function (st, i) { st.style.transform = 'translateY(' + (-(20 + +digits[i]) * 32) + 'px)'; }); return; }
+    if (REDUCED) { strips.forEach(function (st, i) { st.style.transform = 'translateY(' + (-(20 + +digits[i]) * H) + 'px)'; }); return; }
     var snd = window.BlotSound && BlotSound.sfx;
     rollTimers.push(setTimeout(function () {
       strips.forEach(function (st, i) {
         var dur = 1.1 + i * 0.35;
         st.style.transition = 'transform ' + dur + 's cubic-bezier(.15, .75, .25, 1)';
-        st.style.transform = 'translateY(' + (-(20 + +digits[i]) * 32) + 'px)';   // two full turns, then the digit
+        st.style.transform = 'translateY(' + (-(20 + +digits[i]) * H) + 'px)';   // two full turns, then the digit
         rollTimers.push(setTimeout(function () { if (snd) snd('click', 0.35); st.parentNode.classList.add('is-set'); }, dur * 1000 - 120));
       });
       var last = (1.1 + (digits.length - 1) * 0.35) * 1000;
@@ -787,7 +787,7 @@
     var page = host.querySelector('[data-menu="club"]');
     function set(k, v) { page.querySelector('[data-c="' + k + '"]').textContent = v; }
     page.querySelector('[data-c="badge"]').src = c.badge;
-    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, '')); set('rpos', c.rpos || '—');
+    set('name', c.name); set('motto', c.motto || ''); set('players', c.n + '/50'); set('divname', c.club.replace(/ [IV]+$/, ''));
     set('about', c.about); set('lvl', c.lvl); set('games', c.games); set('pts', c.pts);
     var full = c.n >= 50, mine = c === myClub;
     set('status', mine ? 'You are a member' : full ? 'Club is full' : c.open ? 'Open to join' : c.req ? (c.requested ? 'Request sent, they usually reply within a day' : 'Joins by request') : 'Invite only');

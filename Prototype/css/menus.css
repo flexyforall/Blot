@@ -666,41 +666,51 @@
 .mc-msg.is-mine > div { border-radius: 10px 10px 2px 10px; background: linear-gradient(180deg, rgba(11, 110, 255, .35), rgba(11, 110, 255, .2)); border-color: rgba(92, 160, 255, .55); }
 .mc-chat .mc-say { margin-bottom: 0; }
 
-/* ---- Club lobby before joining (Figma 2014:1852): the top three in a video scene behind the panel */
-.mn_panel.cl-panel { background: #05101f; border-color: rgba(255, 255, 255, .2); border-radius: 10px; }
-.cl-stage { position: absolute; left: 19px; top: -4px; width: 779px; height: 359px; overflow: hidden; transition: opacity .35s ease, filter .35s ease; }
+/* ---- Club lobby before joining (Figma 2017:2890): full screen, the top three in a video scene, the club on the left */
+.mn_panel.cl-panel { left: 0; top: 0; width: 852px; height: 393px; border: 0; border-radius: 0; box-shadow: none; background: #0a061d; animation: mn-fade .3s ease; }
+.cl-stage { position: absolute; left: 0; top: 2px; width: 856px; height: 395px; overflow: hidden; transition: opacity .35s ease, filter .35s ease; }
 .cl-stage > * { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .cl-video { opacity: 0; transition: opacity .25s ease; }
 .cl-panel.is-playing .cl-video { opacity: 1; }
 .cl-still { opacity: 0; transition: opacity .5s ease; }
 .cl-panel.is-settled .cl-still { opacity: 1; }
 .cl-panel.is-over .cl-stage { opacity: .35; filter: blur(2px); }
-/* the scene fades into the panel on the left (three stacked gradients in Figma) and darkens at the bottom */
-.cl-fade { position: absolute; left: 0; top: 0; width: 263px; height: 345px; pointer-events: none;
-  background: linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)), linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)), linear-gradient(90deg, #05101f, rgba(5, 16, 31, 0)); }
-.cl-bottom { position: absolute; left: 0; top: 291px; width: 804px; height: 54px; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, .98)); }   /* Figma strip: black, 0 to 98% */
-.cl-card .mn-side_head { padding-top: 8px; gap: 0; }
-.cl-badge { width: 72px; height: 72px; margin-bottom: -3px; }
-.mn-side_head .cl-badge img { width: 72px; height: 72px; }
-.mn .cl-name { font-size: 18px; padding-top: 0; white-space: nowrap; }
-.cl-motto { font-size: 12px; color: rgba(255, 255, 255, .7); margin-top: 2px; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
-.cl-stats {
-  /* 8px from the card's sides and bottom, as in Figma (the side box is inset 7 / 7 / 15 inside the card) */
-  position: absolute; left: 1px; right: 1px; bottom: -7px; height: 174px; padding: 12px; box-sizing: border-box; border-radius: 6px; overflow: hidden;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid #5ca0ff;
-  background: linear-gradient(180deg, rgba(6, 20, 39, .55), rgba(6, 20, 39, .8)), url("../assets/menus/tile-diamond-btn.webp") -40px 0 / 298px 168px, #061427;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .6), inset 0 0 12px rgba(11, 110, 255, .25), inset 0 6px 12px rgba(0, 0, 0, .5);
+/* header: back, tabs, close */
+.mn .cl-hbtn {
+  position: absolute; top: 19px; width: 32px; height: 32px; padding: 0; display: grid; place-items: center; box-sizing: border-box; border-radius: 4px;
+  background: #061c38; border: 1px solid transparent; box-shadow: 0 8px 8px rgba(0, 0, 0, .25), inset 0 3px 12px rgba(0, 0, 0, .5);
 }
-.cl-stats > div { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.cl-stats b { font-size: 16px; line-height: 24px; font-weight: 700; color: #fff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
+.mn .cl-hbtn:active { transform: scale(.95); }
+.mn .cl-back { left: 16px; }
+.cl-back img { width: 32px; height: 32px; }
+.mn .cl-close { right: 21px; }
+.cl-close img { width: 19.6px; height: 19.6px; }
+.cl-tabs { position: absolute; left: 0; right: 0; top: 20px; display: flex; justify-content: center; }
+/* the club column */
+.cl-info { position: absolute; left: 16px; top: 52px; width: 292px; height: 342px; padding-bottom: 8px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+.cl-id { width: 228px; display: flex; flex-direction: column; align-items: center; text-shadow: 0 6px 6px rgba(0, 0, 0, .5); }
+.cl-badge { width: 80px; height: 80px; }
+.cl-name { font-size: 22px; font-weight: 600; color: #fff; white-space: nowrap; }
+.cl-motto { font-size: 16px; font-weight: 600; color: rgba(255, 255, 255, .7); white-space: nowrap; }
+.cl-stats { align-self: stretch; display: flex; justify-content: center; align-items: flex-start; gap: 40px; padding: 8px 0; border-top: 1px solid rgba(255, 255, 255, .16); border-bottom: 1px solid rgba(255, 255, 255, .16); }
+.cl-stats > div { display: flex; flex-direction: column; align-items: center; }
+.cl-stats b { font-size: 16px; line-height: 24px; font-weight: 600; color: #fff; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); white-space: nowrap; }
 .cl-stats span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
-.cl-tabs { position: absolute; left: 233px; width: 555px; top: 16px; display: flex; justify-content: center; }
-.mn .cl-close { right: 16px; top: 16px; }
-.cl-join { position: absolute; left: 613px; top: 293px; }
+.cl-join { margin-top: 8px; }
 .mn .cl-join .mn-cta { width: 175px; height: 36px; }
 .cl-join .mn-cta_label { font-size: 14px; }
-/* other tabs float over the dimmed scene */
-.mn-pane.cl-pane { left: 233px; right: 16px; top: 64px; bottom: 60px; }
+/* the ranking rolls like an odometer: "#" and one reel per digit on one 24px line */
+.cl-stats b.cl-odo { display: inline-flex; align-items: flex-start; height: 24px; }
+.cl-odo .odo_h { display: block; height: 24px; }
+.cl-odo .odo { display: block; height: 24px; overflow: hidden; padding: 0 4px; margin: 0 -4px; box-sizing: content-box; }
+.cl-odo .odo_s { display: flex; flex-direction: column; }
+.cl-odo .odo_s i { display: block; height: 24px; line-height: 24px; font-style: normal; font-size: 16px; color: #fff; text-shadow: none; }
+.cl-odo .odo.is-set { animation: odo-set .35s cubic-bezier(.34, 1.8, .64, 1); }
+.cl-odo.is-landed { animation: odo-glow .7s ease; }
+@keyframes odo-set { 40% { transform: translateY(-3px); } }
+@keyframes odo-glow { 40% { color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9), 0 4px 4px rgba(0, 0, 0, .5); } }
+/* the other tabs float over the dimmed scene, right of the club column */
+.mn-pane.cl-pane { left: 324px; right: 16px; top: 64px; bottom: 16px; }
 .cl-pane.mn-list { gap: 6px; padding-bottom: 4px; }
 .cl-pane.mn-clubpage { gap: 8px; }
 .cl-week { gap: 8px; }
@@ -708,22 +718,6 @@
   background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); }
 .cl-week b { font-size: 16px; color: #fff; }
 .cl-week img { width: 24px; height: 24px; }
-.cl-stats b span { font: inherit; color: inherit; text-shadow: inherit; }
-/* weekly ranking over the scene, bottom left (Figma 2017:2096) */
-.cl-week-rank { position: absolute; left: 241px; top: 279px; display: flex; flex-direction: column; text-shadow: 0 4px 4px rgba(0, 0, 0, .5); }
-.cl-week-rank b { font-size: 28px; line-height: 32px; font-weight: 700; font-style: italic; color: #fff; display: inline-block; font-variant-numeric: tabular-nums; }
-.cl-week-rank > span { font-size: 12px; color: rgba(255, 255, 255, .5); text-shadow: 0 2px 5px rgba(0, 0, 0, .8); }
-/* "#" and the digit reels share one 32px line; each reel clips only top and bottom so the italic glyphs keep their slant */
-.cl-week-rank b.cl-odo { position: relative; display: inline-flex; align-items: flex-start; height: 32px; line-height: 32px; }
-.cl-odo .odo_h { display: block; height: 32px; line-height: 32px; }
-.cl-odo .odo { display: block; height: 32px; overflow: hidden; padding: 0 6px; margin: 0 -6px; box-sizing: content-box; }
-.cl-odo .odo_s { display: flex; flex-direction: column; }
-.cl-odo .odo_s i { display: block; height: 32px; line-height: 32px; font-style: italic; }
-.cl-odo .odo.is-set { animation: odo-set .35s cubic-bezier(.34, 1.8, .64, 1); }
-.cl-odo.is-landed { animation: odo-glow .7s ease; }
-@keyframes odo-set { 40% { transform: translateY(-3px); } }
-@keyframes odo-glow { 40% { color: #bff5ff; text-shadow: 0 0 14px rgba(68, 224, 255, .9), 0 4px 4px rgba(0, 0, 0, .5); } }
-.cl-panel.is-over .cl-week-rank { opacity: 0; transition: opacity .25s ease; }
 
 /* tabs on the club scene: the resting tabs keep a faint stroke (Figma) */
 .mn .cl-tabs .mn-tab:not(.is-active) { border-color: rgba(168, 204, 255, .25) !important; }
