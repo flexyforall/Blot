@@ -744,8 +744,8 @@
 .cl-rank_row .mn-row_avatar { margin-right: -4px; }
 .cl-rank_row .mn-row_name { flex: 1; font-weight: 600; line-height: 1.4; }
 /* matches won / winrate: plain text, 200px wide, 24px left of the score (Figma 2017:3575) */
-/* the two numbers sit in a sunken plate: dark navy, the inactive stroke, a hairline between them */
-.cl-rank_stat { position: absolute; right: 112px; top: 50%; transform: translateY(-50%); width: 216px; height: 30px; box-sizing: border-box; padding: 0 10px;
+/* the two numbers sit in a sunken plate, 6px from the score: the same gap as the score to the row edge */
+.cl-rank_stat { position: absolute; right: 102px; top: 50%; transform: translateY(-50%); width: 216px; height: 30px; box-sizing: border-box; padding: 0 10px;
   display: flex; align-items: center; justify-content: space-between; border-radius: 6px;
   background: rgba(0, 12, 28, .55); box-shadow: inset 0 3px 8px rgba(0, 0, 0, .45); }
 .cl-rank_stat::after { content: ""; position: absolute; inset: 0; box-sizing: border-box; padding: 1px; border-radius: inherit; pointer-events: none;
