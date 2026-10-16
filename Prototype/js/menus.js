@@ -241,8 +241,7 @@
           '<button class="cl-hbtn cl-go" type="button" aria-label="Read the digest"><img src="' + C + 'arrow-left.svg" alt=""></button></div>' +
         '<div class="cl-feedh"><b>Club feed</b><button type="button">See more</button></div>' +
         '<div class="cl-feed">' +
-          [['bolt', 'Narek reached Contender II', '5m'], ['cup', 'Sona & Vardan won the Friday League Quarters', '15m'], ['bolt', 'MikaBluff hit a 12-game win streak', '1h'],
-           ['cup', 'Club quest reached 320 of 500 contracts', '3h'], ['bolt', 'NareNoir joined the club', '1d']].map(function (f) {
+          [['bolt', 'Narek reached Contender II', '5m'], ['cup', 'Sona & Vardan won the Friday League Quarters', '15m']].map(function (f) {
             return '<div class="cl-ccard cl-frow"><span class="cl-frow_i is-' + f[0] + '"><img src="' + (f[0] === 'bolt' ? C + 'bolt.webp' : A + 'trophy.webp') + '" alt=""></span>' +
               '<b>' + f[1].replace(/&/g, '&amp;') + '</b><span>' + f[2] + '</span></div>';
           }).join('') + '</div></div>' +
