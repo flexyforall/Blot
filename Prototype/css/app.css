@@ -68,6 +68,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   border-radius: var(--radius);
   overflow: hidden;
   background: #000;
+  /* keeps composited children (the club lobby video, blurred layers) inside the rounded corners */
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+          mask-image: radial-gradient(white, black);
 }
 
 /* ---- sound on/off, outside the phone frame (prototype control) */
