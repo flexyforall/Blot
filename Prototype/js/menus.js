@@ -227,7 +227,7 @@
           return '<div class="mn-list cl-rank_list" data-period-list="' + set[0] + '"' + (set[0] === 'all' ? '' : ' hidden') + '>' + set[1].map(function (r, i) {
             var place = i < 3 ? '<img class="mn-place" src="' + A + 'place-' + (i + 1) + '.webp" alt="' + (i + 1) + '">' : '<span class="mn-place mn-place--n">' + (i + 1) + '</span>';
             return '<div class="mn-row cl-rank_row">' + place + '<img class="mn-row_avatar" src="' + A + 'lb-' + r[0] + '.webp" alt=""><span class="mn-row_name">' + r[1] + '</span>' +
-              '<span class="cl-rank_stat"><span>Matches won: <b>' + r[2] + '</b></span><span>Winrate <b>' + r[3] + '</b></span></span>' +
+              '<span class="cl-rank_stat"><span>Matches won: <b>' + r[2] + '</b></span><i></i><span>Winrate <b>' + r[3] + '</b></span></span>' +
               '<span class="mn-score cl-rank_score"><b>' + r[4] + '</b><img src="' + C + 'bolt.webp" alt=""></span></div>';
           }).join('') + '</div>';
         }).join('') + '</div>' +
@@ -468,7 +468,7 @@
   function animateIn(root, onlyPane) {
     if (REDUCED) return;
     var els = Array.prototype.slice.call(root.querySelectorAll(ITEMS)).filter(function (el) {
-      return el.offsetParent !== null && !el.closest('.cl-info') && (!onlyPane || el.closest('.mn-pane, .mn-side'));
+      return el.offsetParent !== null && !el.closest('.cl-info, .cl-comm') && (!onlyPane || el.closest('.mn-pane, .mn-side'));
     });
     els.forEach(function (el, i) {
       el.classList.remove('mn-in'); void el.offsetWidth;
@@ -611,6 +611,7 @@
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
       main.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== tab.getAttribute('data-tab'); });
       animateIn(main, true);
+      if (tab.getAttribute('data-tab') === 'community' && tab.closest('[data-menu="club"]')) commIn(clubPanel.querySelector('.cl-comm'));
       return;
     }
     var period = t.closest('[data-period]');
@@ -777,6 +778,30 @@
     input.value = '';
     sfx('pop', 0.4);
   });
+
+  // Community entrance: the cards rise in one after another, the online faces pop, the digest art lands with a glint,
+  // the feed slides in from the left and the chat replays its last messages
+  function commIn(pane) {
+    if (REDUCED || !pane) return;
+    var d = 0, mark = function (el, kind, step) {
+      el.classList.remove('cl-a', 'cl-a--pop', 'cl-a--left', 'cl-a--msg');
+      el.classList.add('cl-a'); if (kind) el.classList.add('cl-a--' + kind);
+      el.style.setProperty('--d', d.toFixed(3) + 's'); d += step;
+    };
+    pane.classList.remove('is-in');
+    mark(pane.querySelector('.cl-online'), '', 0.06);
+    var dd = d; pane.querySelectorAll('.cl-online_av > *').forEach(function (el) { mark(el, 'pop', 0.05); }); d = dd;
+    mark(pane.querySelector('.cl-digest'), '', 0.08);
+    mark(pane.querySelector('.cl-digest_art'), 'pop', 0);
+    mark(pane.querySelector('.cl-feedh'), '', 0.06);
+    pane.querySelectorAll('.cl-frow').forEach(function (el) { mark(el, 'left', 0.06); });
+    d = 0.1; mark(pane.querySelector('.cl-chat'), '', 0.18);
+    pane.querySelectorAll('.cl-msg').forEach(function (el) { mark(el, 'msg', 0.14); });
+    mark(pane.querySelector('.cl-say'), '', 0);
+    void pane.offsetWidth;
+    pane.classList.add('is-in');
+    var msgs = pane.querySelector('[data-cl-msgs]'); msgs.scrollTop = msgs.scrollHeight;
+  }
 
   // the club page chat: what you send lands as your own green bubble
   host.querySelector('[data-cl-say]').addEventListener('submit', function (e) {
