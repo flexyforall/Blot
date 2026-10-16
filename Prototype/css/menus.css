@@ -758,13 +758,19 @@
   background: url("../assets/clubs/community-bg.webp") center / cover; }
 .cl-panel.is-comm::before { opacity: .2; }
 .mn-pane.cl-comm { left: 16px; right: auto; top: 68px; bottom: auto; width: 820px; height: 309px; display: flex; gap: 16px; align-items: flex-start; overflow: hidden; }
-.cl-ccard { box-sizing: border-box; border-radius: 8px; border: 1px solid rgba(168, 204, 255, .14); background: linear-gradient(180deg, rgba(13, 24, 40, .5) 0%, rgba(0, 25, 59, .5) 57.3%); }
+.cl-ccard { position: relative; box-sizing: border-box; border-radius: 8px; background: linear-gradient(180deg, rgba(13, 24, 40, .5) 0%, rgba(0, 25, 59, .5) 57.3%); }
+/* Figma "stroke inactive": a 1px inside stroke fading in from the top, #a8ccff at 0% to #2e3f56 */
+.cl-ccard::after, .cl-go::after, .cl-frow_i.is-bolt::after, .cl-digest_art::after, .cl-say::after, .cl-send::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; box-sizing: border-box; padding: 1px; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(180deg, rgba(168, 204, 255, 0) -37.5%, #2e3f56 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+}
 .cl-ccard_t { display: flex; flex-direction: column; white-space: nowrap; font-weight: 600; }
 .cl-ccard_t b { font-weight: 600; color: #fff; }
 .cl-ccard_t span { font-size: 10px; color: rgba(255, 255, 255, .6); }
 .cl-ccard_t em { font-style: normal; font-size: 10px; font-weight: 700; color: #45dffe; text-transform: uppercase; }
 .cl-comm_l { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; gap: 8px; }
-.mn .cl-go { position: static; flex: none; }
+.mn .cl-go { position: relative; top: auto; left: auto; right: auto; flex: none; border: 0; }
 .cl-go img { transform: scaleX(-1); }
 .cl-online { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
 .cl-online .cl-ccard_t b { font-size: 12px; }
@@ -774,9 +780,13 @@
 .cl-digest { height: 85px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
 .cl-digest .cl-ccard_t { flex: 1; min-width: 0; gap: 2px; }
 .cl-digest .cl-ccard_t b { font-size: 16px; line-height: 1.2; }
-.cl-digest_art { position: relative; flex: none; width: 64px; height: 64px; border-radius: 8px; overflow: hidden;
-  background: url("../assets/menus/tile-diamond-btn.webp") -36px -6px / 175px 98px, #000; box-shadow: inset 0 1px 12px 8px #124995; }
-.cl-digest_art img { position: absolute; left: 9px; top: 9px; width: 44px; height: 44px; filter: drop-shadow(0 2px 6px #000); }
+/* the art (Figma 2023:4388): black tile, the navy diamond backdrop fading out downwards, its inner glow faded with it */
+.cl-digest_art { position: relative; flex: none; width: 64px; height: 64px; border-radius: 8px; overflow: hidden; background: #000; }
+.cl-digest_art i { position: absolute; left: -1px; top: -1px; width: 72px; height: 113.34px;
+  background: url("../assets/clubs/tile-navy.webp") -51.67px 0 / 428.56px 241.19px no-repeat; box-shadow: inset 0 1px 12px 8px #124995;
+  -webkit-mask: linear-gradient(180deg, #fff 3.1px, rgba(255, 255, 255, .2) 56.8px, rgba(255, 255, 255, 0) 94.05px);
+          mask: linear-gradient(180deg, #fff 3.1px, rgba(255, 255, 255, .2) 56.8px, rgba(255, 255, 255, 0) 94.05px); }
+.cl-digest_art img { position: absolute; left: 10px; top: 10px; width: 44px; height: 44px; filter: drop-shadow(0 2px 6px #000); }
 .cl-feedh { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 0; font-weight: 600; }
 .cl-feedh b { font-size: 16px; font-weight: 600; color: #fff; }
 .mn .cl-feedh button { padding: 0; border: 0; background: none; font: inherit; font-size: 12px; font-weight: 600; color: #45dffe; cursor: pointer; }
@@ -785,12 +795,17 @@
 .cl-frow { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
 .cl-frow b { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cl-frow > span:last-child { font-size: 10px; font-weight: 500; color: #999; }
+/* feed icons (Figma 2023:4490 / 4403): the bolt sits on a small stroked button with a red glow inside, the cup floats over a dark tile under an orange glow */
 .cl-frow_i { position: relative; flex: none; width: 28px; height: 28px; border-radius: 6px; background: #040c16; }
-.cl-frow_i img { position: absolute; left: 0; top: 0; width: 28px; height: 28px; }
-.cl-frow_i.is-cup { background: radial-gradient(circle at 50% 50%, rgba(255, 145, 0, .55) 0, rgba(255, 145, 0, 0) 60%), #040c16; }
-.cl-frow_i.is-cup img { left: 2px; top: -1px; width: 29px; height: 29px; transform: rotate(11.22deg); }
+.cl-frow_i img { position: absolute; z-index: 1; }
+.cl-frow_i.is-bolt { border-radius: 4px; background: #061427; box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 6px 12px rgba(0, 0, 0, .5); }
+.cl-frow_i.is-bolt::before { content: ""; position: absolute; left: 0; top: 0; right: 0; bottom: 0; border-radius: inherit; overflow: hidden;
+  background: radial-gradient(circle 11px at 14.5px 12.5px, rgba(255, 55, 0, .55), rgba(255, 55, 0, 0)); }
+.cl-frow_i.is-bolt img { left: 1px; top: -3px; width: 28px; height: 28px; }
+.cl-frow_i.is-cup img { left: -1.42px; top: -4.42px; width: 29.4px; height: 29.4px; transform: rotate(11.22deg); }
+.cl-frow_i.is-cup::after { content: ""; position: absolute; z-index: 2; left: 8px; top: 3px; width: 11px; height: 11px; border-radius: 50%; background: #ff9100; filter: blur(6px); pointer-events: none; }
 /* the docked club chat */
-.cl-chat { flex: none; width: 243px; height: 309px; display: flex; flex-direction: column; gap: 16px; padding: 12px; backdrop-filter: blur(10px); }
+.cl-chat { flex: none; width: 243px; height: 309px; display: flex; flex-direction: column; gap: 16px; padding: 12px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .cl-chat_h { display: flex; align-items: center; justify-content: space-between; }
 .cl-chat_h b { font-size: 16px; font-weight: 600; color: #fff; }
 .cl-msgs { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; scrollbar-width: none; }
@@ -803,15 +818,23 @@
 .cl-msg.is-me b { color: #c5ff69; }
 .cl-msg span { font-size: 11px; font-weight: 500; line-height: 14px; color: #fff; overflow-wrap: anywhere; }
 .cl-msg i { float: right; margin: 3px 0 0 10px; font-style: normal; font-size: 11px; font-weight: 400; line-height: 11px; color: rgba(255, 255, 255, .5); }
-.cl-say { flex: none; display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 12px; border-radius: 6px; background: rgba(255, 255, 255, .05); box-shadow: 0 4px 20px rgba(0, 0, 0, .5); }
+/* the message field (Figma 2023:4429): 42px, white 5%, inactive stroke, the send button 5px in */
+.cl-say { position: relative; flex: none; height: 42px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 5px 5px 5px 13px; border-radius: 6px;
+  background: rgba(255, 255, 255, .05); box-shadow: 0 4px 20px rgba(0, 0, 0, .5); }
 .mn .cl-say input { flex: 1; min-width: 0; padding: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 12px; font-weight: 500; color: #fff; }
 .cl-say input::placeholder { color: rgba(255, 255, 255, .85); }
+/* send (Figma 2023:4455): navy, a soft patch of the blue lattice in the top-left, cyan-to-blue stroke, the plane at 8,8 */
 .mn .cl-send {
-  flex: none; width: 32px; height: 32px; padding: 0; display: grid; place-items: center; box-sizing: border-box; border-radius: 4px; cursor: pointer;
-  border: 1px solid #5ca0ff; box-shadow: 0 -2px 12px rgba(11, 83, 183, .5), 0 2px 8px rgba(0, 0, 0, .5);
-  background: url("../assets/menus/tile-diamond-btn.webp") -40px -20px / 119px 67px, #031f47;
+  position: relative; flex: none; width: 32px; height: 32px; padding: 0; box-sizing: border-box; border: 0; border-radius: 4px; cursor: pointer; overflow: hidden;
+  background: #031f47; box-shadow: 0 2px 8px rgba(0, 0, 0, .5), 0 -2px 12px rgba(11, 83, 183, .5);
 }
-.cl-send img { width: 20px; height: 20.5px; margin: 2px 0 0 2px; }
+.mn .cl-send::after { background: linear-gradient(180deg, #44e0ff, #5ca0ff); }
+.cl-send_fx { position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask: radial-gradient(circle at 7.5px -4.6px, #000 7px, rgba(0, 0, 0, .5) 27.4px, rgba(0, 0, 0, 0) 47px);
+          mask: radial-gradient(circle at 7.5px -4.6px, #000 7px, rgba(0, 0, 0, .5) 27.4px, rgba(0, 0, 0, 0) 47px); }
+.cl-send_fx i { position: absolute; left: -20.34px; top: -26.26px; width: 71.71px; height: 40.36px; transform: rotate(-90deg) scaleY(-1);
+  background: url("../assets/clubs/lattice-blue.webp") center / cover; }
+.cl-send > img { position: absolute; z-index: 1; left: 5.5px; top: 8px; width: 20px; height: 20.5px; }
 .mn .cl-send:active { transform: scale(.95); }
 .cl-week { gap: 8px; }
 .cl-week span { flex: 1; display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 6px; font-size: 12px; color: rgba(255, 255, 255, .7);

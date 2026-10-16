@@ -236,7 +236,7 @@
         '<div class="cl-ccard cl-online"><p class="cl-ccard_t"><b>Online now</b><span>8 of 42 · 4 in games</span></p><span class="cl-online_av">' +
           ['aramace', 'narenoir', 'mikabluff', 'sonaspade', 'vardan7'].map(function (n) { return '<img src="' + A + 'lb-' + n + '.webp" alt="">'; }).join('') +
           '<em>+3</em></span><button class="cl-hbtn cl-go" type="button" aria-label="Online players"><img src="' + C + 'arrow-left.svg" alt=""></button></div>' +
-        '<div class="cl-ccard cl-digest"><span class="cl-digest_art"><img src="' + A + 'swords.webp" alt=""></span>' +
+        '<div class="cl-ccard cl-digest"><span class="cl-digest_art"><i></i><img src="' + A + 'swords.webp" alt=""></span>' +
           '<p class="cl-ccard_t"><em>Weekly digest · Week 41</em><b>We climbed to #188 🔥</b><span>Read the latest digest about your team success</span></p>' +
           '<button class="cl-hbtn cl-go" type="button" aria-label="Read the digest"><img src="' + C + 'arrow-left.svg" alt=""></button></div>' +
         '<div class="cl-feedh"><b>Club feed</b><button type="button">See more</button></div>' +
@@ -251,7 +251,7 @@
             [[C + 'avatar-pharaoh', 'AramAce', 'anyone up for a duo?', '14:49', '#69a7ff'], [A + 'avatar-cowboy', 'Artexcb', 'me! 10 min pls🙏', '14:49', 'me'],
              [C + 'avatar-pharaoh', 'AramAce', 'kk, waiting for you', '14:51', '#69a7ff']].map(clMsg).join('') + '</div>' +
           '<form class="cl-say" data-cl-say><input type="text" placeholder="Let’s do it!" aria-label="Message the club" data-cl-say-input>' +
-            '<button class="cl-send" type="submit" aria-label="Send"><img src="' + C + 'paper-plane.svg" alt=""></button></form></div></div>' +
+            '<button class="cl-send" type="submit" aria-label="Send"><span class="cl-send_fx"><i></i></span><img src="' + C + 'paper-plane.svg" alt=""></button></form></div></div>' +
       // About: the club in words, how to get in, its week
       '<div class="mn-pane cl-pane mn-clubpage" data-pane="about" hidden><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
         '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div>' +
