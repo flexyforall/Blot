@@ -514,49 +514,49 @@
   .tb-plate { transition: none; }
 }
 
-/* ---- reactions drawer (Figma 1914:50150): frosted panel on the right over a blurred table */
+/* ---- reactions drawer (Figma 1914:45467): a frosted panel over almost the whole screen, the table blurred behind */
 .tb-react { position: absolute; inset: 0; z-index: 5; }
 .tb-react[hidden] { display: none; }
-.tb-react_veil { position: absolute; inset: 0; background: rgba(0, 0, 0, .25); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); animation: tb-fade .25s ease; }
+.tb-react_veil { position: absolute; inset: 0; background: rgba(0, 0, 0, .5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); animation: tb-fade .25s ease; }
 .tb-react_panel {
-  position: absolute;
-  right: 44px;   /* inside the screen's 55px rounded corners */
-  top: 16px;
-  bottom: 16px;
-  width: 292px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, .2);
-  border-radius: 8px;
-  background: rgba(0, 0, 0, .2);
-  -webkit-backdrop-filter: blur(50px);
-  backdrop-filter: blur(50px);
+  position: absolute; left: 8px; top: 8px; width: 836px; height: 377px; box-sizing: border-box;
+  display: flex; flex-direction: column; gap: 16px; padding: 16px;
+  border: 1px solid rgba(255, 255, 255, .2); border-radius: 8px; background: rgba(0, 0, 0, .2);
+  -webkit-backdrop-filter: blur(50px); backdrop-filter: blur(50px);
   overflow: hidden;
   animation: tb-drawer .35s cubic-bezier(.22, 1, .36, 1);
 }
 .tb-react_head { display: flex; align-items: center; gap: 10px; height: 40px; flex: none; }
-.tb-react_head p { flex: 1; font-weight: 600; font-size: 18px; line-height: 1.4; color: #eff3fa; }
-.table .tb-react_close { width: 32px; height: 32px; flex: none; }
-.tb-react_close img { position: absolute; left: -8px; top: 0; width: 48px; height: 48px; }
+.tb-react_head p { flex: 1; font-weight: 600; font-size: 22px; line-height: 1.4; color: #eff3fa; }
+.table .tb-react_close { position: relative; width: 32px; height: 32px; flex: none; display: grid; place-items: center; border-radius: 4px;
+  background: #131313; box-shadow: 0 8px 4px rgba(0, 0, 0, .25), inset 0 3px 12px rgba(0, 0, 0, .5); }
+.tb-react_close img { width: 19.56px; height: 19.56px; }
 .table .tb-react_close:active { transform: scale(.92); }
+/* nine to a row; the last rows run under the fade and the tabs */
 .tb-react_grid {
-  display: grid;
-  grid-template-columns: repeat(3, 78.79px);
-  gap: 11.82px;
-  overflow-y: auto;
-  margin: 0 -16px -16px;
-  padding: 0 16px 16px;
+  display: flex; flex-wrap: wrap; align-content: flex-start; gap: 11.6px;   /* 9 x 78.79 fit inside the 1px border */
+  overflow-y: auto; margin: 0 -16px -16px; padding: 0 16px 84px;
   scrollbar-width: none;
 }
+.tb-react_grid[hidden] { display: none; }
 .tb-react_grid::-webkit-scrollbar { display: none; }
-.table .tb-react_grid button { width: 78.79px; height: 78.79px; transition: transform .15s ease; }
+.table .tb-react_grid button { flex: none; width: 78.79px; height: 78.79px; transition: transform .15s ease; }
 .tb-react_grid img { width: 100%; height: 100%; filter: drop-shadow(0 -4px 4px rgba(119, 119, 119, .25)) drop-shadow(0 2px 8px rgba(0, 0, 0, .5)); }
 .table .tb-react_grid button:hover { transform: scale(1.06); }
 .table .tb-react_grid button:active { transform: scale(.92); }
-@keyframes tb-drawer { from { opacity: 0; transform: translateX(24px); } }
+.tb-react_empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding-bottom: 60px; }
+.tb-react_empty[hidden] { display: none; }
+.tb-react_empty p { font-weight: 600; font-size: 16px; color: #eff3fa; }
+.tb-react_empty span { font-size: 12px; color: rgba(255, 255, 255, .5); }
+.tb-react_fade { position: absolute; left: 0; right: 0; bottom: -1px; height: 110px; pointer-events: none; background: linear-gradient(180deg, rgba(0, 0, 0, 0), #000); }
+.tb-react_tabs { position: absolute; left: 50%; top: 322px; transform: translateX(-50%); display: flex; gap: 8px; }
+.table .tb-react_tabs button {
+  padding: 8px 12px; border-radius: 6px; border: 1px solid transparent; font-weight: 600; font-size: 14px; line-height: 1.4; color: rgba(255, 255, 255, .4);
+  background: rgba(0, 0, 0, .8); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition: color .15s ease, border-color .15s ease;
+}
+.table .tb-react_tabs button.is-active { color: #fff; border-color: #5ca0ff; }
+.table .tb-react_tabs button:active { transform: scale(.95); }
+@keyframes tb-drawer { from { opacity: 0; transform: translateY(14px) scale(.985); } }
 @keyframes tb-fade { from { opacity: 0; } }
 /* a sent reaction pops up over your seat */
 .tb-say_react { width: 80px; height: 80px; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .6)); animation: tb-react-pop 3.4s ease forwards; }

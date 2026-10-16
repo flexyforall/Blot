@@ -862,6 +862,14 @@
   screen.querySelectorAll('[data-react]').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); bubble('bottom', b.getAttribute('data-react'), 'react'); });
   });
+  // Reactions / GIFs tabs at the bottom of the drawer
+  screen.querySelectorAll('[data-react-show]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var want = b.getAttribute('data-react-show');
+      screen.querySelectorAll('[data-react-show]').forEach(function (t) { t.classList.toggle('is-active', t === b); });
+      screen.querySelectorAll('[data-react-tab]').forEach(function (p) { p.hidden = p.getAttribute('data-react-tab') !== want; });
+    });
+  });
   screen.querySelectorAll('[data-react-close]').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); });
   });
