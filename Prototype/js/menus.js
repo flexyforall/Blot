@@ -160,6 +160,11 @@
 
   // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
   var C = 'assets/clubs/';
+  function clMsg(m) {   // a club chat line: [avatar, name, text, time, name colour or 'me']
+    var me = m[4] === 'me';
+    return '<div class="cl-msg' + (me ? ' is-me' : '') + '"><img src="' + A + m[0] + '.webp" alt=""><p><b' + (me ? '' : ' style="color:' + m[4] + '"') + '>' + m[1] + '</b>' +
+      '<span>' + m[2] + '<i>' + m[3] + '</i></span></p></div>';
+  }
   var CLUBS = [
     { name: 'Yerevan Courtyard', wrank: 196, motto: '“Who Dares Wins”', rpos: '19/48', badge: C + 'crest-dragon.webp', rank: 'Hotshot IV', n: 42, city: 'Yerevan', open: true, lvl: 8, club: 'Hotshot III', games: 42, pts: '12,480',
       about: 'Weeknight players, mostly Yerevan. We keep one table running after 20:00.' },
@@ -226,12 +231,27 @@
               '<span class="mn-score cl-rank_score"><b>' + r[4] + '</b><img src="' + C + 'bolt.webp" alt=""></span></div>';
           }).join('') + '</div>';
         }).join('') + '</div>' +
-      // Community: what the club has been up to
-      '<div class="mn-pane cl-pane mn-list" data-pane="community" hidden>' +
-        [['lb-aramace', 'Aram', 'made a 250 contract', '2m'], ['lb-sonaspade', 'Sona', 'and Vardan won the Friday table +480', '1h'],
-         ['lb-mikabluff', 'Narek', 'reached Contender II', '5h'], ['lb-narenoir', 'Nare', 'joined the club', '1d'], ['lb-vardan7', 'Vardan', 'set the weekly quest: 500 contracts', '2d']].map(function (f) {
-          return '<div class="mc-feed"><img src="' + A + f[0] + '.webp" alt=""><p><b>' + f[1] + '</b> ' + f[2] + '</p><span>' + f[3] + '</span></div>';
-        }).join('') + '</div>' +
+      // Community (Figma 2017:3829): who's online, the weekly digest and the feed on the left, the club chat docked right
+      '<div class="mn-pane cl-pane cl-comm" data-pane="community" hidden><div class="cl-comm_l">' +
+        '<div class="cl-ccard cl-online"><p class="cl-ccard_t"><b>Online now</b><span>8 of 42 · 4 in games</span></p><span class="cl-online_av">' +
+          ['aramace', 'narenoir', 'mikabluff', 'sonaspade', 'vardan7'].map(function (n) { return '<img src="' + A + 'lb-' + n + '.webp" alt="">'; }).join('') +
+          '<em>+3</em></span><button class="cl-hbtn cl-go" type="button" aria-label="Online players"><img src="' + C + 'arrow-left.svg" alt=""></button></div>' +
+        '<div class="cl-ccard cl-digest"><span class="cl-digest_art"><img src="' + A + 'swords.webp" alt=""></span>' +
+          '<p class="cl-ccard_t"><em>Weekly digest · Week 41</em><b>We climbed to #188 🔥</b><span>Read the latest digest about your team success</span></p>' +
+          '<button class="cl-hbtn cl-go" type="button" aria-label="Read the digest"><img src="' + C + 'arrow-left.svg" alt=""></button></div>' +
+        '<div class="cl-feedh"><b>Club feed</b><button type="button">See more</button></div>' +
+        '<div class="cl-feed">' +
+          [['bolt', 'Narek reached Contender II', '5m'], ['cup', 'Sona & Vardan won the Friday League Quarters', '15m'], ['bolt', 'MikaBluff hit a 12-game win streak', '1h'],
+           ['cup', 'Club quest reached 320 of 500 contracts', '3h'], ['bolt', 'NareNoir joined the club', '1d']].map(function (f) {
+            return '<div class="cl-ccard cl-frow"><span class="cl-frow_i is-' + f[0] + '"><img src="' + (f[0] === 'bolt' ? C + 'bolt.webp' : A + 'trophy.webp') + '" alt=""></span>' +
+              '<b>' + f[1].replace(/&/g, '&amp;') + '</b><span>' + f[2] + '</span></div>';
+          }).join('') + '</div></div>' +
+        '<div class="cl-ccard cl-chat"><div class="cl-chat_h"><b>Club chat</b><button class="mn-search" type="button" aria-label="Search the chat"><img src="' + C + 'search.svg" alt=""></button></div>' +
+          '<div class="cl-msgs" data-cl-msgs>' +
+            [['lb-aramace', 'AramAce', 'anyone up for a duo?', '14:49', '#69a7ff'], ['avatar-cowboy', 'Artexcb', 'me! 2 min 🙏', '14:49', 'me'],
+             ['lb-narenoir', 'NareNoir', 'Who wants to bond in 10 min?', '14:55', '#69e1ff']].map(clMsg).join('') + '</div>' +
+          '<form class="cl-say" data-cl-say><input type="text" placeholder="Let’s do it!" aria-label="Message the club" data-cl-say-input>' +
+            '<button class="cl-send" type="submit" aria-label="Send"><img src="' + C + 'paper-plane.svg" alt=""></button></form></div></div>' +
       // About: the club in words, how to get in, its week
       '<div class="mn-pane cl-pane mn-clubpage" data-pane="about" hidden><div class="mn-about"><p class="mn-about_h">About us</p><p class="mn-about_t" data-c="about"></p></div>' +
         '<div class="mn-join"><b><img src="' + C + 'check.webp" alt="" data-c="check"><span data-c="status"></span></b><span>Level <span data-c="lvl"></span> and above</span></div>' +
@@ -585,6 +605,7 @@
       if (tab.closest('[data-menu="club"]')) {
         clubPanel.classList.toggle('is-over', tab.getAttribute('data-tab') !== 'lobby');
         clubPanel.classList.toggle('is-rank', tab.getAttribute('data-tab') === 'rankings');
+        clubPanel.classList.toggle('is-comm', tab.getAttribute('data-tab') === 'community');
       }
       var main = tab.closest('.mn_panel');
       main.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b === tab); });
@@ -757,6 +778,21 @@
     sfx('pop', 0.4);
   });
 
+  // the club page chat: what you send lands as your own green bubble
+  host.querySelector('[data-cl-say]').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var input = this.querySelector('[data-cl-say-input]'), v = input.value.trim();
+    if (!v) return;
+    var d = new Date(), wrap = document.createElement('div');
+    wrap.innerHTML = clMsg(['avatar-cowboy', 'Artexcb', v.replace(/[<>&]/g, ''), d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2), 'me']);
+    var row = wrap.firstChild, msgs = host.querySelector('[data-cl-msgs]');
+    row.classList.add('mn-in');
+    msgs.appendChild(row);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+    sfx('pop', 0.4);
+  });
+
   // the lobby scene: one clip, muted for autoplay; near its end the still takes over
   var clubPanel = host.querySelector('[data-club-panel]');
   var lobbyV = clubPanel.querySelector('[data-cl-video]');
@@ -832,7 +868,7 @@
       c.req ? (c.requested ? 'Request sent' : 'Ask to join') : 'Invite only';
     page.querySelectorAll('.mn-tab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-tab') === 'lobby'); });
     page.querySelectorAll('[data-pane]').forEach(function (p) { p.hidden = p.getAttribute('data-pane') !== 'lobby'; });
-    page.querySelector('[data-club-panel]').classList.remove('is-over', 'is-rank');
+    page.querySelector('[data-club-panel]').classList.remove('is-over', 'is-rank', 'is-comm');
     open('club');
     playLobby();
     statsIn(page, c);

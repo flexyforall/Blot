@@ -751,6 +751,70 @@
 .mn-score.cl-rank_score::after { content: ""; position: absolute; left: 0; top: 0; width: 88px; height: 28px; box-sizing: border-box; border: .5px solid rgba(255, 255, 255, .1); border-radius: 5px; pointer-events: none; }
 .cl-rank_score b { width: 55px; text-align: center; font-size: 14px; font-weight: 600; line-height: 1.4; color: #fff; }
 .mn-score.cl-rank_score img { left: 57px; top: -1px; width: 28px; height: 28px; transform: none; filter: drop-shadow(0 2px 8px rgba(255, 156, 80, .4)); }
+.cl-panel.is-comm .cl-info { opacity: 0; visibility: hidden; }
+.cl-panel.is-comm .cl-stage { opacity: 0; }
+/* Community (Figma 2017:3829): the painted arches at 20% behind, the club column steps aside */
+.cl-panel::before { content: ""; position: absolute; left: 1px; top: -11px; width: 878px; height: 405px; opacity: 0; transition: opacity .35s ease; pointer-events: none;
+  background: url("../assets/clubs/community-bg.webp") center / cover; }
+.cl-panel.is-comm::before { opacity: .2; }
+.mn-pane.cl-comm { left: 16px; right: auto; top: 68px; bottom: auto; width: 820px; height: 309px; display: flex; gap: 16px; align-items: flex-start; overflow: hidden; }
+.cl-ccard { box-sizing: border-box; border-radius: 8px; border: 1px solid rgba(168, 204, 255, .14); background: linear-gradient(180deg, rgba(13, 24, 40, .5) 0%, rgba(0, 25, 59, .5) 57.3%); }
+.cl-ccard_t { display: flex; flex-direction: column; white-space: nowrap; font-weight: 600; }
+.cl-ccard_t b { font-weight: 600; color: #fff; }
+.cl-ccard_t span { font-size: 10px; color: rgba(255, 255, 255, .6); }
+.cl-ccard_t em { font-style: normal; font-size: 10px; font-weight: 700; color: #45dffe; text-transform: uppercase; }
+.cl-comm_l { flex: 1; min-width: 0; height: 100%; display: flex; flex-direction: column; gap: 8px; }
+.mn .cl-go { position: static; flex: none; }
+.cl-go img { transform: scaleX(-1); }
+.cl-online { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.cl-online .cl-ccard_t b { font-size: 12px; }
+.cl-online_av { flex: 1; display: flex; align-items: center; gap: 6px; }
+.cl-online_av img { width: 28px; height: 28px; box-sizing: border-box; border-radius: 6px; border: 1px solid #94ff5e; object-fit: cover; background: #d6d6d6; }
+.cl-online_av em { font-style: normal; font-size: 13px; font-weight: 600; color: rgba(255, 255, 255, .6); }
+.cl-digest { height: 85px; display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+.cl-digest .cl-ccard_t { flex: 1; min-width: 0; gap: 2px; }
+.cl-digest .cl-ccard_t b { font-size: 16px; line-height: 1.2; }
+.cl-digest_art { position: relative; flex: none; width: 64px; height: 64px; border-radius: 8px; overflow: hidden;
+  background: url("../assets/menus/tile-diamond-btn.webp") -36px -6px / 175px 98px, #000; box-shadow: inset 0 1px 12px 8px #124995; }
+.cl-digest_art img { position: absolute; left: 9px; top: 9px; width: 44px; height: 44px; filter: drop-shadow(0 2px 6px #000); }
+.cl-feedh { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 0; font-weight: 600; }
+.cl-feedh b { font-size: 16px; font-weight: 600; color: #fff; }
+.mn .cl-feedh button { padding: 0; border: 0; background: none; font: inherit; font-size: 12px; font-weight: 600; color: #45dffe; cursor: pointer; }
+.cl-feed { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; scrollbar-width: none; }
+.cl-feed::-webkit-scrollbar { display: none; }
+.cl-frow { flex: none; display: flex; align-items: center; gap: 10px; padding: 8px 12px; }
+.cl-frow b { flex: 1; min-width: 0; font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-frow > span:last-child { font-size: 10px; font-weight: 500; color: #999; }
+.cl-frow_i { position: relative; flex: none; width: 28px; height: 28px; border-radius: 6px; background: #040c16; }
+.cl-frow_i img { position: absolute; left: 0; top: 0; width: 28px; height: 28px; }
+.cl-frow_i.is-cup { background: radial-gradient(circle at 50% 50%, rgba(255, 145, 0, .55) 0, rgba(255, 145, 0, 0) 60%), #040c16; }
+.cl-frow_i.is-cup img { left: 2px; top: -1px; width: 29px; height: 29px; transform: rotate(11.22deg); }
+/* the docked club chat */
+.cl-chat { flex: none; width: 243px; height: 309px; display: flex; flex-direction: column; gap: 16px; padding: 12px; backdrop-filter: blur(10px); }
+.cl-chat_h { display: flex; align-items: center; justify-content: space-between; }
+.cl-chat_h b { font-size: 16px; font-weight: 600; color: #fff; }
+.cl-msgs { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; scrollbar-width: none; }
+.cl-msgs::-webkit-scrollbar { display: none; }
+.cl-msg { flex: none; display: flex; align-items: flex-start; gap: 8px; }
+.cl-msg > img { flex: none; width: 22px; height: 22px; border-radius: 6px; object-fit: cover; background: #d6d6d6; }
+.cl-msg.is-me { gap: 4px; }
+.cl-msg.is-me > img { width: 28px; height: 28px; border-radius: 0; background: none; margin-left: -3px; }
+.cl-msg p { min-width: 0; max-width: 177px; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px; border-radius: 6px; background: rgba(255, 255, 255, .12); }
+.cl-msg.is-me p { background: #0c4f09; }
+.cl-msg b { font-size: 10px; font-weight: 600; color: #69a7ff; }
+.cl-msg.is-me b { color: #c5ff69; }
+.cl-msg span { font-size: 11px; font-weight: 500; line-height: 14px; color: #fff; overflow-wrap: anywhere; }
+.cl-msg i { float: right; margin: 3px 0 0 10px; font-style: normal; font-size: 11px; font-weight: 400; line-height: 11px; color: rgba(255, 255, 255, .5); }
+.cl-say { flex: none; display: flex; align-items: center; gap: 8px; padding: 4px 4px 4px 12px; border-radius: 6px; background: rgba(255, 255, 255, .05); box-shadow: 0 4px 20px rgba(0, 0, 0, .5); }
+.mn .cl-say input { flex: 1; min-width: 0; padding: 0; border: 0; outline: 0; background: none; font: inherit; font-size: 12px; font-weight: 500; color: #fff; }
+.cl-say input::placeholder { color: rgba(255, 255, 255, .85); }
+.mn .cl-send {
+  flex: none; width: 32px; height: 32px; padding: 0; display: grid; place-items: center; box-sizing: border-box; border-radius: 4px; cursor: pointer;
+  border: 1px solid #5ca0ff; box-shadow: 0 -2px 12px rgba(11, 83, 183, .5), 0 2px 8px rgba(0, 0, 0, .5);
+  background: url("../assets/menus/tile-diamond-btn.webp") -40px -20px / 119px 67px, #031f47;
+}
+.cl-send img { width: 20px; height: 20.5px; margin: 2px 0 0 2px; }
+.mn .cl-send:active { transform: scale(.95); }
 .cl-week { gap: 8px; }
 .cl-week span { flex: 1; display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 6px; font-size: 12px; color: rgba(255, 255, 255, .7);
   background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); }
