@@ -160,9 +160,9 @@
 
   // ---- Clubs (the sword icon, Figma 1958:6619): the list of clubs, and a club's page from View
   var C = 'assets/clubs/';
-  function clMsg(m) {   // a club chat line: [avatar, name, text, time, name colour or 'me']
+  function clMsg(m) {   // a club chat line: [avatar path, name, text, time, name colour or 'me']
     var me = m[4] === 'me';
-    return '<div class="cl-msg' + (me ? ' is-me' : '') + '"><img src="' + A + m[0] + '.webp" alt=""><p><b' + (me ? '' : ' style="color:' + m[4] + '"') + '>' + m[1] + '</b>' +
+    return '<div class="cl-msg' + (me ? ' is-me' : '') + '"><img src="' + m[0] + '.webp" alt=""><p><b' + (me ? '' : ' style="color:' + m[4] + '"') + '>' + m[1] + '</b>' +
       '<span>' + m[2] + '<i>' + m[3] + '</i></span></p></div>';
   }
   var CLUBS = [
@@ -248,8 +248,8 @@
           }).join('') + '</div></div>' +
         '<div class="cl-ccard cl-chat"><div class="cl-chat_h"><b>Club chat</b><button class="mn-search" type="button" aria-label="Search the chat"><img src="' + C + 'search.svg" alt=""></button></div>' +
           '<div class="cl-msgs" data-cl-msgs>' +
-            [['lb-aramace', 'AramAce', 'anyone up for a duo?', '14:49', '#69a7ff'], ['avatar-cowboy', 'Artexcb', 'me! 2 min 🙏', '14:49', 'me'],
-             ['lb-narenoir', 'NareNoir', 'Who wants to bond in 10 min?', '14:55', '#69e1ff']].map(clMsg).join('') + '</div>' +
+            [[C + 'avatar-pharaoh', 'AramAce', 'anyone up for a duo?', '14:49', '#69a7ff'], [A + 'avatar-cowboy', 'Artexcb', 'me! 10 min pls🙏', '14:49', 'me'],
+             [C + 'avatar-pharaoh', 'AramAce', 'kk, waiting for you', '14:51', '#69a7ff']].map(clMsg).join('') + '</div>' +
           '<form class="cl-say" data-cl-say><input type="text" placeholder="Let’s do it!" aria-label="Message the club" data-cl-say-input>' +
             '<button class="cl-send" type="submit" aria-label="Send"><img src="' + C + 'paper-plane.svg" alt=""></button></form></div></div>' +
       // About: the club in words, how to get in, its week
@@ -784,7 +784,7 @@
     var input = this.querySelector('[data-cl-say-input]'), v = input.value.trim();
     if (!v) return;
     var d = new Date(), wrap = document.createElement('div');
-    wrap.innerHTML = clMsg(['avatar-cowboy', 'Artexcb', v.replace(/[<>&]/g, ''), d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2), 'me']);
+    wrap.innerHTML = clMsg([A + 'avatar-cowboy', 'Artexcb', v.replace(/[<>&]/g, ''), d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2), 'me']);
     var row = wrap.firstChild, msgs = host.querySelector('[data-cl-msgs]');
     row.classList.add('mn-in');
     msgs.appendChild(row);
