@@ -9,12 +9,11 @@
 .bd button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 
 .bd-main, .bd-friends {
-  position: absolute; top: 72px; height: 301px; box-sizing: border-box; border: 1px solid #000; border-radius: 8px; overflow: hidden;
+  position: absolute; top: 72px; height: 301px; box-sizing: border-box; border: 1px solid transparent; border-radius: 8px; overflow: hidden;
   background: linear-gradient(180deg, #0d1828 0%, #00193b 57.3%);
 }
 .bd-main { left: 20px; width: 537px; }
 .bd-friends { left: 569px; width: 263px; padding: 16px; transition: box-shadow .3s ease, border-color .3s ease; }
-.bd-friends::before { content: ""; position: absolute; inset: 0; border: 1px solid rgba(255, 255, 255, .08); border-radius: 7px; pointer-events: none; }
 
 /* ---- the pair */
 .bd-glow {   /* the storm behind the pair: our cloud artwork in a soft circle, slowly turning */
@@ -201,18 +200,16 @@
 .bd-list::-webkit-scrollbar { display: none; }
 .bd-row {
   position: relative; flex: none; height: 46px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 6px;
-  background: rgba(255, 255, 255, .05); border: 1px solid rgba(255, 255, 255, .1); border-radius: 8px;
+  background: rgba(255, 255, 255, .05); border: 1px solid transparent; border-radius: 8px;
   cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none;
   transition: border-color .2s ease, background .2s ease, opacity .2s ease, transform .2s ease;
 }
 .bd-row:hover { background: rgba(255, 255, 255, .08); }
-/* green = online (as in Figma); the friend you're bonded with gets the blue highlight */
-/* online: the usual faint border with soft green light along the top (right) and bottom (left) edges, as in Figma */
-.bd-row.is-online::before {
-  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(26, 211, 152, 0) 38%, rgba(26, 211, 152, .75) 70%, rgba(26, 211, 152, 0) 96%) top / 100% 1px no-repeat,
-    linear-gradient(90deg, rgba(26, 211, 152, 0) 6%, rgba(26, 211, 152, .75) 34%, rgba(26, 211, 152, 0) 62%) bottom / 100% 1px no-repeat;
+/* rows carry Figma's "stroke inactive" (1952:1136): a 1px inside stroke fading in from the top to #2e3f56; online shows as the dot only */
+.bd-row::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; pointer-events: none; box-sizing: border-box; padding: 1px;
+  background: linear-gradient(180deg, rgba(168, 204, 255, 0) -37.5%, #2e3f56 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
 }
 .bd-row.is-bonded::before { display: none; }
 .bd-row.is-bonded { border-color: #5ca0ff; background: rgba(92, 160, 255, .14); box-shadow: 0 0 12px rgba(92, 160, 255, .45), inset 0 0 10px rgba(92, 160, 255, .25); }

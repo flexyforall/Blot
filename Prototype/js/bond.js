@@ -1,4 +1,4 @@
-// Bond mode (Figma 1952:1246), the third tab of the stage select. You play as a pair: pick a friend
+// Bond mode (Figma 1952:1246, rows per 1952:1037), the third tab of the stage select. You play as a pair: pick a friend
 // from "Your bonds" on the right by dragging them onto the empty card, or tap + and then a friend
 // (while picking, the list lights up). When the bond forms, the friend's card flies in, the link
 // snaps shut with a burst of light, and the record and PLAY NOW slide up. Tap the friend's card to
@@ -43,7 +43,7 @@
       '<div class="bd-list">' + FRIENDS.map(function (f, i) {
         return '<div class="bd-row' + (f.online ? ' is-online' : '') + '" data-friend="' + i + '" style="--i:' + i + '"><img class="bd-row_av" src="' + B + f.img + '.webp" alt="" draggable="false">' +
           '<div class="bd-row_text"><b>' + f.name + (f.online ? '<i class="bd-online"></i>' : '') + '</b><span>' + f.rank + ' • Lv. ' + f.lv + '</span></div>' +
-          '<span class="bd-row_btn"><img class="bd-ic-plane" src="' + B + 'plane.svg" alt=""></span><span class="bd-row_btn"><img class="bd-ic-add" src="' + B + 'user-plus.svg" alt=""></span></div>';
+          '<span class="bd-row_btn"><img class="bd-ic-plane" src="' + B + 'plane.svg" alt=""></span></div>';
       }).join('') + '</div>' +
     '</div>';
   screen.appendChild(root);
