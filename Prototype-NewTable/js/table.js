@@ -68,7 +68,7 @@
   var HAND_SC = 1.7;                   // your cards: 57 px wide, as in the mockup
 
   // ---------- Cards ----------
-  // The deck: GGPoker-style four-colour faces with a large corner index (readable at fan and trick sizes), in one atlas
+  // The deck: the classic Bicycle-style faces from the first prototype, in one atlas
   // (assets/table/cards/standard.webp: 240x336 cells, columns 7..A, rows S H C D, the corners
   // transparent). Each face is cut out into its own canvas once the atlas has loaded.
   // A card is 78 x 109.2 scene units.
