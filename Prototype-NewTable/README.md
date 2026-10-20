@@ -11,5 +11,5 @@ Open `index.html` in a browser (no build step, works from the file system).
   opponents' fans, your hand arc, tricks; the view API that `js/game.js` drives.
 - `css/table.css` — background, HUD, nameplates, bid / result panels, speech clouds.
 - `assets/table/` — `bg.webp` (the flattened table design), `players/` (character art), `hud/`
-  (button, nameplates, icons), `ui/suits/` (suit discs), `cards/standard.webp` (a minimal deck in the game style: large corner index, one big suit or a gold crown for J Q K).
+  (button, nameplates, icons), `ui/suits/` (suit discs), `cards/standard.webp` (a GGPoker-style four-colour deck: solid faces, spades graphite, hearts red, diamonds blue, clubs green, a large white index and one big suit).
 - The side players sit 24 px further in than in the mockup, so the left one clears the iPhone island.
