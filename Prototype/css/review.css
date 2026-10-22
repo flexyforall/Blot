@@ -52,7 +52,7 @@
 .rv-card--left { left: 384px; top: 188px; transform: rotate(-8deg); --from: translate(-120px, -10px) rotate(-30deg); }
 .rv-card--top { left: 426px; top: 164px; transform: rotate(3deg); --from: translate(0, -90px) rotate(20deg); }
 .rv-card--right { left: 468px; top: 188px; transform: rotate(8deg); --from: translate(120px, -10px) rotate(30deg); }
-.rv-card--bottom { left: 426px; top: 212px; transform: rotate(-3deg); --from: translate(0, 90px) rotate(-15deg); }
+.rv-card--bottom { z-index: 5; left: 426px; top: 212px; transform: rotate(-3deg); --from: translate(0, 90px) rotate(-15deg); }
 .rv-card.is-new { animation: rv-card .38s cubic-bezier(.2, .9, .3, 1.15) both; }
 .rv-card.is-late { animation-delay: .32s; }
 @keyframes rv-card { from { opacity: 0; transform: var(--from) scale(.8); } }
@@ -60,8 +60,10 @@
 .rv-fly { position: absolute; z-index: 3; width: 52px; height: 73px; border-radius: 3px; box-shadow: 0 3px 16px rgba(0, 0, 0, .4); pointer-events: none; }
 
 /* your hand */
-.rv-hand { position: absolute; left: 50%; top: 263px; transform: translateX(-50%); display: flex; gap: 4px; }
+.rv-hand { position: absolute; z-index: 4; left: 50%; top: 263px; transform: translateX(-50%); display: flex; gap: 4px; }
 .rv-hand img { width: 30px; height: 40px; border-radius: 2px; box-shadow: 0 1.7px 3.5px rgba(0, 0, 0, .45); transition: transform .2s; }
+.rv-hand img.is-gone { visibility: hidden; animation: rv-gone .28s .25s ease-in-out forwards; }
+@keyframes rv-gone { to { width: 0; margin-left: -4px; } }
 .rv-hand img.is-next { transform: translateY(-5px); box-shadow: 0 0 0 1.5px #44e0ff, 0 0 12px rgba(68, 224, 255, .6); }
 
 /* last trick */

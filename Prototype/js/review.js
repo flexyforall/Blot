@@ -93,8 +93,9 @@
     var onTable = cur ? steps.filter(function (s, i) { return i < step && s.trick === cur.trick; }) : [];
     var collect = animate && cur && cur.k === 0 && cur.trick > 0;
     if (collect) fly(rec.tricks[cur.trick - 1].plays);
+    var fromHand = animate && cur && cur.seat === 'bottom';   // your card leaves the hand for the table
     q('[data-rv-trick]').innerHTML = onTable.map(function (s, i) {
-      var isNew = animate && i === onTable.length - 1;
+      var isNew = animate && i === onTable.length - 1 && !fromHand;
       return '<img class="rv-card rv-card--' + s.seat + (isNew ? ' is-new' : '') + (isNew && collect ? ' is-late' : '') + '" src="assets/review/full/' + s.card.rank + s.card.suit + '.webp" alt="">';
     }).join('');
     // the trick before: the last trick
@@ -103,11 +104,13 @@
     q('[data-rv-last]').innerHTML = last.length ? last.map(function (p) { return '<img' + (collect ? ' class="is-wait"' : '') + ' src="assets/review/mini/' + p.card.rank + p.card.suit + '.webp" alt="">'; }).join('') : '<em>—</em>';
     // your hand: what is left after your plays so far
     var played = steps.slice(0, step).filter(function (s) { return s.seat === 'bottom'; }).map(function (s) { return s.card.id; });
-    var hand = sorted(rec.hands.bottom.filter(function (c) { return played.indexOf(c.id) < 0; }));
+    var gone = fromHand ? cur.card.id : null;   // keep its slot for a moment so the hand closes up smoothly
+    var hand = sorted(rec.hands.bottom.filter(function (c) { return played.indexOf(c.id) < 0 || c.id === gone; }));
     var upNext = steps[step] && steps[step].seat === 'bottom' ? steps[step].card.id : null;
     q('[data-rv-hand]').innerHTML = hand.map(function (c) {
-      return '<img class="' + (c.id === upNext ? 'is-next' : '') + '" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="">';
+      return '<img class="' + (c.id === upNext ? 'is-next' : c.id === gone ? 'is-gone' : '') + '" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="">';
     }).join('');
+    if (fromHand) throwFromHand(hand.map(function (c) { return c.id; }).indexOf(gone), hand.length, collect);
     // whose move it was
     root.querySelectorAll('[data-rv-seat]').forEach(function (el) { el.classList.toggle('is-turn', !!cur && el.getAttribute('data-rv-seat') === cur.seat); });
     // the coach only comments on your moves; while the other players' cards run past he stays as he was
@@ -153,6 +156,18 @@
         if (mini && mini.classList.contains('is-wait')) { mini.classList.remove('is-wait'); mini.classList.add('is-land'); }
       };
     });
+  }
+  // Your card slides out of its slot in the hand (mini, 30x40, row at y 263) onto its spot on the table.
+  function throwFromHand(slot, n, late) {
+    var el = root.querySelector('.rv-card--bottom');
+    if (!el || slot < 0) return;
+    var x = 426 - (n * 34 - 4) / 2 + slot * 34 + 15, y = 283;
+    var sp = SPOT.bottom;
+    el.animate([
+      { transform: 'translate(' + (x - sp[0]) + 'px,' + (y - sp[1]) + 'px) scale(' + 30 / 52 + ')', opacity: 1 },
+      { transform: 'translate(' + (x - sp[0]) * .4 + 'px,' + ((y - sp[1]) * .4 - 18) + 'px) rotate(-8deg) scale(.9)', offset: .55 },
+      { transform: 'rotate(' + sp[2] + 'deg)' }
+    ], { duration: 460, delay: late ? 320 : 0, easing: 'cubic-bezier(.3, .7, .3, 1)', fill: 'backwards' });
   }
   function clearFly() { root.querySelectorAll('.rv-fly').forEach(function (el) { el.remove(); }); }
   function sorted(hand) {
@@ -221,6 +236,8 @@
     build(); render(); show(false);
     root.hidden = false;
     root.classList.remove('is-in'); void root.offsetWidth; root.classList.add('is-in');
+    // the opening animations run once: later re-renders must not deal the hand again
+    clearTimeout(root._in); root._in = setTimeout(function () { root.classList.remove('is-in'); }, 1700);
   }
   function close(silent) {
     stop(); cancelFF();
