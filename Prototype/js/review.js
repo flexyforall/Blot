@@ -84,7 +84,7 @@
   }
 
   // ---------- one step of the replay ----------
-  function show(animate) {
+  function show(animate, quiet) {
     var q = function (s) { return root.querySelector(s); };
     var cur = step ? steps[step - 1] : null;
     var trickIx = cur ? cur.trick : 0;
@@ -104,14 +104,22 @@
     // your hand: what is left after your plays so far
     var played = steps.slice(0, step).filter(function (s) { return s.seat === 'bottom'; }).map(function (s) { return s.card.id; });
     var hand = sorted(rec.hands.bottom.filter(function (c) { return played.indexOf(c.id) < 0; }));
-    var nextMine = steps[step] && steps[step].seat === 'bottom' ? steps[step].card.id : null;
+    var upNext = steps[step] && steps[step].seat === 'bottom' ? steps[step].card.id : null;
     q('[data-rv-hand]').innerHTML = hand.map(function (c) {
-      return '<img class="' + (c.id === nextMine ? 'is-next' : '') + '" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="">';
+      return '<img class="' + (c.id === upNext ? 'is-next' : '') + '" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="">';
     }).join('');
     // whose move it was
     root.querySelectorAll('[data-rv-seat]').forEach(function (el) { el.classList.toggle('is-turn', !!cur && el.getAttribute('data-rv-seat') === cur.seat); });
-    // the coach
-    var note = cur ? cur.note : { kind: 'info', title: 'Replay of round ' + rec.round, text: NAMES[rec.contract.seat] + ' won the bidding. Press play or step through the moves.' };
+    // the coach only comments on your moves; while the other players' cards run past he stays as he was
+    if (!quiet) coachSay(cur, animate);
+    // buttons
+    q('[data-rv="first"]').disabled = q('[data-rv="prev"]').disabled = step === 0;
+    q('[data-rv="next"]').disabled = q('[data-rv="last"]').disabled = nextMine(step) === null;
+    root.classList.toggle('is-playing', !!timer);
+  }
+  function coachSay(cur, animate) {
+    var q = function (s) { return root.querySelector(s); };
+    var note = cur ? cur.note : { kind: 'info', title: 'Replay of round ' + rec.round, text: NAMES[rec.contract.seat] + ' won the bidding. Step through your moves: the other cards play out on their own.' };
     var box = q('[data-rv-note]');
     box.className = 'rv-note rv-note--' + note.kind + (animate ? ' is-pop' : '');
     q('[data-rv-note-title]').innerHTML = '<i></i>' + note.title;
@@ -122,10 +130,6 @@
     coach.setAttribute('data-mood', MOOD[note.kind] || 'neutral');
     coach.classList.remove('is-react');
     if (animate) { void coach.offsetWidth; coach.classList.add('is-react'); }
-    // buttons
-    q('[data-rv="first"]').disabled = q('[data-rv="prev"]').disabled = step === 0;
-    q('[data-rv="next"]').disabled = q('[data-rv="last"]').disabled = step === steps.length;
-    root.classList.toggle('is-playing', !!timer);
   }
   // The four cards of a finished trick slide from the table into their slots in "Last trick".
   var SPOT = { left: [384, 188, -8], top: [426, 164, 3], right: [468, 188, 8], bottom: [426, 212, -3] };
@@ -156,16 +160,39 @@
     if (trump !== R.NO_TRUMP) order = [trump].concat(order.filter(function (s) { return s !== trump; }));
     return hand.slice().sort(function (a, b) { return order.indexOf(a.suit) - order.indexOf(b.suit) || R.RANKS.indexOf(a.rank) - R.RANKS.indexOf(b.rank); });
   }
-  function go(n, animate) { clearFly(); step = Math.max(0, Math.min(steps.length, n)); show(animate); }
-  function stop() { clearInterval(timer); timer = null; root.classList.remove('is-playing'); }
+  // Only your moves are analysed: "next" runs the other players' cards past quickly
+  // and stops on your next card; "back" jumps straight to your previous one.
+  function myStops() { var out = []; steps.forEach(function (s, i) { if (s.seat === 'bottom') out.push(i + 1); }); return out; }
+  function nextMine(from) { var m = myStops().filter(function (n) { return n > from; }); return m.length ? m[0] : null; }
+  function prevMine(from) { var m = myStops().filter(function (n) { return n < from; }); return m.length ? m[m.length - 1] : 0; }
+  var ff = null;
+  function go(n, animate) { cancelFF(); clearFly(); step = Math.max(0, Math.min(steps.length, n)); show(animate); }
+  function cancelFF() { clearTimeout(ff); ff = null; }
+  function forward(done) {
+    var target = nextMine(step);
+    cancelFF();
+    if (target === null) { if (done) done(false); return; }
+    (function tick() {
+      step++;
+      var cur = steps[step - 1], landed = step === target;
+      show(true, !landed);
+      if (landed) { ff = null; if (done) done(true); return; }
+      // give a finished trick time to fly into "Last trick"
+      ff = setTimeout(tick, cur.k === 0 && cur.trick > 0 ? 700 : 380);
+    })();
+  }
+  function stop() { clearTimeout(timer); timer = null; root.classList.remove('is-playing'); }
   function play() {
     if (timer) { stop(); return; }
-    if (step === steps.length) go(0);
-    timer = setInterval(function () {
-      if (step >= steps.length) { stop(); show(false); return; }
-      go(step + 1, true);
-    }, 1300);
-    go(step + 1, true);
+    if (nextMine(step) === null) go(0);
+    timer = true; root.classList.add('is-playing');
+    (function loop() {
+      forward(function (ok) {
+        if (!timer) return;
+        if (!ok || nextMine(step) === null) { stop(); show(false, true); return; }
+        timer = setTimeout(loop, 2600);
+      });
+    })();
   }
 
   root.addEventListener('click', function (e) {
@@ -175,28 +202,28 @@
       if (a === 'play') { play(); return; }
       stop();
       if (a === 'first') go(0);
-      if (a === 'prev') go(step - 1);
-      if (a === 'next') go(step + 1, true);
-      if (a === 'last') go(steps.length);
+      if (a === 'prev') go(prevMine(step));
+      if (a === 'next') forward();
+      if (a === 'last') go(myStops().pop());
       return;
     }
     if (e.target.closest('[data-rv-close]')) close();
   });
   document.addEventListener('keydown', function (e) {
     if (root.hidden) return;
-    if (e.key === 'ArrowRight') { stop(); go(step + 1, true); }
-    if (e.key === 'ArrowLeft') { stop(); go(step - 1); }
+    if (e.key === 'ArrowRight') { stop(); forward(); }
+    if (e.key === 'ArrowLeft') { stop(); go(prevMine(step)); }
     if (e.key === ' ') { e.preventDefault(); play(); }
   });
 
   function open(record, done) {
-    rec = record; onDone = done; step = 0; stop();
+    rec = record; onDone = done; step = 0; stop(); cancelFF();
     build(); render(); show(false);
     root.hidden = false;
     root.classList.remove('is-in'); void root.offsetWidth; root.classList.add('is-in');
   }
   function close(silent) {
-    stop();
+    stop(); cancelFF();
     if (root.hidden) return;
     root.hidden = true;
     var cb = onDone; onDone = null;
