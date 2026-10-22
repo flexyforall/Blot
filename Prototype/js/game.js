@@ -188,8 +188,39 @@
       resultEl.hidden = false;
     });
   }
+  // The end of a round, the end of the game, the analysis and the hand replay come from Figma
+  // (section 1934:4575) as images with tap areas, in 852x393 screen coordinates.
+  var SHOTS = {
+    round: { img: 'round-lost', hots: [[0, 0, 852, 393, 'game']] },
+    game: { img: 'game-lost', hots: [[663, 65, 40, 40, 'exit'], [169, 325, 145, 32, 'analysis'], [326, 317, 201, 40, 'again'], [539, 325, 145, 32, null]] },
+    analysis: { img: 'analysis', hots: [[166, 89, 38, 38, 'game'], [369, 308, 301, 38, 'review']] },
+    review: { img: 'game-review', hots: [[804, 21, 34, 30, 'game'], [767, 21, 30, 30, null], [401, 319, 50, 50, null]] }
+  };
+  function showShots() {
+    var box = document.querySelector('[data-shots]'), img = box.querySelector('[data-shot-img]'), hots = box.querySelector('[data-shot-hots]');
+    return new Promise(function (res) {
+      function open(id) {
+        var sh = SHOTS[id];
+        img.src = 'assets/table/shots/' + sh.img + '.webp';
+        hots.innerHTML = sh.hots.map(function (h) {
+          return '<button class="tb-shot_hot" type="button" data-go="' + (h[4] || '') + '" style="left:' + h[0] / 8.52 + '%;top:' + h[1] / 3.93 + '%;width:' + h[2] / 8.52 + '%;height:' + h[3] / 3.93 + '%"></button>';
+        }).join('');
+        box.hidden = false;
+        box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
+      }
+      hots.onclick = function (e) {
+        var b = e.target.closest('[data-go]'), go = b && b.getAttribute('data-go');
+        if (!go) return;
+        if (go === 'again') { box.hidden = true; hots.onclick = null; res(); return; }
+        if (go === 'exit') { box.hidden = true; hots.onclick = null; window.BlotNav.show('play'); res(); return; }
+        open(go);
+      };
+      open('round');
+    });
+  }
   function hidePanels() {
     bidEl.hidden = true; resultEl.hidden = true; bidEl.onclick = null;
+    var shots = document.querySelector('[data-shots]'); if (shots) shots.hidden = true;
     if (view && view.lowerHand) view.lowerHand(false);
   }
 
@@ -338,7 +369,7 @@
         '<p class="tb-result_from">' + from.join(' · ') + '</p></div>';
     }
     if (window.BlotGame.autoplay) { log.push({ round: game.round, contract: contract, res: res, score: { us: game.score.us, them: game.score.them } }); await view.wait(.2); }
-    else { await showResult(html, over && winner ? 'Play again' : 'Next round'); if (!alive()) return; }
+    else { await showShots(); if (!alive()) return; }
     await view.clear();
     if (over && winner) {
       game.score = { us: 0, them: 0 }; game.round = 0;
