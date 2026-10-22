@@ -88,19 +88,30 @@
 .rv-note { position: absolute; right: var(--m); bottom: var(--m); width: 234px; display: flex; flex-direction: column; gap: 4px; padding: 10px; border-radius: 8px;
   background: #fff; color: #000; border: 1px solid var(--edge, #1bb908); box-shadow: 0 2px 20px rgba(0, 0, 0, .5); }
 .rv-note_title { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; line-height: 18px; }
-.rv-note_title i { width: 20px; height: 20px; border-radius: 50%; flex: none; background: #9aa3b2 var(--ico) center / 11px no-repeat; }
-.rv-note_text { padding-right: 24px; font-size: 10px; font-weight: 500; line-height: 15px; }
-.rv-note_coach { position: absolute; right: calc(var(--m) - 45px); bottom: calc(var(--m) - 35px); z-index: 2; width: 81px; height: 97px; pointer-events: none; }
-.rv-note--best, .rv-note--great { --edge: #1bb908; }
-.rv-note--best .rv-note_title i, .rv-note--great .rv-note_title i { background: url("../assets/review/great.webp") center / 100% no-repeat; }
-.rv-note--good { --edge: #4aa3ff; }
-.rv-note--good .rv-note_title i { background-color: #3b8ef0; --ico: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M2 5.2l2 2L8 3" stroke="white" stroke-width="1.6" fill="none"/></svg>'); }
-.rv-note--inaccuracy { --edge: #f2b33d; }
-.rv-note--inaccuracy .rv-note_title i { background-color: #f2b33d; --ico: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M5 2v4M5 7.6v.4" stroke="white" stroke-width="1.8"/></svg>'); }
-.rv-note--mistake { --edge: #ef6a2e; }
-.rv-note--mistake .rv-note_title i { background-color: #ef6a2e; --ico: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><path d="M5 2v4M5 7.6v.4" stroke="white" stroke-width="1.8"/></svg>'); }
+.rv-note_title i { width: 20px; height: 20px; flex: none; background: var(--ico) center / 100% no-repeat; }
+.rv-note_text { padding-right: 38px; font-size: 10px; font-weight: 500; line-height: 15px; }
+.rv-note--best, .rv-note--great { --edge: #1bb908; --ico: url("../assets/review/icon-star.webp"); }
+.rv-note--good { --edge: #4aa3ff; --ico: url("../assets/review/icon-star.webp"); }
+.rv-note--inaccuracy { --edge: #f2a33d; --ico: url("../assets/review/icon-warn.webp"); }
+.rv-note--mistake { --edge: #e8352b; --ico: url("../assets/review/icon-cross.webp"); }
 .rv-note--info { --edge: #c9ced8; }
-.rv-note--info .rv-note_title i { background-color: #7b8494; --ico: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="1.8" fill="white"/></svg>'); }
+.rv-note--info .rv-note_title i { display: none; }
+
+/* the coach: three moods stacked, the current one shown; he breathes all the time
+   and reacts to every move (a hop for a good move, a head shake for a bad one) */
+.rv-coach { position: absolute; right: calc(var(--m) - 46px); bottom: calc(var(--m) - 58px); z-index: 2; width: 92px; height: 138px; pointer-events: none; transform-origin: 50% 100%; }
+.rv-coach_body { position: absolute; inset: 0; transform-origin: 50% 100%; animation: rv-breathe 3.2s ease-in-out infinite; }
+.rv-coach img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .15s; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5)); }
+.rv-coach[data-mood="neutral"] [data-mood-img="neutral"],
+.rv-coach[data-mood="happy"] [data-mood-img="happy"],
+.rv-coach[data-mood="puzzled"] [data-mood-img="puzzled"] { opacity: 1; }
+.rv-coach.is-react[data-mood="neutral"] { animation: rv-nod .45s ease-out; }
+.rv-coach.is-react[data-mood="happy"] { animation: rv-hop .6s cubic-bezier(.3, 1.4, .5, 1); }
+.rv-coach.is-react[data-mood="puzzled"] { animation: rv-shake .7s ease-in-out; }
+@keyframes rv-breathe { 50% { transform: translateY(-1.5px) scale(1.012, .992); } }
+@keyframes rv-nod { 30% { transform: rotate(-2deg) translateY(1px); } 65% { transform: rotate(1deg); } }
+@keyframes rv-hop { 0% { transform: scale(1.06, .9); } 35% { transform: translateY(-12px) scale(.96, 1.06) rotate(-3deg); } 65% { transform: translateY(0) scale(1.04, .95); } 85% { transform: scale(.99, 1.01); } }
+@keyframes rv-shake { 15% { transform: rotate(-4deg); } 35% { transform: rotate(3.5deg); } 55% { transform: rotate(-2.5deg); } 75% { transform: rotate(1.5deg); } }
 
 /* opening: everything comes in one after the other */
 .rv.is-in .rv-bg { animation: rv-fade .4s ease both; }
@@ -118,6 +129,7 @@
 .rv.is-in .rv-hand img:nth-child(7) { animation-delay: .85s; } .rv.is-in .rv-hand img:nth-child(8) { animation-delay: .9s; }
 .rv.is-in .rv-player { animation: rv-up-x .5s .5s cubic-bezier(.2, 1.2, .4, 1) both; }
 .rv.is-in .rv-last { animation: rv-up .5s .6s ease-out both; }
+.rv.is-in .rv-coach { animation: rv-up .55s .85s cubic-bezier(.2, 1.3, .4, 1) both; }
 .rv.is-in .rv-note { animation: rv-up .5s .75s cubic-bezier(.2, 1.3, .4, 1) both; }
 @keyframes rv-fade { from { opacity: 0; } }
 @keyframes rv-table { from { opacity: 0; transform: scale(.86); } }

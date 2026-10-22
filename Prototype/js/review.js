@@ -8,6 +8,7 @@
   var NAMES = { bottom: 'You', left: 'HasmikG', top: 'GarikAv', right: 'Vazgen1972' };
   var AVATAR = { bottom: 'avatar-artexcb', left: 'avatar-hasmikg', top: 'avatar-garikav', right: 'avatar-placeholder' };
   var SIGN = { C: '♣', D: '♦', H: '♥', S: '♠', NT: 'NT' };
+  var MOOD = { best: 'happy', great: 'happy', good: 'neutral', info: 'neutral', inaccuracy: 'puzzled', mistake: 'puzzled' };
   var RANK_NAME = { '7': 'Seven', '8': 'Eight', '9': 'Nine', '10': 'Ten', J: 'Jack', Q: 'Queen', K: 'King', A: 'Ace' };
   var rec = null, step = 0, steps = [], timer = null, onDone = null;
 
@@ -77,7 +78,9 @@
         '<button type="button" data-rv="last" aria-label="Last"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M1 2.5v11L10.5 8z" fill="currentColor"/><rect x="12.6" y="2" width="2.4" height="12" rx="1" fill="currentColor"/></svg></button>' +
       '</div>' +
       '<div class="rv-note" data-rv-note><p class="rv-note_title" data-rv-note-title></p><p class="rv-note_text" data-rv-note-text></p></div>' +
-      '<img class="rv-note_coach" src="assets/review/coach.webp" alt="">';
+      '<div class="rv-coach" data-rv-coach data-mood="neutral"><div class="rv-coach_body">' +
+        ['neutral', 'happy', 'puzzled'].map(function (m) { return '<img data-mood-img="' + m + '" src="assets/review/coach-' + m + '.webp" alt="">'; }).join('') +
+      '</div></div>';
   }
 
   // ---------- one step of the replay ----------
@@ -114,6 +117,11 @@
     q('[data-rv-note-title]').innerHTML = '<i></i>' + note.title;
     q('[data-rv-note-text]').innerHTML = note.text;
     if (animate) { void box.offsetWidth; }
+    // the coach reacts: pleased with good moves, puzzled by bad ones, calm otherwise
+    var coach = q('[data-rv-coach]');
+    coach.setAttribute('data-mood', MOOD[note.kind] || 'neutral');
+    coach.classList.remove('is-react');
+    if (animate) { void coach.offsetWidth; coach.classList.add('is-react'); }
     // buttons
     q('[data-rv="first"]').disabled = q('[data-rv="prev"]').disabled = step === 0;
     q('[data-rv="next"]').disabled = q('[data-rv="last"]').disabled = step === steps.length;
