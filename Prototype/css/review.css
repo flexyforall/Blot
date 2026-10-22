@@ -9,8 +9,8 @@
 
 /* header and actions (Figma 2209:6339) */
 .rv-head { position: absolute; left: var(--m); top: var(--m); display: flex; flex-direction: column; gap: 2px; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
-.rv-head b { font-size: 16px; font-weight: 700; line-height: 24px; }
-.rv-head span { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; line-height: 21px; color: rgba(255, 255, 255, .75); }
+.rv-head b { font-size: 14px; font-weight: 700; line-height: 21px; }
+.rv-head span { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; line-height: 18px; color: rgba(255, 255, 255, .75); }
 .rv-head span i { width: 4px; height: 4px; border-radius: 50%; background: rgba(255, 255, 255, .4); }
 .rv-actions { position: absolute; right: var(--m); top: 26px; display: flex; gap: 18px; }
 .rv-icon { width: 22px; height: 20px; display: grid !important; place-items: center; color: #fff; }
@@ -42,7 +42,7 @@
 .rv-chip--top { left: 458px; top: 39px; }
 .rv-chip--left { left: 173px; top: 140px; }
 .rv-chip--right { left: 749px; top: 137px; }
-.rv-chip--bottom { left: 458px; top: 245px; }
+.rv-chip--bottom { left: 508px; top: 226px; }
 
 /* the cards of the current trick, each in front of its player */
 .rv-trick { position: absolute; inset: 0; pointer-events: none; }
@@ -63,8 +63,8 @@
 .rv-hand img.is-next { transform: translateY(-5px); box-shadow: 0 0 0 1.5px #44e0ff, 0 0 12px rgba(68, 224, 255, .6); }
 
 /* last trick */
-.rv-last { position: absolute; left: var(--m); top: 308px; display: flex; flex-direction: column; gap: 8px; }
-.rv-last span { font-size: 14px; font-weight: 600; line-height: 21px; color: rgba(255, 255, 255, .75); text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+.rv-last { position: absolute; left: var(--m); top: 311px; display: flex; flex-direction: column; gap: 8px; }
+.rv-last span { font-size: 12px; font-weight: 600; line-height: 18px; color: rgba(255, 255, 255, .75); text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
 .rv-last div { display: flex; gap: 4px; height: 36px; align-items: center; }
 .rv-last img { width: 27px; height: 36px; border-radius: 1.5px; box-shadow: 0 1.5px 3px rgba(0, 0, 0, .45); }
 .rv-last img.is-wait { opacity: 0; }
@@ -97,21 +97,16 @@
 .rv-note--info { --edge: #c9ced8; }
 .rv-note--info .rv-note_title i { display: none; }
 
-/* the coach: three moods stacked, the current one shown; he breathes all the time
-   and reacts to every move (a hop for a good move, a head shake for a bad one) */
+/* the coach: three looping animations (generated with Higgsfield from the Figma art), one per mood,
+   stacked; the current one is shown and pops in when his mood changes */
 .rv-coach { position: absolute; right: calc(var(--m) - 46px); bottom: calc(var(--m) - 58px); z-index: 2; width: 92px; height: 138px; pointer-events: none; transform-origin: 50% 100%; }
-.rv-coach_body { position: absolute; inset: 0; transform-origin: 50% 100%; animation: rv-breathe 3.2s ease-in-out infinite; }
+.rv-coach_body { position: absolute; inset: 0; transform-origin: 50% 100%; }
 .rv-coach img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .15s; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5)); }
 .rv-coach[data-mood="neutral"] [data-mood-img="neutral"],
 .rv-coach[data-mood="happy"] [data-mood-img="happy"],
 .rv-coach[data-mood="puzzled"] [data-mood-img="puzzled"] { opacity: 1; }
-.rv-coach.is-react[data-mood="neutral"] { animation: rv-nod .45s ease-out; }
-.rv-coach.is-react[data-mood="happy"] { animation: rv-hop .6s cubic-bezier(.3, 1.4, .5, 1); }
-.rv-coach.is-react[data-mood="puzzled"] { animation: rv-shake .7s ease-in-out; }
-@keyframes rv-breathe { 50% { transform: translateY(-1.5px) scale(1.012, .992); } }
-@keyframes rv-nod { 30% { transform: rotate(-2deg) translateY(1px); } 65% { transform: rotate(1deg); } }
-@keyframes rv-hop { 0% { transform: scale(1.06, .9); } 35% { transform: translateY(-12px) scale(.96, 1.06) rotate(-3deg); } 65% { transform: translateY(0) scale(1.04, .95); } 85% { transform: scale(.99, 1.01); } }
-@keyframes rv-shake { 15% { transform: rotate(-4deg); } 35% { transform: rotate(3.5deg); } 55% { transform: rotate(-2.5deg); } 75% { transform: rotate(1.5deg); } }
+.rv-coach.is-react .rv-coach_body { animation: rv-react .4s cubic-bezier(.3, 1.5, .5, 1); }
+@keyframes rv-react { 0% { transform: scale(1.05, .93); } 55% { transform: scale(.98, 1.03); } }
 
 /* opening: everything comes in one after the other */
 .rv.is-in .rv-bg { animation: rv-fade .4s ease both; }
