@@ -27,7 +27,7 @@
     steps.forEach(function (s) { s.note = coach(s, trump); });
   }
   function coach(s, trump) {
-    var pts = R.cardPoints(s.card, trump), won = s.tr.winner, after = s.tr.plays.slice(0, s.k + 1);
+    var won = s.tr.winner, after = s.tr.plays.slice(0, s.k + 1);
     var winNow = R.trickWinner(after.map(function (p) { return { seat: p.seat, card: p.card }; }), trump).seat;
     var trickPts = s.tr.points;
     if (s.seat !== 'bottom') {
@@ -35,10 +35,33 @@
       if (s.k === 3) return { kind: 'info', title: NAMES[won] + (won === 'bottom' ? ' take' : ' takes') + ' the trick', text: who + ' played ' + cardTxt(s.card) + '. The trick is worth ' + trickPts + ' points.' };
       return { kind: 'info', title: who + ' played ' + cardTxt(s.card), text: winNow === s.seat ? who + ' is winning the trick for now.' : NAMES[winNow] + (winNow === 'bottom' ? ' are' : ' is') + ' still winning the trick.' };
     }
-    var cheaper = s.legal.filter(function (c) { return R.cardPoints(c, trump) < pts; });
-    var cheapest = s.legal.reduce(function (m, c) { return R.cardPoints(c, trump) < R.cardPoints(m, trump) ? c : m; }, s.legal[0]);
-    var isTrump = trump !== R.NO_TRUMP && s.card.suit === trump;
     if (s.legal.length === 1) return { kind: 'good', title: 'Forced move', text: cardTxt(s.card) + ' was your only legal card here.' };
+    // Hindsight check: replay this trick with every legal card in place of yours (the others' cards stay
+    // as they were played) and score it for your side: + the trick if you win it, − if the opponents do.
+    var bonus = s.tr.points - R.stockPoints(s.tr.plays.map(function (p) { return p.card; }), trump);
+    function tryCard(c) {
+      var plays = s.tr.plays.map(function (p, i) { return { seat: p.seat, card: i === s.k ? c : p.card }; });
+      var w = R.trickWinner(plays, trump).seat, sum = R.stockPoints(plays.map(function (p) { return p.card; }), trump) + bonus;
+      return { card: c, win: team(w) === 'us', winner: w, pts: sum, gain: team(w) === 'us' ? sum : -sum, cost: R.power(c, trump, c.suit) };
+    }
+    var mine = tryCard(s.card), tries = s.legal.map(tryCard);
+    var best = tries.reduce(function (b, t) { return t.gain > b.gain || (t.gain === b.gain && t.cost < b.cost) ? t : b; }, tries[0]);
+    var diff = best.gain - mine.gain, isTrump = trump !== R.NO_TRUMP && s.card.suit === trump;
+    var grade = diff >= 10 ? 'mistake' : 'inaccuracy', label = diff >= 10 ? 'Mistake' : 'Inaccuracy';
+    function alt(text) { return { card: best.card, title: 'Better: ' + cardTxt(best.card), text: text }; }
+    if (diff > 0 && best.win && !mine.win)
+      return { kind: grade, title: label, text: cardTxt(s.card) + ' lost the trick and ' + mine.pts + ' points went to the opponents.',
+        alt: alt(cardTxt(best.card) + ' beats every card in this trick. Your side takes it for ' + best.pts + ' points instead.') };
+    if (diff > 0 && !best.win)
+      return { kind: grade, title: label, text: cardTxt(s.card) + ' gave ' + R.cardPoints(s.card, trump) + ' points to ' + NAMES[won] + '.',
+        alt: alt(NAMES[won] + ' takes this trick anyway, so give the cheapest card. ' + cardTxt(best.card) + ' keeps ' + diff + ' points away from the opponents and saves your ' + cardTxt(s.card) + ' for later.') };
+    if (diff > 0)
+      return { kind: grade, title: label, text: 'Your side won the trick, but it could have been worth more.',
+        alt: alt('The trick is yours either way, so load it: ' + cardTxt(best.card) + ' adds ' + diff + ' more points for your team.') };
+    if (mine.win && best.cost < mine.cost && R.cardPoints(s.card, trump) === R.cardPoints(best.card, trump) && (isTrump || s.card.rank === 'A'))
+      return { kind: 'inaccuracy', title: 'Inaccuracy', text: cardTxt(s.card) + ' won, but a weaker card would have won too.',
+        alt: alt(cardTxt(best.card) + ' also takes this trick for ' + best.pts + ' points and keeps your ' + cardTxt(s.card) + ' for a harder trick.') };
+    var pts = R.cardPoints(s.card, trump), trickPts = s.tr.points;
     if (won === 'bottom') {
       if (isTrump && (s.card.rank === 'J' || s.card.rank === '9')) return { kind: 'best', title: 'Best move!', text: 'Your ' + RANK_NAME[s.card.rank] + ' of trumps is too strong to beat. It takes the trick for ' + trickPts + ' points.' };
       return { kind: 'great', title: 'Great move!', text: 'Your ' + cardTxt(s.card) + ' took the trick for ' + trickPts + ' points.' };
@@ -47,9 +70,6 @@
       if (pts >= 10) return { kind: 'great', title: 'Great move!', text: 'Your partner was winning, so you added ' + pts + ' points with ' + cardTxt(s.card) + '.' };
       return { kind: 'good', title: 'Good move', text: 'Your partner had the trick. ' + cardTxt(s.card) + ' kept your strong cards for later.' };
     }
-    var alt = { card: cheapest, title: 'Better: ' + cardTxt(cheapest), text: NAMES[won] + ' takes this trick anyway, so give the cheapest card. ' + cardTxt(cheapest) + ' keeps ' + (pts - R.cardPoints(cheapest, trump)) + ' points away from the opponents' + (pts >= 10 ? ' and saves your ' + cardTxt(s.card) + ' for a trick you can win.' : '.') };
-    if (pts >= 10 && cheaper.length) return { kind: 'mistake', title: 'Mistake', text: cardTxt(s.card) + ' gave ' + pts + ' points to the opponents. ' + cardTxt(cheapest) + ' would have saved them.', alt: alt };
-    if (pts > 0 && cheaper.length) return { kind: 'inaccuracy', title: 'Inaccuracy', text: 'The trick was lost anyway: ' + cardTxt(cheapest) + ' was cheaper than ' + cardTxt(s.card) + '.', alt: alt };
     return { kind: 'good', title: 'Good move', text: 'The opponents had this trick. ' + cardTxt(s.card) + ' was the cheapest card to give.' };
   }
 
@@ -65,7 +85,7 @@
       '<header class="rv-head"><b>Ranking · Backroom</b><span data-rv-sub></span></header>' +
       '<div class="rv-actions"><button type="button" aria-label="Share" class="rv-icon"><svg viewBox="0 0 20 20" width="20" height="20"><circle cx="15" cy="4" r="2.6" fill="currentColor"/><circle cx="5" cy="10" r="2.6" fill="currentColor"/><circle cx="15" cy="16" r="2.6" fill="currentColor"/><path d="M7.3 8.8l5.4-3.4M7.3 11.2l5.4 3.4" stroke="currentColor" stroke-width="1.8"/></svg></button>' +
       '<button type="button" aria-label="Done" class="rv-icon" data-rv-close><svg viewBox="0 0 22 20" width="22" height="20"><path d="M2.5 10.5L8 16 19.5 3.5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
-      '<div class="rv-table"><i class="rv-table_felt">CLASSROOM</i></div>' +
+      '<div class="rv-table"><i class="rv-table_felt">CLASSROOM</i><i class="rv-table_sweep"><i class="rv-table_rim"></i></i></div>' +
       seatHtml('top') + seatHtml('left') + seatHtml('right') +
       '<div class="rv-chip rv-chip--' + c.seat + '"><i data-s="' + c.suit + '"></i>' + (c.kaput ? 'Kaput' : c.value) + (c.sur ? ' ×4' : c.contra ? ' ×2' : '') + '</div>' +
       '<div class="rv-trick" data-rv-trick></div>' +
