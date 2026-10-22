@@ -288,12 +288,6 @@
             <button class="tb-key tb-key--primary tb-result_next" type="button" data-result-next>Next round</button>
           </div>
 
-          <!-- prototype shortcuts: finish the round / the game at once to see the end screens -->
-          <div class="tb-dev">
-            <button class="tb-dev_btn" type="button" data-play-random="round">Play round randomly</button>
-            <button class="tb-dev_btn" type="button" data-play-random="game">Play game randomly</button>
-          </div>
-
           <!-- end of round / end of game / analysis / hand replay: the screens from Figma (section 1934:4575) -->
           <div class="tb-shots" data-shots hidden>
             <img class="tb-shots_img" data-shot-img alt="">
@@ -331,6 +325,11 @@
 
     </div>
     <div class="device_island" aria-hidden="true"></div>
+  </div>
+  <!-- prototype shortcuts, outside the phone: finish the round / the game at once to see the end screens -->
+  <div class="dev-bar" data-dev-bar hidden>
+    <button class="dev-bar_btn" type="button" data-play-random="round">Play round randomly</button>
+    <button class="dev-bar_btn" type="button" data-play-random="game">Play game randomly</button>
   </div>
   <button class="sound-toggle" type="button" data-sound-toggle>
     <svg class="sound-toggle_on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>

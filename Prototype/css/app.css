@@ -173,3 +173,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .splash_skip.is-visible { opacity: 1; }
 
+
+/* prototype shortcuts below the phone (shown on the table screen) */
+.dev-bar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+.dev-bar[hidden] { display: none; }
+.dev-bar_btn { height: 34px; padding: 0 16px; border-radius: 100px; background: #13233d; border: 1px solid rgba(92, 160, 255, .5); font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; }
+.dev-bar_btn:hover { background: #1b3358; }
+.dev-bar_btn:active { background: #24467a; }

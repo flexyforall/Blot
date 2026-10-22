@@ -392,7 +392,10 @@
     }
   }
 
-  screen.addEventListener('click', function (e) {
+  // the shortcut bar below the phone: only on the table screen
+  var devBar = document.querySelector('[data-dev-bar]');
+  document.addEventListener('screen:show', function (e) { devBar.hidden = e.detail !== 'table'; });
+  devBar.addEventListener('click', function (e) {
     var b = e.target.closest('[data-play-random]');
     if (b && window.BlotGame) window.BlotGame.playRandomly(b.getAttribute('data-play-random'));
   });

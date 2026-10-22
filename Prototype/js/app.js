@@ -9,7 +9,7 @@
     var margin = 32;
     var s = Math.min(1,
       (window.innerWidth - margin) / device.offsetWidth,
-      (window.innerHeight - margin) / device.offsetHeight);
+      (window.innerHeight - margin - 100) / device.offsetHeight);   // room for the shortcut bar below
     device.style.transform = 'scale(' + s + ')';
   }
   window.addEventListener('resize', fit);
