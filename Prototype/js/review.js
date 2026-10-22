@@ -47,8 +47,9 @@
       if (pts >= 10) return { kind: 'great', title: 'Great move!', text: 'Your partner was winning, so you added ' + pts + ' points with ' + cardTxt(s.card) + '.' };
       return { kind: 'good', title: 'Good move', text: 'Your partner had the trick. ' + cardTxt(s.card) + ' kept your strong cards for later.' };
     }
-    if (pts >= 10 && cheaper.length) return { kind: 'mistake', title: 'Mistake', text: cardTxt(s.card) + ' gave ' + pts + ' points to the opponents. ' + cardTxt(cheapest) + ' would have saved them.' };
-    if (pts > 0 && cheaper.length) return { kind: 'inaccuracy', title: 'Inaccuracy', text: 'The trick was lost anyway: ' + cardTxt(cheapest) + ' was cheaper than ' + cardTxt(s.card) + '.' };
+    var alt = { card: cheapest, title: 'Better: ' + cardTxt(cheapest), text: NAMES[won] + ' takes this trick anyway, so give the cheapest card. ' + cardTxt(cheapest) + ' keeps ' + (pts - R.cardPoints(cheapest, trump)) + ' points away from the opponents' + (pts >= 10 ? ' and saves your ' + cardTxt(s.card) + ' for a trick you can win.' : '.') };
+    if (pts >= 10 && cheaper.length) return { kind: 'mistake', title: 'Mistake', text: cardTxt(s.card) + ' gave ' + pts + ' points to the opponents. ' + cardTxt(cheapest) + ' would have saved them.', alt: alt };
+    if (pts > 0 && cheaper.length) return { kind: 'inaccuracy', title: 'Inaccuracy', text: 'The trick was lost anyway: ' + cardTxt(cheapest) + ' was cheaper than ' + cardTxt(s.card) + '.', alt: alt };
     return { kind: 'good', title: 'Good move', text: 'The opponents had this trick. ' + cardTxt(s.card) + ' was the cheapest card to give.' };
   }
 
@@ -77,7 +78,8 @@
         '<button type="button" data-rv="next" aria-label="Next"><svg viewBox="0 0 12 16" width="12" height="16"><path d="M1.5 2L9 8l-7.5 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
         '<button type="button" data-rv="last" aria-label="Last"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M1 2.5v11L10.5 8z" fill="currentColor"/><rect x="12.6" y="2" width="2.4" height="12" rx="1" fill="currentColor"/></svg></button>' +
       '</div>' +
-      '<div class="rv-note" data-rv-note><p class="rv-note_title" data-rv-note-title></p><p class="rv-note_text" data-rv-note-text></p></div>' +
+      '<div class="rv-note" data-rv-note><p class="rv-note_title" data-rv-note-title></p><p class="rv-note_text" data-rv-note-text></p>' +
+        '<button type="button" class="rv-alt" data-rv-alt hidden><svg viewBox="0 0 12 12" width="11" height="11"><path d="M6 1.5a4.5 4.5 0 1 1-4.2 2.9M1.5 1.5v3h3" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Show better move</span></button></div>' +
       '<div class="rv-coach" data-rv-coach data-mood="neutral"><div class="rv-coach_body">' +
         ['neutral', 'happy', 'puzzled'].map(function (m) { return '<img data-mood-img="' + m + '" src="assets/review/coach-' + m + '.webp" alt="">'; }).join('') +
       '</div></div>';
@@ -127,6 +129,9 @@
     box.className = 'rv-note rv-note--' + note.kind + (animate ? ' is-pop' : '');
     q('[data-rv-note-title]').innerHTML = '<i></i>' + note.title;
     q('[data-rv-note-text]').innerHTML = note.text;
+    var altBtn = q('[data-rv-alt]');
+    altBtn.hidden = !note.alt; altBtn.classList.remove('is-on');
+    altBtn.querySelector('span').textContent = 'Show better move';
     if (animate) { void box.offsetWidth; }
     // the coach reacts: pleased with good moves, puzzled by bad ones, calm otherwise
     var coach = q('[data-rv-coach]');
@@ -157,6 +162,32 @@
       };
     });
   }
+  // "Show better move": your card goes back to the hand and the better one is played instead;
+  // pressing again returns to what you actually played.
+  var altOn = false;
+  function toggleAlt() {
+    var cur = steps[step - 1];
+    if (!cur || !cur.note.alt) return;
+    stop(); cancelFF(); clearFly();
+    if (altOn) { altOn = false; show(false); return; }
+    altOn = true;
+    var a = cur.note.alt, q = function (s) { return root.querySelector(s); };
+    var mine = q('.rv-card--bottom');
+    if (mine) { mine.src = 'assets/review/full/' + a.card.rank + a.card.suit + '.webp'; mine.classList.add('is-alt'); mine.classList.remove('is-new'); }
+    var played = steps.slice(0, step - 1).filter(function (s) { return s.seat === 'bottom'; }).map(function (s) { return s.card.id; });
+    var hand = sorted(rec.hands.bottom.filter(function (c) { return played.indexOf(c.id) < 0; }));
+    q('[data-rv-hand]').innerHTML = hand.map(function (c) {
+      return '<img class="' + (c.id === a.card.id ? 'is-gone' : c.id === cur.card.id ? 'is-back' : '') + '" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="">';
+    }).join('');
+    throwFromHand(hand.map(function (c) { return c.id; }).indexOf(a.card.id), hand.length);
+    var box = q('[data-rv-note]');
+    box.className = 'rv-note rv-note--best is-pop';
+    q('[data-rv-note-title]').innerHTML = '<i></i>' + a.title;
+    q('[data-rv-note-text]').innerHTML = a.text;
+    var btn = q('[data-rv-alt]'); btn.classList.add('is-on'); btn.querySelector('span').textContent = 'Back to my move';
+    var coach = q('[data-rv-coach]'); coach.setAttribute('data-mood', 'happy');
+    coach.classList.remove('is-react'); void coach.offsetWidth; coach.classList.add('is-react');
+  }
   // Your card slides out of its slot in the hand (mini, 30x40, row at y 263) onto its spot on the table.
   function throwFromHand(slot, n, late) {
     var el = root.querySelector('.rv-card--bottom');
@@ -181,14 +212,14 @@
   function nextMine(from) { var m = myStops().filter(function (n) { return n > from; }); return m.length ? m[0] : null; }
   function prevMine(from) { var m = myStops().filter(function (n) { return n < from; }); return m.length ? m[m.length - 1] : 0; }
   var ff = null;
-  function go(n, animate) { cancelFF(); clearFly(); step = Math.max(0, Math.min(steps.length, n)); show(animate); }
+  function go(n, animate) { altOn = false; cancelFF(); clearFly(); step = Math.max(0, Math.min(steps.length, n)); show(animate); }
   function cancelFF() { clearTimeout(ff); ff = null; }
   function forward(done) {
     var target = nextMine(step);
     cancelFF();
     if (target === null) { if (done) done(false); return; }
     (function tick() {
-      step++;
+      step++; altOn = false;
       var cur = steps[step - 1], landed = step === target;
       show(true, !landed);
       if (landed) { ff = null; if (done) done(true); return; }
@@ -222,6 +253,7 @@
       if (a === 'last') go(myStops().pop());
       return;
     }
+    if (e.target.closest('[data-rv-alt]')) { toggleAlt(); return; }
     if (e.target.closest('[data-rv-close]')) close();
   });
   document.addEventListener('keydown', function (e) {

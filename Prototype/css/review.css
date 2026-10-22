@@ -94,6 +94,16 @@
 .rv-note_title { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; line-height: 18px; }
 .rv-note_title i { width: 20px; height: 20px; flex: none; background: var(--ico) center / 100% no-repeat; }
 .rv-note_text { padding-right: 38px; font-size: 10px; font-weight: 400; line-height: 15px; }
+/* sits just above the coach note, by its left edge */
+.rv-alt { position: absolute !important; left: 0; bottom: calc(100% + 6px); display: inline-flex !important; align-items: center; gap: 5px; height: 26px; padding: 0 12px !important; border-radius: 100px; white-space: nowrap;
+  background: #1b6ad8 !important; color: #fff !important; font-size: 11px !important; font-weight: 600 !important; border: 1px solid rgba(255, 255, 255, .25) !important; box-shadow: 0 4px 12px rgba(0, 0, 0, .45); animation: rv-alt-in .3s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes rv-alt-in { from { opacity: 0; transform: translateY(6px) scale(.9); } }
+.rv-alt[hidden] { display: none !important; }
+.rv-alt:hover { background: #2a7cf0 !important; }
+.rv-alt.is-on { background: #fff !important; color: #1b2230 !important; }
+.rv-card.is-alt { box-shadow: 0 0 0 2px #1bb908, 0 0 16px rgba(27, 185, 8, .7), 0 3px 16px rgba(0, 0, 0, .4); }
+.rv-hand img.is-back { animation: rv-back .35s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes rv-back { from { transform: translateY(-40px) scale(1.3); opacity: 0; } }
 .rv-note--best, .rv-note--great { --edge: #1bb908; --ico: url("../assets/review/icon-star.webp"); }
 .rv-note--good { --edge: #4aa3ff; --ico: url("../assets/review/icon-star.webp"); }
 .rv-note--inaccuracy { --edge: #f2a33d; --ico: url("../assets/review/icon-warn.webp"); }
