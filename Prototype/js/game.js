@@ -12,6 +12,7 @@
 
   var view = null, tok = 0;
   var fast = null;   // 'round' | 'game' while a play-randomly shortcut runs
+  var lastRound = null;   // the last finished round, for the replay
   var game = null;   // { score: {us, them}, dealer, round }
   var log = [];      // round results, for tests (autoplay)
 
@@ -189,31 +190,44 @@
       resultEl.hidden = false;
     });
   }
-  // The end of a round, the end of the game, the analysis and the hand replay come from Figma
-  // (section 1934:4575) as images with tap areas, in 852x393 screen coordinates.
+  // The end of a round, the end of the game and the analysis come from Figma (section 1934:4575)
+  // as layers (blurred table, panel, ribbon) that animate in, with tap areas in 852x393 screen
+  // coordinates. "Replay round" opens the replay of the round you just played (js/review.js).
   var SHOTS = {
-    round: { img: 'round-lost', hots: [[0, 0, 852, 393, 'game']] },
-    game: { img: 'game-lost', hots: [[663, 65, 40, 40, 'exit'], [169, 325, 145, 32, 'analysis'], [326, 317, 201, 40, 'again'], [539, 325, 145, 32, null]] },
-    analysis: { img: 'analysis', hots: [[166, 89, 38, 38, 'game'], [369, 308, 301, 38, 'review']] },
-    review: { img: 'game-review', hots: [[804, 21, 34, 30, 'game'], [767, 21, 30, 30, null], [401, 319, 50, 50, null]] }
+    round: { hots: [[0, 0, 852, 393, 'game']] },
+    game: { hots: [[663, 65, 40, 40, 'exit'], [169, 325, 145, 32, 'analysis'], [326, 317, 201, 40, 'again'], [539, 325, 145, 32, null]] },
+    analysis: { hots: [[166, 89, 38, 38, 'game'], [369, 308, 301, 38, 'review']] }
   };
   function showShots(start) {
-    var box = document.querySelector('[data-shots]'), img = box.querySelector('[data-shot-img]'), hots = box.querySelector('[data-shot-hots]');
+    var box = screen.querySelector('[data-shots]'), layer = box.querySelector('[data-shot-layer]');
+    var panel = box.querySelector('[data-shot-panel]'), ribbon = box.querySelector('[data-shot-ribbon]'), shine = box.querySelector('[data-shot-shine]');
+    var hots = box.querySelector('[data-shot-hots]');
     return new Promise(function (res) {
       function open(id) {
         var sh = SHOTS[id];
-        img.src = 'assets/table/shots/' + sh.img + '.webp';
+        panel.src = 'assets/table/shots/' + id + '-panel.webp';
+        ribbon.src = 'assets/table/shots/' + id + '-ribbon.webp';
+        shine.style.setProperty('--ribbon', 'url("' + new URL('assets/table/shots/' + id + '-ribbon.webp', location.href).href + '")');
         hots.innerHTML = sh.hots.map(function (h) {
           return '<button class="tb-shot_hot" type="button" data-go="' + (h[4] || '') + '" style="left:' + h[0] / 8.52 + '%;top:' + h[1] / 3.93 + '%;width:' + h[2] / 8.52 + '%;height:' + h[3] / 3.93 + '%"></button>';
         }).join('');
+        var first = box.hidden;
         box.hidden = false;
-        box.style.animation = 'none'; void box.offsetWidth; box.style.animation = '';
+        if (first) { box.classList.remove('is-open'); void box.offsetWidth; box.classList.add('is-open'); }
+        layer.classList.remove('is-in'); void layer.offsetWidth; layer.classList.add('is-in');
       }
+      function close() { box.hidden = true; box.classList.remove('is-open'); hots.onclick = null; }
       hots.onclick = function (e) {
         var b = e.target.closest('[data-go]'), go = b && b.getAttribute('data-go');
         if (!go) return;
-        if (go === 'again') { box.hidden = true; hots.onclick = null; res(); return; }
-        if (go === 'exit') { box.hidden = true; hots.onclick = null; window.BlotNav.show('play'); res(); return; }
+        if (go === 'again') { close(); res(); return; }
+        if (go === 'exit') { close(); window.BlotNav.show('play'); res(); return; }
+        if (go === 'review') {
+          if (!lastRound || !window.BlotReview) return;
+          box.hidden = true;
+          window.BlotReview.open(lastRound, function () { box.hidden = false; open('game'); });
+          return;
+        }
         open(go);
       };
       open(start || 'round');
@@ -222,6 +236,7 @@
   function hidePanels() {
     bidEl.hidden = true; resultEl.hidden = true; bidEl.onclick = null;
     var shots = document.querySelector('[data-shots]'); if (shots) shots.hidden = true;
+    if (window.BlotReview) window.BlotReview.close(true);
     if (view && view.lowerHand) view.lowerHand(false);
   }
 
@@ -269,6 +284,9 @@
     var deck = R.shuffle(R.makeDeck());
     var dealt = R.deal(deck, dealer);
     var hands = dealt.hands;
+    // what the replay (js/review.js) needs: the dealt hands, the contract and every play
+    var rec = { round: game.round, dealer: dealer, hands: {}, tricks: [] };
+    R.SEATS.forEach(function (s) { rec.hands[s] = hands[s].slice(); });
     setContract(null);
     window.BlotTable.setLastTrick([]);
     view.say(dealer, 'Dealing');
@@ -288,6 +306,7 @@
       return 'redeal';
     }
     setContract(contract);
+    rec.contract = contract;
     var trump = contract.suit;
     hands.bottom = sortHand(hands.bottom, trump);
     await view.layoutHand(ids(hands.bottom)); if (!alive()) return;
@@ -313,7 +332,7 @@
     // ---- eight tricks
     var stock = { us: [], them: [] }, lastTrick = null;
     for (var t = 0; t < 8; t++) {
-      var plays = [], seat = leader;
+      var plays = [], seat = leader, recPlays = [];
       for (var n = 0; n < 4; n++) {
         var hand = hands[seat], legal = R.legalMoves(hand, plays, trump, seat), card;
         view.turn(seat);
@@ -326,12 +345,14 @@
         }
         remove(hand, card);
         plays.push({ seat: seat, card: card });
+        recPlays.push({ seat: seat, card: card, legal: legal.slice() });
         view.turn(null);
         await view.playCard(seat, card.id); if (!alive()) return;
         if (seat === 'bottom') view.layoutHand(ids(hand)); else view.layoutPile(seat, ids(hand));
         seat = R.next(seat);
       }
       var win = R.trickWinner(plays, trump);
+      rec.tricks.push({ plays: recPlays, winner: win.seat, points: R.stockPoints(plays.map(function (p) { return p.card; }), trump) + (t === 7 ? 10 : 0) });
       await view.wait(.9); if (!alive()) return;
       await view.collect(win.seat, plays.map(function (p) { return p.card.id; })); if (!alive()) return;
       stock[team(win.seat)] = stock[team(win.seat)].concat(plays.map(function (p) { return p.card; }));
@@ -344,6 +365,8 @@
     var res = R.roundResult({ bid: contract, stock: stock, lastTrick: lastTrick, combos: comboWin, blotRebot: blot });
     game.score.us += res.us; game.score.them += res.them;
     window.BlotTable.setScore(game.score.us, game.score.them);
+    rec.res = res; rec.score = { us: game.score.us, them: game.score.them };
+    lastRound = rec;
     view.chime();
     var cards = { us: R.stockPoints(stock.us, trump), them: R.stockPoints(stock.them, trump) };
     cards[lastTrick] += 10;
@@ -420,6 +443,7 @@
     // tests: autoplay = true lets the bots play your seat too; log has the round results
     autoplay: false,
     log: log,
+    lastRound: function () { return lastRound; },
     _ai: { handValue: handValue, aiBid: aiBid, aiPlay: aiPlay }
   };
 })();

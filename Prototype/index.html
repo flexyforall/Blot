@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/table.css">
 <link rel="stylesheet" href="css/menus.css">
 <link rel="stylesheet" href="css/bond.css">
+  <link rel="stylesheet" href="css/review.css">
 </head>
 <body>
 <div class="stage">
@@ -290,9 +291,17 @@
 
           <!-- end of round / end of game / analysis / hand replay: the screens from Figma (section 1934:4575) -->
           <div class="tb-shots" data-shots hidden>
-            <img class="tb-shots_img" data-shot-img alt="">
+            <img class="tb-shots_bg" src="assets/table/shots/bg.webp" alt="">
+            <div class="tb-shots_layer" data-shot-layer>
+              <img class="tb-shots_panel" data-shot-panel alt="">
+              <img class="tb-shots_ribbon" data-shot-ribbon alt="">
+              <i class="tb-shots_shine" data-shot-shine></i>
+            </div>
             <div data-shot-hots></div>
           </div>
+
+          <!-- the replay of the last round: a simplified table that plays the round back move by move (js/review.js) -->
+          <div class="rv" data-review hidden></div>
 
           <!-- bottom bar (Figma 1893:716): chat, reactions | info -->
           <!-- bottom bar (Figma 1914:44796 / 1914:45431): settings on the left, reactions on the right -->
@@ -345,5 +354,6 @@
 <script src="js/blot-rules.js"></script>
 <script src="js/table.js"></script>
 <script src="js/game.js"></script>
+<script src="js/review.js"></script>
 </body>
 </html>
