@@ -820,7 +820,15 @@
     screen.querySelector('[data-trick-empty]').hidden = !box.hidden;
   }
   setScore(0, 0); setLastTrick([]);
-  window.BlotTable = { setScore: setScore, setLastTrick: setLastTrick, countUp: countUp };
+  // Play-randomly shortcuts (js/game.js): faster animations, and your pending card picked for you.
+  function setSpeed(n) { SPEED = n; }
+  function autoPlayCard() {
+    if (!humanWait) return;
+    var w = humanWait; humanWait = null;
+    w.hand.forEach(function (h) { var c = byId[h]; if (c) { c.base = 0; c.dim = 0; } });
+    w.res(w.legal[Math.floor(Math.random() * w.legal.length)]);
+  }
+  window.BlotTable = { setScore: setScore, setLastTrick: setLastTrick, countUp: countUp, setSpeed: setSpeed, autoPlayCard: autoPlayCard };
 
   // Chat and reactions: each button opens its popover; a pick pops up above your seat.
   var say = screen.querySelector('[data-say]');

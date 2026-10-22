@@ -11,6 +11,7 @@
   var COMBO_NAME = { terz: 'Terz', fifty: '50', hundred: '100', four: 'Four' };
 
   var view = null, tok = 0;
+  var fast = null;   // 'round' | 'game' while a play-randomly shortcut runs
   var game = null;   // { score: {us, them}, dealer, round }
   var log = [];      // round results, for tests (autoplay)
 
@@ -196,7 +197,7 @@
     analysis: { img: 'analysis', hots: [[166, 89, 38, 38, 'game'], [369, 308, 301, 38, 'review']] },
     review: { img: 'game-review', hots: [[804, 21, 34, 30, 'game'], [767, 21, 30, 30, null], [401, 319, 50, 50, null]] }
   };
-  function showShots() {
+  function showShots(start) {
     var box = document.querySelector('[data-shots]'), img = box.querySelector('[data-shot-img]'), hots = box.querySelector('[data-shot-hots]');
     return new Promise(function (res) {
       function open(id) {
@@ -215,7 +216,7 @@
         if (go === 'exit') { box.hidden = true; hots.onclick = null; window.BlotNav.show('play'); res(); return; }
         open(go);
       };
-      open('round');
+      open(start || 'round');
     });
   }
   function hidePanels() {
@@ -368,7 +369,12 @@
         '<p>' + (res[t] ? '<em data-count="0,' + res[t] + '" data-plus>+0</em>' : '+0') + ' this round</p>' +
         '<p class="tb-result_from">' + from.join(' · ') + '</p></div>';
     }
-    if (window.BlotGame.autoplay) { log.push({ round: game.round, contract: contract, res: res, score: { us: game.score.us, them: game.score.them } }); await view.wait(.2); }
+    if (fast) {
+      // "Play round / game randomly": back to normal speed, then the end-of-round or end-of-game screens
+      var kind = fast; fast = null; window.BlotGame.autoplay = false; window.BlotTable.setSpeed(2);
+      await showShots(kind === 'game' ? 'game' : 'round'); if (!alive()) return;
+    }
+    else if (window.BlotGame.autoplay) { log.push({ round: game.round, contract: contract, res: res, score: { us: game.score.us, them: game.score.them } }); await view.wait(.2); }
     else { await showShots(); if (!alive()) return; }
     await view.clear();
     if (over && winner) {
@@ -386,6 +392,11 @@
     }
   }
 
+  screen.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-play-random]');
+    if (b && window.BlotGame) window.BlotGame.playRandomly(b.getAttribute('data-play-random'));
+  });
+
   window.BlotGame = {
     // called by the table once everybody is seated
     start: function (v) {
@@ -395,7 +406,14 @@
       hidePanels(); setContract(null);
       loop();
     },
-    stop: function () { tok = -1; hidePanels(); setContract(null); if (view) view.turn(null); },
+    stop: function () { tok = -1; fast = null; window.BlotTable.setSpeed(2); hidePanels(); setContract(null); if (view) view.turn(null); },
+    // Play the rest of this round for you, fast, then show the end of the round ('round')
+    // or jump to the end of the game ('game').
+    playRandomly: function (kind) {
+      fast = kind; window.BlotGame.autoplay = true; window.BlotTable.setSpeed(16);
+      if (!bidEl.hidden) { var p = bidEl.querySelector('[data-bid-pass]'); if (p) p.click(); }
+      window.BlotTable.autoPlayCard();
+    },
     // tests: autoplay = true lets the bots play your seat too; log has the round results
     autoplay: false,
     log: log,

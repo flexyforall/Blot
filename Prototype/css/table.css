@@ -582,3 +582,8 @@
 .table .tb-shot_hot { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .table .tb-shot_hot:active { background: rgba(255, 255, 255, .08); border-radius: 6px; }
 @keyframes tb-shots { from { opacity: 0; } }
+
+/* prototype shortcuts: play the round / the game for you */
+.tb-dev { position: absolute; left: 20px; top: 74px; display: flex; flex-direction: column; gap: 6px; z-index: 6; }
+.table .tb-dev_btn { pointer-events: auto; height: 26px; padding: 0 10px; border-radius: 100px; background: rgba(4, 14, 30, .78); border: 1px solid rgba(92, 160, 255, .45); font-size: 11px; font-weight: 600; color: #fff; text-align: left; white-space: nowrap; }
+.table .tb-dev_btn:active { background: rgba(92, 160, 255, .35); }
