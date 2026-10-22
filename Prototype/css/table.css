@@ -590,6 +590,16 @@
   mix-blend-mode: screen; pointer-events: none; opacity: 0;
 }
 .tb-shots_layer.is-in .tb-shots_shine { animation: shot-shine 1s .7s ease-out both; }
+/* the final score on "Game lost" counts up from zero once the panel has landed */
+.tb-shots_score { pointer-events: none; }
+.tb-shots_score[hidden] { display: none; }
+.tb-shots_score b { position: absolute; top: 25.7%; transform: translateX(-50%); font-size: 48px; line-height: 72px; font-weight: 800; font-style: italic;
+  letter-spacing: -.02em; color: #fff; text-shadow: 0 2px 8px #000; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tb-shots_score b[data-score="us"] { left: 39.73%; }
+.tb-shots_score b[data-score="them"] { left: 59.39%; }
+.tb-shots_layer.is-in .tb-shots_score { animation: shot-panel .55s cubic-bezier(.2, 1.25, .4, 1) both; }
+.tb-shots_score b.is-done { animation: shot-score .35s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes shot-score { 40% { transform: translateX(-50%) scale(1.18); text-shadow: 0 0 18px rgba(120, 190, 255, .9), 0 2px 8px #000; } }
 .table .tb-shot_hot { position: absolute; padding: 0; border: 0; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .table .tb-shot_hot:active { background: rgba(255, 255, 255, .08); border-radius: 6px; }
 @keyframes shot-bg { from { opacity: 0; transform: scale(1.06); filter: blur(6px); } }

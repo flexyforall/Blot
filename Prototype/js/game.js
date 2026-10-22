@@ -211,6 +211,7 @@
         hots.innerHTML = sh.hots.map(function (h) {
           return '<button class="tb-shot_hot" type="button" data-go="' + (h[4] || '') + '" style="left:' + h[0] / 8.52 + '%;top:' + h[1] / 3.93 + '%;width:' + h[2] / 8.52 + '%;height:' + h[3] / 3.93 + '%"></button>';
         }).join('');
+        countScore(id === 'game');
         var first = box.hidden;
         box.hidden = false;
         if (first) { box.classList.remove('is-open'); void box.offsetWidth; box.classList.add('is-open'); }
@@ -231,6 +232,27 @@
         open(go);
       };
       open(start || 'round');
+    });
+  }
+  // The final score on "Game lost": both totals run up from zero after the panel lands.
+  var DESIGN_SCORE = { us: 89, them: 151 };
+  function countScore(on) {
+    var box = screen.querySelector('[data-shot-score]');
+    box.hidden = !on;
+    if (!on) return;
+    var fin = game && game.score.them > game.score.us ? game.score : DESIGN_SCORE;
+    box.querySelectorAll('[data-score]').forEach(function (el) {
+      var to = fin[el.getAttribute('data-score')], t0 = null;
+      el.textContent = '0'; el.classList.remove('is-done');
+      clearTimeout(el._t); cancelAnimationFrame(el._raf);
+      el._t = setTimeout(function () {
+        (function tick(t) {
+          if (t0 === null) t0 = t;
+          var k = Math.min(1, (t - t0) / 1100), e = 1 - Math.pow(1 - k, 3);
+          el.textContent = Math.round(to * e);
+          if (k < 1) el._raf = requestAnimationFrame(tick); else el.classList.add('is-done');
+        })(performance.now());
+      }, 500);
     });
   }
   function hidePanels() {

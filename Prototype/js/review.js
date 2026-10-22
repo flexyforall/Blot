@@ -63,7 +63,7 @@
       '<header class="rv-head"><b>Ranking · Backroom</b><span data-rv-sub></span></header>' +
       '<div class="rv-actions"><button type="button" aria-label="Share" class="rv-icon"><svg viewBox="0 0 20 20" width="20" height="20"><circle cx="15" cy="4" r="2.6" fill="currentColor"/><circle cx="5" cy="10" r="2.6" fill="currentColor"/><circle cx="15" cy="16" r="2.6" fill="currentColor"/><path d="M7.3 8.8l5.4-3.4M7.3 11.2l5.4 3.4" stroke="currentColor" stroke-width="1.8"/></svg></button>' +
       '<button type="button" aria-label="Done" class="rv-icon" data-rv-close><svg viewBox="0 0 22 20" width="22" height="20"><path d="M2.5 10.5L8 16 19.5 3.5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
-      '<div class="rv-table"><i class="rv-table_felt"></i></div>' +
+      '<div class="rv-table"><i class="rv-table_felt">CLASSROOM</i></div>' +
       seatHtml('top') + seatHtml('left') + seatHtml('right') +
       '<div class="rv-chip rv-chip--' + c.seat + '"><i data-s="' + c.suit + '"></i>' + (c.kaput ? 'Kaput' : c.value) + (c.sur ? ' ×4' : c.contra ? ' ×2' : '') + '</div>' +
       '<div class="rv-trick" data-rv-trick></div>' +
@@ -72,11 +72,12 @@
       '<div class="rv-player">' +
         '<button type="button" data-rv="first" aria-label="First"><svg viewBox="0 0 16 16" width="16" height="16"><rect x="1" y="2" width="2.4" height="12" rx="1" fill="currentColor"/><path d="M15 2.5v11L5.5 8z" fill="currentColor"/></svg></button>' +
         '<button type="button" data-rv="prev" aria-label="Back"><svg viewBox="0 0 12 16" width="12" height="16"><path d="M10.5 2L3 8l7.5 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
-        '<button type="button" data-rv="play" class="rv-play" aria-label="Play"><svg class="rv-play_on" viewBox="0 0 18 20" width="18" height="20"><path d="M3 1.5v17L17 10z" fill="currentColor"/></svg><svg class="rv-play_off" viewBox="0 0 18 20" width="18" height="20"><rect x="3" y="2" width="4" height="16" rx="1" fill="currentColor"/><rect x="11" y="2" width="4" height="16" rx="1" fill="currentColor"/></svg></button>' +
+        '<button type="button" data-rv="play" class="rv-play" aria-label="Play"><img src="assets/review/play.webp" alt=""><svg class="rv-play_off" viewBox="0 0 18 20" width="18" height="20"><rect x="3" y="2" width="4" height="16" rx="1" fill="currentColor"/><rect x="11" y="2" width="4" height="16" rx="1" fill="currentColor"/></svg></button>' +
         '<button type="button" data-rv="next" aria-label="Next"><svg viewBox="0 0 12 16" width="12" height="16"><path d="M1.5 2L9 8l-7.5 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
         '<button type="button" data-rv="last" aria-label="Last"><svg viewBox="0 0 16 16" width="16" height="16"><path d="M1 2.5v11L10.5 8z" fill="currentColor"/><rect x="12.6" y="2" width="2.4" height="12" rx="1" fill="currentColor"/></svg></button>' +
       '</div>' +
-      '<div class="rv-note" data-rv-note><img class="rv-note_coach" src="assets/table/ui/react-face.webp" alt=""><div class="rv-note_body"><p class="rv-note_title" data-rv-note-title></p><p class="rv-note_text" data-rv-note-text></p></div></div>';
+      '<div class="rv-note" data-rv-note><p class="rv-note_title" data-rv-note-title></p><p class="rv-note_text" data-rv-note-text></p></div>' +
+      '<img class="rv-note_coach" src="assets/review/coach.webp" alt="">';
   }
 
   // ---------- one step of the replay ----------
@@ -84,17 +85,19 @@
     var q = function (s) { return root.querySelector(s); };
     var cur = step ? steps[step - 1] : null;
     var trickIx = cur ? cur.trick : 0;
-    q('[data-rv-sub]').innerHTML = 'Round ' + rec.round + ' · Trick ' + (trickIx + 1) + ' of 8 · ' + NAMES[rec.contract.seat] + ' bid ' + (rec.contract.kaput ? 'Kaput ' : rec.contract.value + ' ') + '<span class="rv-s' + (rec.contract.suit === 'H' || rec.contract.suit === 'D' ? ' is-red' : '') + '">' + SIGN[rec.contract.suit] + '</span>';
+    q('[data-rv-sub]').innerHTML = 'Round ' + rec.round + ' out of ' + rec.round + '<i></i>Trick ' + (trickIx + 1) + ' out of 8';
     // the cards of the current trick
     var onTable = cur ? steps.filter(function (s, i) { return i < step && s.trick === cur.trick; }) : [];
+    var collect = animate && cur && cur.k === 0 && cur.trick > 0;
+    if (collect) fly(rec.tricks[cur.trick - 1].plays);
     q('[data-rv-trick]').innerHTML = onTable.map(function (s, i) {
       var isNew = animate && i === onTable.length - 1;
-      return '<img class="rv-card rv-card--' + s.seat + (isNew ? ' is-new' : '') + '" src="assets/review/full/' + s.card.rank + s.card.suit + '.webp" alt="">';
+      return '<img class="rv-card rv-card--' + s.seat + (isNew ? ' is-new' : '') + (isNew && collect ? ' is-late' : '') + '" src="assets/review/full/' + s.card.rank + s.card.suit + '.webp" alt="">';
     }).join('');
     // the trick before: the last trick
     var lastIx = cur ? (cur.k === 3 ? cur.trick - 1 : cur.trick - 1) : -1;
     var last = lastIx >= 0 ? rec.tricks[lastIx].plays : [];
-    q('[data-rv-last]').innerHTML = last.length ? last.map(function (p) { return '<img src="assets/review/mini/' + p.card.rank + p.card.suit + '.webp" alt="">'; }).join('') : '<em>—</em>';
+    q('[data-rv-last]').innerHTML = last.length ? last.map(function (p) { return '<img' + (collect ? ' class="is-wait"' : '') + ' src="assets/review/mini/' + p.card.rank + p.card.suit + '.webp" alt="">'; }).join('') : '<em>—</em>';
     // your hand: what is left after your plays so far
     var played = steps.slice(0, step).filter(function (s) { return s.seat === 'bottom'; }).map(function (s) { return s.card.id; });
     var hand = sorted(rec.hands.bottom.filter(function (c) { return played.indexOf(c.id) < 0; }));
@@ -116,12 +119,36 @@
     q('[data-rv="next"]').disabled = q('[data-rv="last"]').disabled = step === steps.length;
     root.classList.toggle('is-playing', !!timer);
   }
+  // The four cards of a finished trick slide from the table into their slots in "Last trick".
+  var SPOT = { left: [384, 188, -8], top: [426, 164, 3], right: [468, 188, 8], bottom: [426, 212, -3] };
+  function fly(plays) {
+    var slots = root.querySelector('[data-rv-last]');
+    plays.forEach(function (p, i) {
+      var sp = SPOT[p.seat], el = document.createElement('img');
+      el.className = 'rv-fly'; el.alt = '';
+      el.src = 'assets/review/full/' + p.card.rank + p.card.suit + '.webp';
+      el.style.left = (sp[0] - 26) + 'px'; el.style.top = (sp[1] - 36.5) + 'px';
+      root.appendChild(el);
+      var dx = 20 + 13.5 + i * 31 - sp[0], dy = 355 - sp[1];
+      var a = el.animate([
+        { transform: 'rotate(' + sp[2] + 'deg)' },
+        { transform: 'translate(' + dx * .45 + 'px,' + (dy * .45 - 24) + 'px) rotate(' + sp[2] * .3 + 'deg) scale(.8)', offset: .45 },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + 27 / 52 + ')' }
+      ], { duration: 560, delay: i * 55, easing: 'cubic-bezier(.45, 0, .25, 1)', fill: 'both' });
+      a.onfinish = function () {
+        el.remove();
+        var mini = slots.children[i];
+        if (mini && mini.classList.contains('is-wait')) { mini.classList.remove('is-wait'); mini.classList.add('is-land'); }
+      };
+    });
+  }
+  function clearFly() { root.querySelectorAll('.rv-fly').forEach(function (el) { el.remove(); }); }
   function sorted(hand) {
     var trump = rec.contract.suit, order = ['S', 'H', 'C', 'D'];
     if (trump !== R.NO_TRUMP) order = [trump].concat(order.filter(function (s) { return s !== trump; }));
     return hand.slice().sort(function (a, b) { return order.indexOf(a.suit) - order.indexOf(b.suit) || R.RANKS.indexOf(a.rank) - R.RANKS.indexOf(b.rank); });
   }
-  function go(n, animate) { step = Math.max(0, Math.min(steps.length, n)); show(animate); }
+  function go(n, animate) { clearFly(); step = Math.max(0, Math.min(steps.length, n)); show(animate); }
   function stop() { clearInterval(timer); timer = null; root.classList.remove('is-playing'); }
   function play() {
     if (timer) { stop(); return; }
