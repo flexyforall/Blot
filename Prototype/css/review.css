@@ -109,7 +109,6 @@
 @keyframes rv-alt-in { from { opacity: 0; transform: translateY(6px) scale(.9); } }
 .rv-alt[hidden] { display: none !important; }
 .rv-alt:hover { background: #2a7cf0 !important; }
-.rv-alt.is-on { background: #fff !important; color: #1b2230 !important; }
 .rv-card.is-alt { box-shadow: 0 0 0 2px #1bb908, 0 0 16px rgba(27, 185, 8, .7), 0 3px 16px rgba(0, 0, 0, .4); }
 .rv-hand img.is-back { animation: rv-back .35s cubic-bezier(.2, 1.4, .4, 1) both; }
 @keyframes rv-back { from { transform: translateY(-40px) scale(1.3); opacity: 0; } }
