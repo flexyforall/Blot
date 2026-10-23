@@ -226,7 +226,7 @@
         if (go === 'review') {
           if (!lastRound || !window.BlotReview) return;
           box.hidden = true;
-          window.BlotReview.open(lastRound, function () { box.hidden = false; open('game'); });
+          window.BlotReview.open(lastRound, function () { box.hidden = false; open('analysis'); });
           return;
         }
         open(go);
