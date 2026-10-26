@@ -82,12 +82,16 @@
   // where the avatars sit on the simplified table: cards are dealt to them and taken back to them
   var SIMPLE = { top: [1000, 164], left: [282, 434], right: [1718, 434], bottom: [1000, 1000] };
   function simple() { return S.simple > .5; }
-  // The zoom itself, filmed (Higgsfield, MiniMax H3 Max, from the seated room to the simplified table):
+  // The zoom itself, filmed (Higgsfield, Seedance 2.5, from the seated room to the simplified table;
+  // the players blur away into the smoke rather than vanish):
   // played over the room when everyone is seated; if it cannot play, the drawn zoom below is used.
   var zoomVid = document.createElement('video'), zoomReady = false;
   zoomVid.muted = true; zoomVid.playsInline = true; zoomVid.setAttribute('playsinline', ''); zoomVid.preload = 'auto';
   zoomVid.src = A + (zoomVid.canPlayType('video/webm; codecs="vp9"') ? 'zoom.webm' : 'zoom.mp4');
   zoomVid.addEventListener('canplaythrough', function () { zoomReady = true; });
+  // where the clip's first frame matches the seated room, and where its last frame's table matches the
+  // simplified one (scene units; measured on the clip's first and last frames)
+  var ZOOM_START = { w: 2118, x: 10, y: 10 }, ZOOM_END = { w: 1963, x: 61.7, y: 17.7 };
   // card pictures: see faceAt / backAt
 
   function feathered(r, core) {
@@ -508,7 +512,7 @@
   // The filmed zoom: the clip fades in over the live room (its first frame is the same room), plays,
   // and its last frame (the simplified table) hands over to the drawn simplified table.
   async function zoomFilm(ok) {
-    try { zoomVid.currentTime = 0; zoomVid.playbackRate = 1.15; await zoomVid.play(); } catch (e) { return false; }
+    try { zoomVid.currentTime = 0; zoomVid.playbackRate = 1.1; await zoomVid.play(); } catch (e) { return false; }
     if (!ok()) return true;
     tween(S, { vid: 1 }, .7, { ease: ease.inOut });
     await new Promise(function (res) {
@@ -817,10 +821,18 @@
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
     }
-    // the filmed zoom, over the room (cover: the clip is a touch narrower than the scene)
+    // The filmed zoom over the room. The clip (Seedance, 21:9) is wider than the scene: it starts laid
+    // over the room (ZOOM_START) and eases into ZOOM_END, where its table lies exactly on the simplified
+    // one; the red smoke of the simplified table fills in round its edges as it shrinks.
     if (S.vid > 0 && zoomVid.readyState >= 2) {
-      var dh = W * zoomVid.videoHeight / zoomVid.videoWidth;
-      ctx.save(); ctx.globalAlpha = S.vid; ctx.drawImage(zoomVid, 0, (H - dh) / 2, W, dh); ctx.restore();
+      var vw = zoomVid.videoWidth, vh = zoomVid.videoHeight;
+      var p = Math.min(1, zoomVid.currentTime / (zoomVid.duration || 5)), e = p * p * (3 - 2 * p);
+      var c0 = ZOOM_START.w / vw, x0 = ZOOM_START.x, y0 = ZOOM_START.y, c1 = ZOOM_END.w / vw;
+      var vs = c0 + (c1 - c0) * e, vx = x0 + (ZOOM_END.x - x0) * e, vy = y0 + (ZOOM_END.y - y0) * e;
+      ctx.save();
+      if (e > 0 && simpleBg.complete && simpleBg.naturalWidth) { ctx.globalAlpha = S.vid * e; ctx.drawImage(simpleBg, 0, 0, W, H); }
+      ctx.globalAlpha = S.vid; ctx.drawImage(zoomVid, vx, vy, vw * vs, vh * vs);
+      ctx.restore();
     }
     // the simplified table fades in on the same zoom, so the two tables stay on top of each other
     if (S.simple > 0) {
