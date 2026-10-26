@@ -82,8 +82,8 @@
   // where the avatars sit on the simplified table: cards are dealt to them and taken back to them
   var SIMPLE = { top: [1000, 164], left: [282, 434], right: [1718, 434], bottom: [1000, 1000] };
   function simple() { return S.simple > .5; }
-  // The zoom itself, filmed (Higgsfield, Seedance 2.5, from the seated room to the simplified table;
-  // the players blur away into the smoke rather than vanish):
+  // The zoom itself, filmed (Higgsfield, Seedance 2.5, made in a separate chat: the players glide back
+  // out of the frame in their chairs, the room dissolves, the table grows over a crimson storm):
   // played over the room when everyone is seated; if it cannot play, the drawn zoom below is used.
   var zoomVid = document.createElement('video'), zoomReady = false;
   zoomVid.muted = true; zoomVid.playsInline = true; zoomVid.setAttribute('playsinline', ''); zoomVid.preload = 'auto';
@@ -91,7 +91,7 @@
   zoomVid.addEventListener('canplaythrough', function () { zoomReady = true; });
   // where the clip's first frame matches the seated room, and where its last frame's table matches the
   // simplified one (scene units; measured on the clip's first and last frames)
-  var ZOOM_START = { w: 2118, x: 10, y: 10 }, ZOOM_END = { w: 1963, x: 61.7, y: 17.7 };
+  var ZOOM_START = { w: 2040, x: -10, y: 10 }, ZOOM_END = { w: 2063, x: 6, y: 3 };
   // card pictures: see faceAt / backAt
 
   function feathered(r, core) {
@@ -522,8 +522,8 @@
     });
     if (!ok()) return true;
     S.zoom = 1; S.push = 1;
-    tween(S, { simple: 1 }, .8, { ease: ease.inOut });
-    await wait(.8); if (!ok()) return true;
+    tween(S, { simple: 1 }, 1.2, { ease: ease.inOut });
+    await wait(1.2); if (!ok()) return true;
     S.vid = 0;
     screen.classList.add('tb-simple');
     await wait(2.2);
@@ -822,8 +822,8 @@
     ctx.restore();
     }
     // The filmed zoom over the room. The clip (Seedance, 21:9) is wider than the scene: it starts laid
-    // over the room (ZOOM_START) and eases into ZOOM_END, where its table lies exactly on the simplified
-    // one; the red smoke of the simplified table fills in round its edges as it shrinks.
+    // over the room (ZOOM_START) and eases into ZOOM_END, where the gold oval of its last frame lies on
+    // the simplified table; the red smoke of the simplified table fills in round its edges.
     if (S.vid > 0 && zoomVid.readyState >= 2) {
       var vw = zoomVid.videoWidth, vh = zoomVid.videoHeight;
       var p = Math.min(1, zoomVid.currentTime / (zoomVid.duration || 5)), e = p * p * (3 - 2 * p);
