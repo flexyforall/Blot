@@ -87,6 +87,7 @@
       '<button type="button" aria-label="Done" class="rv-icon" data-rv-close><svg viewBox="0 0 22 20" width="22" height="20"><path d="M2.5 10.5L8 16 19.5 3.5" stroke="currentColor" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' +
       '<div class="rv-table"><i class="rv-table_felt">CLASSROOM</i><i class="rv-table_sweep"><i class="rv-table_rim"></i></i></div>' +
       seatHtml('top') + seatHtml('left') + seatHtml('right') +
+      ['top', 'left', 'right'].map(function (seat) { return '<div class="rv-backs rv-backs--' + seat + '" data-rv-backs="' + seat + '"></div>'; }).join('') +
       '<div class="rv-chip rv-chip--' + c.seat + '"><i data-s="' + c.suit + '"></i>' + (c.kaput ? 'Kaput' : c.value) + (c.sur ? ' ×4' : c.contra ? ' ×2' : '') + '</div>' +
       '<div class="rv-trick" data-rv-trick></div>' +
       '<div class="rv-hand" data-rv-hand></div>' +
@@ -133,6 +134,15 @@
       return '<img class="' + (c.id === upNext ? 'is-next' : c.id === gone ? 'is-gone' : '') + '" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="">';
     }).join('');
     if (fromHand) throwFromHand(hand.map(function (c) { return c.id; }).indexOf(gone), hand.length, collect);
+    // the other players' cards, face down in front of them: what they still hold at this point
+    root.querySelectorAll('[data-rv-backs]').forEach(function (el) {
+      var seat = el.getAttribute('data-rv-backs');
+      var left = rec.hands[seat].length - steps.slice(0, step).filter(function (s) { return s.seat === seat; }).length;
+      if (el.children.length === left) return;
+      var html = '';
+      for (var i = 0; i < left; i++) html += '<i style="--r:' + ((i - (left - 1) / 2) * 6) + 'deg"></i>';
+      el.innerHTML = html;
+    });
     // whose move it was
     root.querySelectorAll('[data-rv-seat]').forEach(function (el) { el.classList.toggle('is-turn', !!cur && el.getAttribute('data-rv-seat') === cur.seat); });
     // the coach only comments on your moves; while the other players' cards run past he stays as he was

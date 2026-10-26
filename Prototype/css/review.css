@@ -55,6 +55,16 @@
 .rv-chip--right { left: 749px; top: 137px; }
 .rv-chip--bottom { left: 508px; top: 226px; }
 
+/* the other players' cards, face down in a small fan in front of each of them (the red back of the main table) */
+.rv-backs { position: absolute; display: flex; height: 26px; pointer-events: none; }
+.rv-backs i { width: 17px; height: 24px; flex: none; border-radius: 2px; border: 1.5px solid #fff; transform: rotate(var(--r)); transform-origin: 50% 120%;
+  background: radial-gradient(circle, rgba(255, 236, 230, .75) .7px, transparent 1.1px) 0 0 / 4px 4px, #b5121f; box-shadow: 0 1px 3px rgba(0, 0, 0, .5); }
+.rv-backs i + i { margin-left: -11px; }
+.rv-backs--top { left: 50%; top: 110px; transform: translateX(-50%); }
+.rv-backs--left { left: 214px; top: 171px; }
+.rv-backs--right { right: 236px; top: 168px; }
+.rv.is-in .rv-backs { animation: rv-fade .4s .7s ease both; }
+
 /* the cards of the current trick, each in front of its player */
 .rv-trick { position: absolute; inset: 0; pointer-events: none; }
 .rv-card { position: absolute; width: 52px; height: 73px; margin: -36.5px 0 0 -26px; border-radius: 3px; box-shadow: 0 3px 16px rgba(0, 0, 0, .4); }
