@@ -82,6 +82,12 @@
   // where the avatars sit on the simplified table: cards are dealt to them and taken back to them
   var SIMPLE = { top: [1000, 164], left: [282, 434], right: [1718, 434], bottom: [1000, 1000] };
   function simple() { return S.simple > .5; }
+  // The zoom itself, filmed (Higgsfield, MiniMax H3 Max, from the seated room to the simplified table):
+  // played over the room when everyone is seated; if it cannot play, the drawn zoom below is used.
+  var zoomVid = document.createElement('video'), zoomReady = false;
+  zoomVid.muted = true; zoomVid.playsInline = true; zoomVid.setAttribute('playsinline', ''); zoomVid.preload = 'auto';
+  zoomVid.src = A + (zoomVid.canPlayType('video/webm; codecs="vp9"') ? 'zoom.webm' : 'zoom.mp4');
+  zoomVid.addEventListener('canplaythrough', function () { zoomReady = true; });
   // card pictures: see faceAt / backAt
 
   function feathered(r, core) {
@@ -323,7 +329,7 @@
   function stopFire() { if (fireGain) fireGain.gain.setTargetAtTime(0, ac.currentTime, .3); }
 
   // ---------- Scene state ----------
-  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, push: 0, blur: 0, simple: 0 };
+  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, push: 0, blur: 0, simple: 0, vid: 0 };
   var MOVE_EVERY = 15;   // seconds between one character's gesture and the next one's
   var moves = { on: false, next: 0, last: null };
   var cards = [], particles = [], clock = 0, nextSmoke = 2;
@@ -356,7 +362,8 @@
       s.light = 0; s.idle = false; s.ring = 0; s.next = 0;
       resetPose(s);
     });
-    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0;
+    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0; S.vid = 0;
+    try { zoomVid.pause(); zoomVid.currentTime = 0; } catch (e) {}
     screen.classList.remove('tb-zoom', 'tb-simple');
     cards = []; particles = []; hover = null; humanWait = null; handHidden = false;
     screen.classList.remove('tb-has-hand', 'tb-hand-up');
@@ -485,6 +492,8 @@
   async function simplify(ok) {
     moves.on = false;
     screen.classList.add('tb-zoom');
+    if (!reduced && zoomReady && await zoomFilm(ok)) return;
+    if (!ok()) return;
     if (reduced) { S.zoom = S.push = 1; S.simple = 1; screen.classList.add('tb-simple'); await wait(.3); return; }
     // (scene time runs at SPEED 2: these are about 1.8s of zoom in real time)
     tween(S, { zoom: 1 }, 3.6, { ease: ease.inOut });
@@ -494,6 +503,27 @@
     await wait(3.4); if (!ok()) return;
     screen.classList.add('tb-simple');
     await wait(2.2);
+  }
+
+  // The filmed zoom: the clip fades in over the live room (its first frame is the same room), plays,
+  // and its last frame (the simplified table) hands over to the drawn simplified table.
+  async function zoomFilm(ok) {
+    try { zoomVid.currentTime = 0; zoomVid.playbackRate = 1.15; await zoomVid.play(); } catch (e) { return false; }
+    if (!ok()) return true;
+    tween(S, { vid: 1 }, .7, { ease: ease.inOut });
+    await new Promise(function (res) {
+      var done = function () { zoomVid.removeEventListener('ended', done); res(); };
+      zoomVid.addEventListener('ended', done);
+      setTimeout(done, 7000);
+    });
+    if (!ok()) return true;
+    S.zoom = 1; S.push = 1;
+    tween(S, { simple: 1 }, .8, { ease: ease.inOut });
+    await wait(.8); if (!ok()) return true;
+    S.vid = 0;
+    screen.classList.add('tb-simple');
+    await wait(2.2);
+    return true;
   }
 
   // ---------- View API for the game controller ----------
@@ -787,6 +817,11 @@
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
     }
+    // the filmed zoom, over the room (cover: the clip is a touch narrower than the scene)
+    if (S.vid > 0 && zoomVid.readyState >= 2) {
+      var dh = W * zoomVid.videoHeight / zoomVid.videoWidth;
+      ctx.save(); ctx.globalAlpha = S.vid; ctx.drawImage(zoomVid, 0, (H - dh) / 2, W, dh); ctx.restore();
+    }
     // the simplified table fades in on the same zoom, so the two tables stay on top of each other
     if (S.simple > 0) {
       ctx.save(); ctx.globalAlpha = S.simple;
@@ -845,6 +880,7 @@
   playBtn.addEventListener('click', function () {
     audio();
     IDS.forEach(function (id) { SEATS[id].vid.load(); });
+    zoomVid.load();
     // let the "into battle" hit land, then cut to the table
     setTimeout(function () { window.BlotNav.show('table'); }, 700);
   });
@@ -865,6 +901,7 @@
       if (window.BlotGame) window.BlotGame.stop();
       cancelAnimationFrame(raf);
       IDS.forEach(function (id) { try { SEATS[id].vid.pause(); } catch (err) {} });
+      try { zoomVid.pause(); } catch (err) {}
       stopFire();
     }
   });
