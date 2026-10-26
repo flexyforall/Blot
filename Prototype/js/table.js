@@ -79,6 +79,14 @@
   // the simplified in-play table (Figma 2289:3981) the camera zooms into once everyone is seated
   var simpleBg = new Image(); simpleBg.src = A + 'simple/bg.webp';
   var simpleTable = new Image(); simpleTable.src = A + 'simple/table.webp';
+  // the in-play table after the filmed zoom is the clip's own last frame (storm + gold oval, 2x), laid
+  // exactly where the clip ends, so the hand-over has no seam; a stretched copy fills the thin edges
+  var storm = new Image(); storm.src = A + 'simple/storm.webp';
+  function stormReady() { return storm.complete && storm.naturalWidth > 0; }
+  function drawStorm() {
+    ctx.drawImage(storm, 0, 0, W, H);
+    ctx.drawImage(storm, ZOOM_END.x, ZOOM_END.y, ZOOM_END.w, ZOOM_END.w * storm.naturalHeight / storm.naturalWidth);
+  }
   // where the avatars sit on the simplified table: cards are dealt to them and taken back to them
   var SIMPLE = { top: [1000, 164], left: [282, 434], right: [1718, 434], bottom: [1000, 1000] };
   function simple() { return S.simple > .5; }
@@ -480,7 +488,7 @@
     // everyone is seated: the lamps come up over the table
     moves.on = true; moves.next = clock + 6;
     tween(S, { amb: .14, lamps: 1 }, 1.4);
-    await wait(2.2); if (!ok()) return;
+    await wait(1.2); if (!ok()) return;
 
     // then the camera moves in over the table and the room gives way to the simplified table
     await simplify(ok); if (!ok()) return;
@@ -512,21 +520,19 @@
   // The filmed zoom: the clip fades in over the live room (its first frame is the same room), plays,
   // and its last frame (the simplified table) hands over to the drawn simplified table.
   async function zoomFilm(ok) {
-    try { zoomVid.currentTime = 0; zoomVid.playbackRate = 1.1; await zoomVid.play(); } catch (e) { return false; }
+    try { zoomVid.currentTime = 0; zoomVid.playbackRate = 1.5; await zoomVid.play(); } catch (e) { return false; }
     if (!ok()) return true;
-    tween(S, { vid: 1 }, .7, { ease: ease.inOut });
+    tween(S, { vid: 1 }, .5, { ease: ease.inOut });
     await new Promise(function (res) {
       var done = function () { zoomVid.removeEventListener('ended', done); res(); };
       zoomVid.addEventListener('ended', done);
       setTimeout(done, 7000);
     });
     if (!ok()) return true;
-    S.zoom = 1; S.push = 1;
-    tween(S, { simple: 1 }, 1.2, { ease: ease.inOut });
-    await wait(1.2); if (!ok()) return true;
-    S.vid = 0;
+    // the in-play table is the clip's last frame in the same place: switch with no fade
+    S.zoom = 1; S.push = 1; S.simple = 1; S.vid = 0;
     screen.classList.add('tb-simple');
-    await wait(2.2);
+    await wait(1.6);
     return true;
   }
 
@@ -823,14 +829,14 @@
     }
     // The filmed zoom over the room. The clip (Seedance, 21:9) is wider than the scene: it starts laid
     // over the room (ZOOM_START) and eases into ZOOM_END, where the gold oval of its last frame lies on
-    // the simplified table; the red smoke of the simplified table fills in round its edges.
+    // the simplified table; the stretched storm fills in round its edges.
     if (S.vid > 0 && zoomVid.readyState >= 2) {
       var vw = zoomVid.videoWidth, vh = zoomVid.videoHeight;
       var p = Math.min(1, zoomVid.currentTime / (zoomVid.duration || 5)), e = p * p * (3 - 2 * p);
       var c0 = ZOOM_START.w / vw, x0 = ZOOM_START.x, y0 = ZOOM_START.y, c1 = ZOOM_END.w / vw;
       var vs = c0 + (c1 - c0) * e, vx = x0 + (ZOOM_END.x - x0) * e, vy = y0 + (ZOOM_END.y - y0) * e;
       ctx.save();
-      if (e > 0 && simpleBg.complete && simpleBg.naturalWidth) { ctx.globalAlpha = S.vid * e; ctx.drawImage(simpleBg, 0, 0, W, H); }
+      if (e > 0 && stormReady()) { ctx.globalAlpha = S.vid * e; ctx.drawImage(storm, 0, 0, W, H); }
       ctx.globalAlpha = S.vid; ctx.drawImage(zoomVid, vx, vy, vw * vs, vh * vs);
       ctx.restore();
     }
@@ -839,11 +845,17 @@
       ctx.save(); ctx.globalAlpha = S.simple;
       var bk = 1 + .08 * (1 - z);
       ctx.translate(1000, 460); ctx.scale(bk, bk); ctx.translate(-1000, -460);
-      if (simpleBg.complete && simpleBg.naturalWidth) ctx.drawImage(simpleBg, 0, 0, W, H);
-      ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
       var tk = k / 1.34;
-      ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
-      if (simpleTable.complete && simpleTable.naturalWidth) ctx.drawImage(simpleTable, 0, 0, W, H);
+      if (stormReady()) {
+        ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
+        ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
+        drawStorm();
+      } else {
+        if (simpleBg.complete && simpleBg.naturalWidth) ctx.drawImage(simpleBg, 0, 0, W, H);
+        ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
+        ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
+        if (simpleTable.complete && simpleTable.naturalWidth) ctx.drawImage(simpleTable, 0, 0, W, H);
+      }
       ctx.restore();
     }
 
@@ -877,7 +889,7 @@
   }
 
   // ---------- Boot: cut the sprites and paint the deck once the art has loaded ----------
-  var art = [img, room, simpleBg, simpleTable, backArt].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
+  var art = [img, room, simpleBg, simpleTable, storm, backArt].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
   var booting = Promise.all(art.map(function (im) { return im.decode().catch(function () {}); })).then(function () {
     IDS.forEach(function (id) {
       var s = SEATS[id];
