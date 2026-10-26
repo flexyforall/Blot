@@ -914,11 +914,11 @@
       roundShown[t[0]] = t[1];
     });
   }
-  // cards: [{rank, suit}] (engine cards) or [] for none yet. Small copies of the card PNGs.
+  // cards: [{rank, suit}] (engine cards) or [] for none yet. The simplified minis (big index, suit), as in Classroom.
   function setLastTrick(cards) {
     var box = screen.querySelector('[data-trick-cards]');
     box.innerHTML = (cards || []).map(function (c) {
-      return '<img class="tb-mini" src="' + A + 'cards/bicycle/' + c.rank + c.suit + '.webp" alt="' + c.rank + c.suit + '">';
+      return '<img class="tb-mini" src="assets/review/mini/' + c.rank + c.suit + '.webp" alt="' + c.rank + c.suit + '">';
     }).join('');
     box.hidden = !(cards && cards.length);
     screen.querySelector('[data-trick-empty]').hidden = !box.hidden;
