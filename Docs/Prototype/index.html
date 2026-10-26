@@ -78,10 +78,24 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .next h3{margin:0 0 .2em;font:400 1.6em var(--display);color:var(--gold-soft);letter-spacing:.05em}
 .next p{margin:0 0 .8em;color:var(--muted);font-size:.95em}
 .next .btn{font-size:.9em}
-.intro{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8em;background:radial-gradient(ellipse at center, rgba(18,11,8,.55), rgba(10,6,4,.92));transition:opacity .6s;text-align:center;padding-inline:16px}
+.intro{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8em;background:#120303;transition:opacity 1s;text-align:center;padding-inline:16px}
 .intro.off{opacity:0;pointer-events:none}
-.intro h1{margin:0;font:400 4.2em var(--display);letter-spacing:.08em;color:var(--gold-soft);text-wrap:balance}
-.intro p{margin:0;color:var(--muted);font-size:1.2em}
+.intro > :not(.splash){position:relative}
+/* Splash: the minimalist table (thin gold rim) over a slowly churning crimson storm.
+   Two copies of the storm drift against each other; the table art sits still on top. */
+.splash{position:absolute;inset:0;overflow:hidden;transition:transform 1.2s cubic-bezier(.3,0,.2,1)}
+.intro.off .splash{transform:scale(1.08)}
+.splash .storm{position:absolute;inset:-8%;background:url(splash_storm.webp) center/cover}
+.splash .s1{animation:drift1 26s ease-in-out infinite alternate}
+.splash .s2{opacity:.4;mix-blend-mode:screen;animation:drift2 34s ease-in-out infinite alternate}
+.splash .felt{position:absolute;inset:0;background:url(splash_table.webp) center/100% 100%}
+.splash .flare{position:absolute;inset:0;background:radial-gradient(ellipse 45% 40% at 50% 50%, rgba(255,40,30,.18), transparent 70%);mix-blend-mode:screen;animation:breathe 6s ease-in-out infinite}
+@keyframes drift1{from{transform:scale(1) rotate(0deg) translate(0,0)}to{transform:scale(1.07) rotate(1.2deg) translate(-1.5%,1%)}}
+@keyframes drift2{from{transform:scaleX(-1) scale(1.05) rotate(0deg)}to{transform:scaleX(-1) scale(1) rotate(-1.6deg) translate(1.5%,-1%)}}
+@keyframes breathe{50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.splash .storm,.splash .flare{animation:none}}
+.intro h1{margin:0;font:400 4.2em var(--display);letter-spacing:.08em;color:var(--gold-soft);text-wrap:balance;text-shadow:0 .08em .4em rgba(40,0,0,.6)}
+.intro p{margin:0;color:#f0d9c0;font-size:1.2em;text-shadow:0 .1em .4em rgba(40,0,0,.7)}
 .open{font:700 1.15em var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);background:linear-gradient(#f1d49a,#c98f2e);border:0;border-radius:3em;padding:.9em 2.4em;cursor:pointer;margin-top:.6em;box-shadow:0 .5em 1.6em rgba(217,164,65,.35)}
 .open:hover{filter:brightness(1.08)}
 .open:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
@@ -114,6 +128,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
       </div>
     </div>
     <div class="intro" id="intro">
+      <div class="splash" aria-hidden="true"><div class="storm s1"></div><div class="storm s2"></div><div class="felt"></div><div class="flare"></div></div>
       <h1>Bazaar Blot</h1>
       <p>Салон у камина · 4 игрока · 2 на 2</p>
       <button class="open" id="open" type="button">Открыть стол</button>
