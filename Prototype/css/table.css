@@ -655,3 +655,6 @@
 /* the speech clouds follow the avatars */
 .tb-simple .tb-bubble--left { top: 104px; }
 .tb-simple .tb-bubble--right { top: 104px; }
+/* the seating intro shows only the avatar and nickname; levels appear with the simplified table */
+.tb-plate .tb-badge { display: none; }
+.tb-plate { height: 48px; }
