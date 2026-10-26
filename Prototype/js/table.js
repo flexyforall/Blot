@@ -511,9 +511,10 @@
     return { x: s.pile[0] + (horiz ? o : 0), y: s.pile[1] + (horiz ? 0 : o), rot: s.pileRot + (i - (n - 1) / 2) * .03 };
   }
   function fanAt(i, n) {
-    var a = (i - (n - 1) / 2) * .058, R0 = 1100;
-    return { x: 1000 + Math.sin(a) * R0, y: 850 + R0 * (1 - Math.cos(a)), rot: a };
+    var a = (i - (n - 1) / 2) * (simple() ? .066 : .058), R0 = 1100;
+    return { x: 1000 + Math.sin(a) * R0, y: (simple() ? 838 : 850) + R0 * (1 - Math.cos(a)), rot: a };
   }
+  function handScale() { return simple() ? 2 : 1.7; }
 
   var view = {
     alive: function (tok) { return tok === run && active; },
@@ -567,7 +568,7 @@
       ids.forEach(function (id, i) {
         var c = byId[id], t = fanAt(i, ids.length), first = !c.mine;
         c.z = 300 + i; c.mine = true;
-        tween(c, { x: t.x, y: t.y, rot: t.rot, sc: 1.7 }, first ? .5 : .3, { delay: first ? i * .04 : 0, ease: ease.inOut });
+        tween(c, { x: t.x, y: t.y, rot: t.rot, sc: handScale() }, first ? .5 : .3, { delay: first ? i * .04 : 0, ease: ease.inOut });
         if (c.flip < 1) tween(c, { flip: 1 }, .35, { delay: .45 + i * .06, ease: ease.inOut, fn: function (p) { if (p === 1) flick(.1); } });
       });
       return wait(.9);
@@ -873,10 +874,22 @@
       if (shown[t[0]] !== t[1]) {
         cell.classList.remove('is-counting'); void cell.offsetWidth; cell.classList.add('is-counting');
       }
+      var total = screen.querySelector('[data-total="' + t[0] + '"]');
       countUp(shown[t[0]], t[1], function (n) {
         cells.forEach(function (el) { el.innerHTML = '<b>' + n + '</b><small>/' + window.BlotRules.GAME_TARGET + '</small>'; });
+        total.textContent = n + '/' + window.BlotRules.GAME_TARGET;
       });
       shown[t[0]] = t[1];
+    });
+  }
+  // The simplified table's big numbers: the points each side has taken so far this round.
+  var roundShown = { us: 0, them: 0 };
+  function setRound(us, them) {
+    [['us', us], ['them', them]].forEach(function (t) {
+      var el = screen.querySelector('[data-round="' + t[0] + '"]');
+      if (roundShown[t[0]] !== t[1] && t[1] > 0) { el.classList.remove('is-counting'); void el.offsetWidth; el.classList.add('is-counting'); }
+      countUp(roundShown[t[0]], t[1], function (n) { el.textContent = n; });
+      roundShown[t[0]] = t[1];
     });
   }
   // cards: [{rank, suit}] (engine cards) or [] for none yet. Small copies of the card PNGs.
@@ -888,7 +901,7 @@
     box.hidden = !(cards && cards.length);
     screen.querySelector('[data-trick-empty]').hidden = !box.hidden;
   }
-  setScore(0, 0); setLastTrick([]);
+  setScore(0, 0); setRound(0, 0); setLastTrick([]);
   // Play-randomly shortcuts (js/game.js): faster animations, and your pending card picked for you.
   function setSpeed(n) { SPEED = n; }
   function autoPlayCard() {
@@ -897,7 +910,7 @@
     w.hand.forEach(function (h) { var c = byId[h]; if (c) { c.base = 0; c.dim = 0; } });
     w.res(w.legal[Math.floor(Math.random() * w.legal.length)]);
   }
-  window.BlotTable = { setScore: setScore, setLastTrick: setLastTrick, countUp: countUp, setSpeed: setSpeed, autoPlayCard: autoPlayCard };
+  window.BlotTable = { setScore: setScore, setRound: setRound, setLastTrick: setLastTrick, countUp: countUp, setSpeed: setSpeed, autoPlayCard: autoPlayCard };
 
   // Chat and reactions: each button opens its popover; a pick pops up above your seat.
   var say = screen.querySelector('[data-say]');
@@ -947,6 +960,8 @@
       screen.querySelectorAll('[data-react-tab]').forEach(function (p) { p.hidden = p.getAttribute('data-react-tab') !== want; });
     });
   });
+  var glove = screen.querySelector('[data-glove]');
+  if (glove) glove.addEventListener('click', function (e) { e.stopPropagation(); closePops(null); bubble('bottom', '🥊', 'emoji'); });
   screen.querySelectorAll('[data-react-close]').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); });
   });

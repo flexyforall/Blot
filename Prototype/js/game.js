@@ -311,6 +311,8 @@
     R.SEATS.forEach(function (s) { rec.hands[s] = hands[s].slice(); });
     setContract(null);
     window.BlotTable.setLastTrick([]);
+    var roundPts = { us: 0, them: 0 };
+    window.BlotTable.setRound(0, 0);
     view.say(dealer, 'Dealing');
     await view.deal(tok, deck, dealt.sequence, dealer); if (!alive()) return;
     R.SEATS.forEach(function (s) { if (s !== 'bottom') view.layoutPile(s, ids(hands[s])); });
@@ -379,6 +381,8 @@
       await view.collect(win.seat, plays.map(function (p) { return p.card.id; })); if (!alive()) return;
       stock[team(win.seat)] = stock[team(win.seat)].concat(plays.map(function (p) { return p.card; }));
       window.BlotTable.setLastTrick(plays.map(function (p) { return p.card; }));
+      roundPts[team(win.seat)] += rec.tricks[rec.tricks.length - 1].points;
+      window.BlotTable.setRound(roundPts.us, roundPts.them);
       lastTrick = team(win.seat);
       leader = win.seat;
     }
@@ -387,6 +391,7 @@
     var res = R.roundResult({ bid: contract, stock: stock, lastTrick: lastTrick, combos: comboWin, blotRebot: blot });
     game.score.us += res.us; game.score.them += res.them;
     window.BlotTable.setScore(game.score.us, game.score.them);
+    window.BlotTable.setRound(res.us, res.them);
     rec.res = res; rec.score = { us: game.score.us, them: game.score.them };
     lastRound = rec;
     view.chime();

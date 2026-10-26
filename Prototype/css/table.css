@@ -658,3 +658,33 @@
 /* the seating intro shows only the avatar and nickname; levels appear with the simplified table */
 .tb-plate .tb-badge { display: none; }
 .tb-plate { height: 48px; }
+
+/* nicknames are not shown at all while the players are seated: the avatars of the simplified table carry them */
+.tb-plate { display: none !important; }
+/* the in-play HUD of the simplified table (Figma 2289:3981) */
+.tb-sc { position: absolute; right: 20px; top: 20px; width: 145px; height: 63px; display: flex; align-items: center; padding: 6px 8px; box-sizing: border-box; border-radius: 4px; visibility: hidden;
+  box-shadow: 0 2px 16px #000, 0 -2px 12px rgba(255, 255, 255, .2); }
+.tb-sc_bg { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 4px; }
+.tb-sc_cell { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0; }
+.tb-sc_cell p { font-weight: 600; font-size: 10px; line-height: 13px; color: rgba(255, 255, 255, .45); }
+.tb-sc_cell b { font-weight: 700; font-size: 20px; line-height: 24px; background: linear-gradient(180deg, #fff 30%, #c7d8ff); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .8)); }
+.tb-sc_cell b.is-counting { animation: tb-sc-pop .5s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes tb-sc-pop { 40% { transform: scale(1.25); } }
+.tb-sc_cell span { font-weight: 600; font-size: 10px; line-height: 13px; color: #fff; text-shadow: 0 2px 2px rgba(0, 0, 0, .5); }
+.tb-sc_divider { position: relative; width: 1px; height: 30px; background: rgba(255, 255, 255, .2); }
+.tb-btn--glove { display: none !important; }
+.tb-simple .tb-score { display: none; }
+.tb-simple .tb-sc { visibility: visible; animation: tb-drop .45s cubic-bezier(.34, 1.4, .64, 1) .3s both; }
+.tb-simple .tb-trick { left: 20px; top: 20px; height: 44px; }
+.tb-simple .tb-trick_empty { display: none; }
+.tb-simple .tb-trick_cards { gap: 6px; }
+.tb-simple .tb-mini { width: 32px; height: 44px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .9)); }
+/* bottom: the reactions face and the glove, side by side at x 152 (no settings gear here; Escape still leaves) */
+.tb-simple .tb-bottom { left: 152px; right: auto; top: 325px; justify-content: flex-start; gap: 4px; }
+.tb-simple .tb-bottom [data-table-exit] { display: none; }
+.tb-simple .tb-btn--glove { display: grid !important; }
+.table .tb-btn--glove { overflow: visible; background: none; transition: transform .15s ease; }
+.tb-btn--glove img { width: 60px; height: 62px; margin: -6px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
+.table .tb-btn--glove:active { transform: scale(.9) rotate(-8deg); }
+.tb-simple .tb-btn--face img { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 -4px 6px rgba(155, 155, 155, .3)); }
