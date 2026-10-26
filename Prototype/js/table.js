@@ -358,7 +358,8 @@
     });
     S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0;
     screen.classList.remove('tb-zoom', 'tb-simple');
-    cards = []; particles = []; hover = null; humanWait = null;
+    cards = []; particles = []; hover = null; humanWait = null; handHidden = false;
+    screen.classList.remove('tb-has-hand', 'tb-hand-up');
     screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.remove('is-turn'); });
   }
   function sparkle(x, y, n) {
@@ -512,7 +513,25 @@
   }
   function fanAt(i, n) {
     var a = (i - (n - 1) / 2) * (simple() ? .066 : .058), R0 = 1100;
-    return { x: 1000 + Math.sin(a) * R0, y: (simple() ? 838 : 850) + R0 * (1 - Math.cos(a)), rot: a };
+    return { x: 1000 + Math.sin(a) * R0, y: (simple() ? 838 : 850) + R0 * (1 - Math.cos(a)) + (handHidden ? 330 : 0), rot: a };
+  }
+  // "Hide cards" (the button right of the hand): the fan slides down out of sight and your avatar
+  // shows again in its place; the hand comes back on the button, or by itself when it is your move.
+  var handHidden = false;
+  function myCards() { return cards.filter(function (c) { return c.mine; }).sort(function (a, b) { return a.z - b.z; }); }
+  function handState() {
+    var has = myCards().length > 0;
+    screen.classList.toggle('tb-has-hand', has);
+    screen.classList.toggle('tb-hand-up', has && !handHidden);
+    var b = screen.querySelector('[data-hand-toggle]');
+    if (b) { b.setAttribute('aria-pressed', handHidden ? 'true' : 'false'); b.setAttribute('aria-label', handHidden ? 'Показать карты' : 'Спрятать карты'); }
+  }
+  function setHandHidden(on) {
+    if (handHidden === on) return;
+    handHidden = on;
+    var mine = myCards();
+    mine.forEach(function (c, i) { var t = fanAt(i, mine.length); tween(c, { x: t.x, y: t.y, rot: t.rot }, .35, { delay: (on ? i : mine.length - 1 - i) * .02, ease: ease.inOut }); });
+    handState();
   }
   function handScale() { return simple() ? 2 : 1.7; }
 
@@ -571,6 +590,7 @@
         tween(c, { x: t.x, y: t.y, rot: t.rot, sc: handScale() }, first ? .5 : .3, { delay: first ? i * .04 : 0, ease: ease.inOut });
         if (c.flip < 1) tween(c, { flip: 1 }, .35, { delay: .45 + i * .06, ease: ease.inOut, fn: function (p) { if (p === 1) flick(.1); } });
       });
+      handState();
       return wait(.9);
     },
     // an opponent's face-down cards, re-spaced after a card leaves
@@ -579,6 +599,7 @@
     },
     // wait for you to tap one of the legal cards; the others are darkened
     waitHuman: function (hand, legal, hint) {
+      setHandHidden(false);   // your move: the hand comes back up
       hand.forEach(function (id) {
         var c = byId[id], ok = legal.indexOf(id) >= 0;
         c.base = ok ? 18 : 0;
@@ -590,6 +611,7 @@
       var c = byId[id], t = (simple() ? TRICK_SIMPLE : TRICK_SPOT)[seat];
       c.mine = false; c.base = 0; c.z = trickZ++;
       if (c === hover) hover = null;
+      handState();
       flick(.25);
       tween(c, { dim: 0, lift: 0 }, .15);
       tween(c, { flip: 1 }, .3, { ease: ease.inOut });
@@ -605,7 +627,7 @@
     },
     clear: async function () {
       await Promise.all(cards.map(function (c) { return tween(c, { alpha: 0, sc: c.sc * .8 }, .3); }));
-      cards = []; byId = {}; hover = null;
+      cards = []; byId = {}; hover = null; handState();
     },
     // whoever has to act gets their nameplate lit; null for nobody
     turn: function (seat) {
@@ -960,6 +982,8 @@
       screen.querySelectorAll('[data-react-tab]').forEach(function (p) { p.hidden = p.getAttribute('data-react-tab') !== want; });
     });
   });
+  var handBtn = screen.querySelector('[data-hand-toggle]');
+  if (handBtn) handBtn.addEventListener('click', function (e) { e.stopPropagation(); closePops(null); setHandHidden(!handHidden); });
   var glove = screen.querySelector('[data-glove]');
   if (glove) glove.addEventListener('click', function (e) { e.stopPropagation(); closePops(null); bubble('bottom', '🥊', 'emoji'); });
   screen.querySelectorAll('[data-react-close]').forEach(function (b) {

@@ -615,8 +615,9 @@
 .tb-prof--top { left: 378px; top: 32px; }
 .tb-prof--left { left: 72px; top: 147px; }
 .tb-prof--right { left: 684px; top: 147px; }
-/* you: right of your hand, clear of the cards */
-.tb-prof--bottom { left: 600px; top: 288px; }
+/* you: in the middle at the bottom, seen until your cards are dealt (or while they are hidden) */
+.tb-prof--bottom { left: 378px; top: 286px; transition: opacity .3s ease, transform .3s ease; }
+.tb-simple.tb-hand-up .tb-prof--bottom { opacity: 0 !important; transform: translateY(16px); }
 .tb-prof--green .tb-prof_lvl { background: linear-gradient(180deg, #1f6b2a, #0a2a10); border-color: #6fe07a; box-shadow: 0 0 6px .6px rgba(60, 220, 90, .8), inset 0 -1.2px 2.4px rgba(140, 255, 150, .5); }
 .tb-prof_ring { position: absolute; left: 9.6px; top: 0; width: 76.8px; height: 76.8px; border-radius: 50%;
   background: linear-gradient(180deg, #3a3f47, #0c0e11); box-shadow: 0 0 0 .6px rgba(91, 100, 112, .7), 0 2.4px 6px rgba(0, 0, 0, .6); transition: box-shadow .25s; }
@@ -693,3 +694,14 @@
 .tb-btn--glove img { width: 40px; height: 52px; margin: -2px 0; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 0 6px rgba(255, 90, 60, .35)); }
 .table .tb-btn--glove:active { transform: scale(.9) rotate(-8deg); }
 .tb-simple .tb-btn--face img { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 -4px 6px rgba(155, 155, 155, .3)); }
+
+/* hide / show your cards: right of the hand, centred on the bottom-left icons (y 325, 48 high) */
+.tb-handbtn { position: absolute; left: 604px; top: 325px; width: 48px; height: 48px; display: none; place-items: center; padding: 0; border-radius: 12px; cursor: pointer;
+  background: rgba(10, 12, 18, .72); border: 1px solid rgba(255, 255, 255, .14); color: #fff; box-shadow: 0 2px 8px rgba(0, 0, 0, .5); pointer-events: auto; transition: transform .15s ease, background .15s ease; }
+.tb-simple.tb-has-hand .tb-handbtn { display: grid; animation: tb-prof-badge .3s cubic-bezier(.3, 1.8, .5, 1) both; }
+.tb-handbtn:active { transform: scale(.92); }
+.tb-handbtn:focus-visible { outline: 2px solid #4384ff; outline-offset: 2px; }
+.tb-handbtn_show { display: none; }
+.tb-handbtn[aria-pressed="true"] .tb-handbtn_hide { display: none; }
+.tb-handbtn[aria-pressed="true"] .tb-handbtn_show { display: block; }
+.tb-handbtn[aria-pressed="true"] { background: rgba(27, 106, 216, .9); border-color: rgba(255, 255, 255, .3); }
