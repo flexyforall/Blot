@@ -615,6 +615,9 @@
 .tb-prof--top { left: 378px; top: 32px; }
 .tb-prof--left { left: 72px; top: 147px; }
 .tb-prof--right { left: 684px; top: 147px; }
+/* you: right of your hand, clear of the cards */
+.tb-prof--bottom { left: 600px; top: 288px; }
+.tb-prof--green .tb-prof_lvl { background: linear-gradient(180deg, #1f6b2a, #0a2a10); border-color: #6fe07a; box-shadow: 0 0 6px .6px rgba(60, 220, 90, .8), inset 0 -1.2px 2.4px rgba(140, 255, 150, .5); }
 .tb-prof_ring { position: absolute; left: 9.6px; top: 0; width: 76.8px; height: 76.8px; border-radius: 50%;
   background: linear-gradient(180deg, #3a3f47, #0c0e11); box-shadow: 0 0 0 .6px rgba(91, 100, 112, .7), 0 2.4px 6px rgba(0, 0, 0, .6); transition: box-shadow .25s; }
 .tb-prof_ring img { position: absolute; left: 3px; top: 3px; width: 70.8px; height: 70.8px; border-radius: 50%; }
@@ -635,11 +638,13 @@
 .tb-simple .tb-prof--left { animation-delay: .12s; }
 .tb-simple .tb-prof--top { animation-delay: .24s; }
 .tb-simple .tb-prof--right { animation-delay: .36s; }
+.tb-simple .tb-prof--bottom { animation-delay: .48s; }
 .tb-simple .tb-prof .tb-prof_plate { animation: tb-prof-plate .4s ease-out both; animation-delay: inherit; }
 .tb-simple .tb-prof .tb-prof_lvl, .tb-simple .tb-prof .tb-prof_flag { animation: tb-prof-badge .35s cubic-bezier(.3, 1.8, .5, 1) both; }
 .tb-simple .tb-prof--left .tb-prof_lvl, .tb-simple .tb-prof--left .tb-prof_flag { animation-delay: .4s; }
 .tb-simple .tb-prof--top .tb-prof_lvl, .tb-simple .tb-prof--top .tb-prof_flag { animation-delay: .52s; }
 .tb-simple .tb-prof--right .tb-prof_lvl, .tb-simple .tb-prof--right .tb-prof_flag { animation-delay: .64s; }
+.tb-simple .tb-prof--bottom .tb-prof_lvl, .tb-simple .tb-prof--bottom .tb-prof_flag { animation-delay: .76s; }
 @keyframes tb-prof-in { from { opacity: 0; transform: scale(.55); } to { opacity: 1; } }
 @keyframes tb-prof-plate { from { opacity: 0; transform: translateY(-10px); } }
 @keyframes tb-prof-badge { from { opacity: 0; transform: scale(0); } }
@@ -685,6 +690,6 @@
 .tb-simple .tb-bottom [data-table-exit] { display: none; }
 .tb-simple .tb-btn--glove { display: grid !important; }
 .table .tb-btn--glove { overflow: visible; background: none; transition: transform .15s ease; }
-.tb-btn--glove img { width: 60px; height: 62px; margin: -6px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
+.tb-btn--glove img { width: 40px; height: 52px; margin: -2px 0; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 0 6px rgba(255, 90, 60, .35)); }
 .table .tb-btn--glove:active { transform: scale(.9) rotate(-8deg); }
 .tb-simple .tb-btn--face img { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 -4px 6px rgba(155, 155, 155, .3)); }
