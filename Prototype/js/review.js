@@ -6,7 +6,6 @@
   var R = window.BlotRules;
   var root = document.querySelector('[data-review]');
   var NAMES = { bottom: 'You', left: 'HasmikG', top: 'GarikAv', right: 'Vazgen1972' };
-  var AVATAR = { bottom: 'avatar-artexcb', left: 'avatar-hasmikg', top: 'avatar-garikav', right: 'avatar-placeholder' };
   var SIGN = { C: '♣', D: '♦', H: '♥', S: '♠', NT: 'NT' };
   var MOOD = { best: 'happy', great: 'happy', good: 'neutral', info: 'neutral', inaccuracy: 'puzzled', mistake: 'puzzled' };
   var RANK_NAME = { '7': 'Seven', '8': 'Eight', '9': 'Nine', '10': 'Ten', J: 'Jack', Q: 'Queen', K: 'King', A: 'Ace' };
@@ -74,9 +73,12 @@
   }
 
   // ---------- markup ----------
+  // the same player profile as on the game table (css/table.css .tb-prof): avatar ring, level, flag, name
+  var LEVEL = { top: 16, left: 16, right: 54 };
   function seatHtml(seat) {
-    return '<div class="rv-seat rv-seat--' + seat + '" data-rv-seat="' + seat + '">' +
-      '<img src="assets/table/ui/' + AVATAR[seat] + '.webp" alt=""><b>' + (seat === 'bottom' ? 'Artexcb' : NAMES[seat]) + '</b></div>';
+    return '<div class="tb-prof rv-seat rv-seat--' + seat + (seat === 'right' ? ' tb-prof--purple' : '') + '" data-rv-seat="' + seat + '">' +
+      '<span class="tb-prof_ring"><img src="assets/table/simple/avatar-' + seat + '.webp" alt=""></span>' +
+      '<span class="tb-prof_plate"><b>' + NAMES[seat] + '</b></span><span class="tb-prof_lvl">' + LEVEL[seat] + '</span><i class="tb-prof_flag"></i></div>';
   }
   function render() {
     var c = rec.contract;
@@ -170,20 +172,20 @@
     if (animate) { void coach.offsetWidth; coach.classList.add('is-react'); }
   }
   // The four cards of a finished trick slide from the table into their slots in "Last trick".
-  var SPOT = { left: [384, 188, -8], top: [426, 164, 3], right: [468, 188, 8], bottom: [426, 212, -3] };
+  var SPOT = { left: [374, 190, -8], top: [426, 160, 3], right: [478, 190, 8], bottom: [426, 218, -3] };
   function fly(plays) {
     var slots = root.querySelector('[data-rv-last]');
     plays.forEach(function (p, i) {
       var sp = SPOT[p.seat], el = document.createElement('img');
       el.className = 'rv-fly'; el.alt = '';
       el.src = 'assets/review/full/' + p.card.rank + p.card.suit + '.webp';
-      el.style.left = (sp[0] - 26) + 'px'; el.style.top = (sp[1] - 36.5) + 'px';
+      el.style.left = (sp[0] - 30) + 'px'; el.style.top = (sp[1] - 42) + 'px';
       root.appendChild(el);
       var dx = 20 + 13.5 + i * 31 - sp[0], dy = 355 - sp[1];
       var a = el.animate([
         { transform: 'rotate(' + sp[2] + 'deg)' },
         { transform: 'translate(' + dx * .45 + 'px,' + (dy * .45 - 24) + 'px) rotate(' + sp[2] * .3 + 'deg) scale(.8)', offset: .45 },
-        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + 27 / 52 + ')' }
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + 27 / 60 + ')' }
       ], { duration: 560, delay: i * 55, easing: 'cubic-bezier(.45, 0, .25, 1)', fill: 'both' });
       a.onfinish = function () {
         el.remove();
@@ -225,7 +227,7 @@
     var x = 426 - (n * 34 - 4) / 2 + slot * 34 + 15, y = 283;
     var sp = SPOT.bottom;
     el.animate([
-      { transform: 'translate(' + (x - sp[0]) + 'px,' + (y - sp[1]) + 'px) scale(' + 30 / 52 + ')', opacity: 1 },
+      { transform: 'translate(' + (x - sp[0]) + 'px,' + (y - sp[1]) + 'px) scale(' + 30 / 60 + ')', opacity: 1 },
       { transform: 'translate(' + (x - sp[0]) * .4 + 'px,' + ((y - sp[1]) * .4 - 18) + 'px) rotate(-8deg) scale(.9)', offset: .55 },
       { transform: 'rotate(' + sp[2] + 'deg)' }
     ], { duration: 460, delay: late ? 320 : 0, easing: 'cubic-bezier(.3, .7, .3, 1)', fill: 'backwards' });

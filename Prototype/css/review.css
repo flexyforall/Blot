@@ -35,14 +35,11 @@
   font-size: 32px; font-weight: 800; font-style: italic; letter-spacing: -.02em; color: rgba(255, 255, 255, .1); }
 
 /* players */
-.rv-seat { position: absolute; display: flex; align-items: center; gap: 8px; height: 50px; padding: 6px 12px 6px 8px; border-radius: 4px;
-  background: #000; border: 1px solid rgba(255, 255, 255, .16); font-size: 13px; font-weight: 600; text-shadow: 0 1px 4px #000; transition: box-shadow .2s; }
-.rv-seat img { width: 36px; height: 36px; object-fit: contain; }
-.rv-seat--top { left: 50%; top: 57px; transform: translateX(-50%); }
-.rv-seat--left { left: 72px; top: 158px; }
-.rv-seat--right { right: 72px; top: 155px; }
-.rv-seat.is-turn { border-color: transparent; background: linear-gradient(#000, #000) padding-box, linear-gradient(90deg, #5ca0ff, #44e0ff) border-box;
-  box-shadow: inset 0 2px 12px #1979ff, 0 2px 8px rgba(0, 90, 214, .2); }
+/* players: the table's profile (.tb-prof, css/table.css), always shown here */
+.rv .tb-prof { opacity: 1; visibility: visible; }
+.rv-seat--top { left: 378px; top: 14px; }
+.rv-seat--left { left: 72px; top: 147px; }
+.rv-seat--right { left: 684px; top: 147px; }
 .rv-chip { position: absolute; display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 8px 0 5px; border-radius: 120px;
   background: rgba(28, 27, 27, .5); border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(8px); font-size: 14px; font-weight: 500; }
 .rv-chip i { width: 16px; height: 16px; border-radius: 50%; background: #fff var(--suit) center / 10px no-repeat; }
@@ -50,9 +47,9 @@
 .rv-chip i[data-s="D"] { --suit: url("../assets/table/ui/suits/d.svg"); }
 .rv-chip i[data-s="H"] { --suit: url("../assets/table/ui/suits/h.svg"); }
 .rv-chip i[data-s="S"] { --suit: url("../assets/table/ui/suits/s.svg"); }
-.rv-chip--top { left: 458px; top: 39px; }
-.rv-chip--left { left: 173px; top: 140px; }
-.rv-chip--right { left: 749px; top: 137px; }
+.rv-chip--top { left: 482px; top: 18px; }
+.rv-chip--left { left: 92px; top: 114px; }
+.rv-chip--right { left: 704px; top: 114px; }
 .rv-chip--bottom { left: 508px; top: 226px; }
 
 /* the other players' cards, face down in a small fan in front of each of them (the red back of the main table) */
@@ -60,23 +57,23 @@
 .rv-backs i { width: 12px; height: 17px; flex: none; border-radius: 1.5px; border: 1px solid #fff; transform: rotate(var(--r)); transform-origin: 50% 120%;
   background: radial-gradient(circle, rgba(255, 236, 230, .75) .5px, transparent .9px) 0 0 / 3px 3px, #b5121f; box-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
 .rv-backs i + i { margin-left: -8px; }
-.rv-backs--top { left: 50%; top: 111px; transform: translateX(-50%); }
-.rv-backs--left { left: 214px; top: 175px; }
-.rv-backs--right { right: 236px; top: 172px; }
+.rv-backs--top { left: 484px; top: 56px; }
+.rv-backs--left { left: 178px; top: 178px; }
+.rv-backs--right { right: 178px; top: 178px; }
 .rv.is-in .rv-backs { animation: rv-fade .4s .7s ease both; }
 
 /* the cards of the current trick, each in front of its player */
 .rv-trick { position: absolute; inset: 0; pointer-events: none; }
-.rv-card { position: absolute; width: 52px; height: 73px; margin: -36.5px 0 0 -26px; border-radius: 3px; box-shadow: 0 3px 16px rgba(0, 0, 0, .4); }
-.rv-card--left { left: 384px; top: 188px; transform: rotate(-8deg); --from: translate(-120px, -10px) rotate(-30deg); }
-.rv-card--top { left: 426px; top: 164px; transform: rotate(3deg); --from: translate(0, -90px) rotate(20deg); }
-.rv-card--right { left: 468px; top: 188px; transform: rotate(8deg); --from: translate(120px, -10px) rotate(30deg); }
-.rv-card--bottom { z-index: 5; left: 426px; top: 212px; transform: rotate(-3deg); --from: translate(0, 90px) rotate(-15deg); }
+.rv-card { position: absolute; width: 60px; height: 84px; margin: -42px 0 0 -30px; border-radius: 3px; box-shadow: 0 3px 16px rgba(0, 0, 0, .4); }
+.rv-card--left { left: 374px; top: 190px; transform: rotate(-8deg); --from: translate(-120px, -10px) rotate(-30deg); }
+.rv-card--top { left: 426px; top: 160px; transform: rotate(3deg); --from: translate(0, -90px) rotate(20deg); }
+.rv-card--right { left: 478px; top: 190px; transform: rotate(8deg); --from: translate(120px, -10px) rotate(30deg); }
+.rv-card--bottom { z-index: 5; left: 426px; top: 218px; transform: rotate(-3deg); --from: translate(0, 90px) rotate(-15deg); }
 .rv-card.is-new { animation: rv-card .38s cubic-bezier(.2, .9, .3, 1.15) both; }
 .rv-card.is-late { animation-delay: .32s; }
 @keyframes rv-card { from { opacity: 0; transform: var(--from) scale(.8); } }
 /* a finished trick flying into the "Last trick" box */
-.rv-fly { position: absolute; z-index: 3; width: 52px; height: 73px; border-radius: 3px; box-shadow: 0 3px 16px rgba(0, 0, 0, .4); pointer-events: none; }
+.rv-fly { position: absolute; z-index: 3; width: 60px; height: 84px; border-radius: 3px; box-shadow: 0 3px 16px rgba(0, 0, 0, .4); pointer-events: none; }
 
 /* your hand */
 .rv-hand { position: absolute; z-index: 4; left: 50%; top: 263px; transform: translateX(-50%); display: flex; gap: 4px; }
@@ -154,7 +151,7 @@
 @keyframes rv-glow { from { opacity: 0; } 55% { opacity: 1; box-shadow: 0 0 40px rgba(92, 160, 255, .55); } }
 .rv.is-in .rv-head { animation: rv-down .45s .15s ease-out both; }
 .rv.is-in .rv-actions { animation: rv-down .45s .2s ease-out both; }
-.rv.is-in .rv-seat--top { animation: rv-pop-x .45s .3s cubic-bezier(.2, 1.4, .4, 1) both; }
+.rv.is-in .rv-seat--top { animation: rv-pop .45s .3s cubic-bezier(.2, 1.4, .4, 1) both; }
 .rv.is-in .rv-seat--left { animation: rv-pop .45s .38s cubic-bezier(.2, 1.4, .4, 1) both; }
 .rv.is-in .rv-seat--right { animation: rv-pop .45s .46s cubic-bezier(.2, 1.4, .4, 1) both; }
 .rv.is-in .rv-chip { animation: rv-fade .3s .6s ease both; }

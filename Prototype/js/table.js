@@ -112,7 +112,7 @@
   var SUITS = [{ s: '♠', l: 'S' }, { s: '♥', l: 'H' }, { s: '♣', l: 'C' }, { s: '♦', l: 'D' }];
   var faceArt = {};
   SUITS.forEach(function (su) {
-    RANKS.forEach(function (r) { var im = new Image(); im.src = A + 'cards/play/' + r + su.l + '.png'; faceArt[r + su.s] = im; });
+    RANKS.forEach(function (r) { var im = new Image(); im.src = A + 'cards/bicycle/' + r + su.l + '.webp'; faceArt[r + su.s] = im; });
   });
   function rr(g, x, y, w, h, r) { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); }
   function levelCanvas(res) {
@@ -176,9 +176,12 @@
     }
     return cache[res];
   }
+  // the Bicycle back (assets/table/cards/bicycle/back.webp); the drawn red back until it has loaded
+  var backArt = new Image(); backArt.src = A + 'cards/bicycle/back.webp';
   function backAt(k) {
     var res = bucket(k);
-    return backCache[res] || remember(backCache, res, makeBack(res), KEEP_BACK);
+    if (backArt.complete && backArt.naturalWidth) return backCache[res] || remember(backCache, res, renderFace(backArt, res, false), KEEP_BACK);
+    return makeBack(res);
   }
   // Red back in the classic "rider" spirit: white border, fine red filigree field, central medallion.
   function makeBack(res) {
@@ -498,6 +501,8 @@
   var DECK_FROM = { top: [1005, 290, Math.PI], bottom: [1000, 760, 0], left: [470, 512, Math.PI / 2], right: [1530, 512, -Math.PI / 2] };
   // the trick is laid in the middle of the table, each card nudged towards whoever played it
   var TRICK_SPOT = { bottom: [1000, 548, -.04], top: [1000, 478, .04], left: [948, 513, -.12], right: [1052, 513, .12] };
+  // the simplified table is bigger on screen, and so is its trick (Figma 2289:3981: about 58px wide)
+  var TRICK_SIMPLE = { bottom: [1000, 575, -.04], top: [1000, 455, .04], left: [905, 515, -.12], right: [1095, 515, .12] };
   var byId = {}, humanWait = null, trickZ = 500;
 
   function pileAt(id, i, n) {
@@ -581,13 +586,13 @@
       return new Promise(function (res) { humanWait = { legal: legal, res: res, hand: hand, hint: hint }; });
     },
     playCard: function (seat, id) {
-      var c = byId[id], t = TRICK_SPOT[seat];
+      var c = byId[id], t = (simple() ? TRICK_SIMPLE : TRICK_SPOT)[seat];
       c.mine = false; c.base = 0; c.z = trickZ++;
       if (c === hover) hover = null;
       flick(.25);
       tween(c, { dim: 0, lift: 0 }, .15);
       tween(c, { flip: 1 }, .3, { ease: ease.inOut });
-      return tween(c, { x: t[0], y: t[1], rot: t[2], sc: 1.15, alpha: 1 }, .4, { ease: ease.out });
+      return tween(c, { x: t[0], y: t[1], rot: t[2], sc: simple() ? 1.65 : 1.15, alpha: 1 }, .4, { ease: ease.out });
     },
     // the trick slides to the winner and is gone
     collect: async function (seat, ids) {
@@ -802,7 +807,7 @@
   }
 
   // ---------- Boot: cut the sprites and paint the deck once the art has loaded ----------
-  var art = [img, room, simpleBg, simpleTable].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
+  var art = [img, room, simpleBg, simpleTable, backArt].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
   var booting = Promise.all(art.map(function (im) { return im.decode().catch(function () {}); })).then(function () {
     IDS.forEach(function (id) {
       var s = SEATS[id];
@@ -878,7 +883,7 @@
   function setLastTrick(cards) {
     var box = screen.querySelector('[data-trick-cards]');
     box.innerHTML = (cards || []).map(function (c) {
-      return '<img class="tb-mini" src="' + A + 'cards/play/' + c.rank + c.suit + '.png" alt="' + c.rank + c.suit + '">';
+      return '<img class="tb-mini" src="' + A + 'cards/bicycle/' + c.rank + c.suit + '.webp" alt="' + c.rank + c.suit + '">';
     }).join('');
     box.hidden = !(cards && cards.length);
     screen.querySelector('[data-trick-empty]').hidden = !box.hidden;
