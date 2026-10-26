@@ -687,12 +687,12 @@
 .tb-simple .tb-trick_cards { gap: 6px; }
 .tb-simple .tb-mini { width: 32px; height: 44px; border-radius: 2px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .9)); }
 /* bottom: the reactions face and the glove, side by side at x 152 (no settings gear here; Escape still leaves) */
-.tb-simple .tb-bottom { left: 140px; right: auto; top: 325px; justify-content: flex-start; gap: 18px; }
+.tb-simple .tb-bottom { left: 152px; right: auto; top: 325px; justify-content: flex-start; gap: 4px; }   /* Figma 2293:4821 */
 .tb-simple .tb-bottom [data-table-exit] { display: none; }
 .tb-simple .tb-btn--glove { display: grid !important; }
 .table .tb-btn--glove { overflow: visible; background: none; transition: transform .15s ease; }
 /* the picture carries its own soft glow, so it is bigger than the button: the glove itself is about 46px tall, like the face */
-.tb-btn--glove img { width: 61px; height: 74px; margin: -13px -6.5px; max-width: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
+.tb-btn--glove img { width: 59px; height: 72px; margin: -12px -5.5px; max-width: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
 .table .tb-btn--glove:active { transform: scale(.9) rotate(-8deg); }
 .tb-simple .tb-btn--face img { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 -4px 6px rgba(155, 155, 155, .3)); }
 
