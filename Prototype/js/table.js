@@ -76,6 +76,12 @@
   // ---------- Assets ----------
   var img = new Image(); img.src = A + 'scene.webp';    // characters are cut from this
   var room = new Image(); room.src = A + 'room.webp';   // the same room with empty chairs
+  // the simplified in-play table (Figma 2289:3981) the camera zooms into once everyone is seated
+  var simpleBg = new Image(); simpleBg.src = A + 'simple/bg.webp';
+  var simpleTable = new Image(); simpleTable.src = A + 'simple/table.webp';
+  // where the avatars sit on the simplified table: cards are dealt to them and taken back to them
+  var SIMPLE = { top: [1000, 164], left: [282, 434], right: [1718, 434], bottom: [1000, 1000] };
+  function simple() { return S.simple > .5; }
   // card pictures: see faceAt / backAt
 
   function feathered(r, core) {
@@ -314,7 +320,7 @@
   function stopFire() { if (fireGain) fireGain.gain.setTargetAtTime(0, ac.currentTime, .3); }
 
   // ---------- Scene state ----------
-  var S = { black: 1, amb: .55, lamps: 0, table: .35 };
+  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, push: 0, blur: 0, simple: 0 };
   var MOVE_EVERY = 15;   // seconds between one character's gesture and the next one's
   var moves = { on: false, next: 0, last: null };
   var cards = [], particles = [], clock = 0, nextSmoke = 2;
@@ -347,7 +353,8 @@
       s.light = 0; s.idle = false; s.ring = 0; s.next = 0;
       resetPose(s);
     });
-    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35;
+    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0;
+    screen.classList.remove('tb-zoom', 'tb-simple');
     cards = []; particles = []; hover = null; humanWait = null;
     screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.remove('is-turn'); });
   }
@@ -458,10 +465,31 @@
     // everyone is seated: the lamps come up over the table
     moves.on = true; moves.next = clock + 6;
     tween(S, { amb: .14, lamps: 1 }, 1.4);
-    await wait(.9); if (!ok()) return;
+    await wait(2.2); if (!ok()) return;
+
+    // then the camera moves in over the table and the room gives way to the simplified table
+    await simplify(ok); if (!ok()) return;
 
     // from here the game controller (js/game.js) runs the deals, bidding and tricks
     if (window.BlotGame) window.BlotGame.start(view);
+  }
+
+  // The zoom: the room scales up around the table (so its table grows into the simplified one),
+  // the characters slide back from the table and fade, the room blurs, and the simplified table
+  // (red smoke, plain table) fades in riding the same zoom. Then a light runs round the rim and the
+  // avatars pop in (CSS: .tb-zoom / .tb-simple in css/table.css).
+  async function simplify(ok) {
+    moves.on = false;
+    screen.classList.add('tb-zoom');
+    if (reduced) { S.zoom = S.push = 1; S.simple = 1; screen.classList.add('tb-simple'); await wait(.3); return; }
+    // (scene time runs at SPEED 2: these are about 1.8s of zoom in real time)
+    tween(S, { zoom: 1 }, 3.6, { ease: ease.inOut });
+    tween(S, { push: 1 }, 2.4, { delay: .2, ease: ease.inOut });
+    tween(S, { blur: 1 }, 2, { delay: .7, ease: ease.inOut });
+    tween(S, { simple: 1 }, 2, { delay: 1.7, ease: ease.inOut });
+    await wait(3.4); if (!ok()) return;
+    screen.classList.add('tb-simple');
+    await wait(2.2);
   }
 
   // ---------- View API for the game controller ----------
@@ -473,6 +501,7 @@
   var byId = {}, humanWait = null, trickZ = 500;
 
   function pileAt(id, i, n) {
+    if (simple() && id !== 'bottom') return { x: SIMPLE[id][0], y: SIMPLE[id][1], rot: SEATS[id].pileRot };
     var s = SEATS[id], o = (i - (n - 1) / 2) * 15, horiz = id === 'top' || id === 'bottom';
     return { x: s.pile[0] + (horiz ? o : 0), y: s.pile[1] + (horiz ? 0 : o), rot: s.pileRot + (i - (n - 1) / 2) * .03 };
   }
@@ -490,6 +519,7 @@
     deal: async function (tok, deck, sequence, dealer) {
       cards = []; byId = {}; hover = null; trickZ = 500;
       var from = DECK_FROM[dealer];
+      if (simple()) from = dealer === 'bottom' ? [1000, 820, 0] : [SIMPLE[dealer][0], SIMPLE[dealer][1], from[2]];
       deck.forEach(function (ec, i) {
         var c = new Card(ec.rank, SUIT_OF[ec.suit]);
         c.id = ec.id; byId[ec.id] = c;
@@ -520,7 +550,8 @@
         var st = sequence[q], c = byId[st.card.id], t = pileAt(st.seat, count[st.seat]++, 8);
         c.z = zTop++;
         flick();
-        tween(c, { x: t.x, y: t.y, rot: t.rot }, .34);
+        // on the simplified table the other players' cards go into their avatars and vanish
+        tween(c, simple() && st.seat !== 'bottom' ? { x: t.x, y: t.y, rot: t.rot, alpha: 0, sc: .5 } : { x: t.x, y: t.y, rot: t.rot }, .34);
         await wait(.075); if (!view.alive(tok)) return;
         if (sequence[q + 1] && sequence[q + 1].seat !== st.seat) { await wait(.12); if (!view.alive(tok)) return; }
       }
@@ -556,11 +587,11 @@
       flick(.25);
       tween(c, { dim: 0, lift: 0 }, .15);
       tween(c, { flip: 1 }, .3, { ease: ease.inOut });
-      return tween(c, { x: t[0], y: t[1], rot: t[2], sc: 1.15 }, .4, { ease: ease.out });
+      return tween(c, { x: t[0], y: t[1], rot: t[2], sc: 1.15, alpha: 1 }, .4, { ease: ease.out });
     },
     // the trick slides to the winner and is gone
     collect: async function (seat, ids) {
-      var f = SEATS[seat].face;
+      var f = simple() ? SIMPLE[seat] : SEATS[seat].face;
       await Promise.all(ids.map(function (id, i) {
         return tween(byId[id], { x: f[0], y: f[1], sc: .5, alpha: 0 }, .45, { delay: i * .03, ease: ease.inOut });
       }));
@@ -670,8 +701,27 @@
     ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    var z = S.zoom, k = 1 + .34 * z, room3d = S.simple < 1;
+    if (room3d) {
+    // camera: scale up around the room's table, which ends where the simplified table sits
+    ctx.save();
+    ctx.translate(1009 - 9 * z, 528 - 68 * z); ctx.scale(k, k); ctx.translate(-1009, -528);
+    if (S.blur > 0) ctx.filter = 'blur(' + (S.blur * 5 * cv.width / 1704).toFixed(2) + 'px)';
     if (room.complete && room.naturalWidth) ctx.drawImage(room, 0, 0, W, H);
-    IDS.forEach(function (id) { if (SEATS[id].sprite) drawSeat(SEATS[id]); });
+    ctx.filter = 'none';
+    IDS.forEach(function (id) {
+      var s = SEATS[id];
+      if (!s.sprite) return;
+      if (S.push <= 0) { drawSeat(s); return; }
+      // pushed back from the table, away from its centre, and fading out
+      var dx = s.pivot[0] - 1009, dy = s.pivot[1] - 528, d = Math.hypot(dx, dy) || 1, L = s.light;
+      ctx.save();
+      ctx.translate(dx / d * 150 * S.push, dy / d * 150 * S.push);
+      s.light = L * (1 - S.push);
+      drawSeat(s);
+      s.light = L;
+      ctx.restore();
+    });
 
     // Room light: a dark veil with warm pools cut out where players sit and over the table.
     sh.setTransform(1, 0, 0, 1, 0, 0);
@@ -707,10 +757,24 @@
       glow(CYBER_EYE[0] + h.dx, CYBER_EYE[1] + h.dy, 16, 'rgba(255,190,60,' + (.25 + .2 * Math.sin(clock * 2.3)) * top.light + ')');
     }
     ctx.globalCompositeOperation = 'source-over';
+    ctx.restore();
+    }
+    // the simplified table fades in on the same zoom, so the two tables stay on top of each other
+    if (S.simple > 0) {
+      ctx.save(); ctx.globalAlpha = S.simple;
+      var bk = 1 + .08 * (1 - z);
+      ctx.translate(1000, 460); ctx.scale(bk, bk); ctx.translate(-1000, -460);
+      if (simpleBg.complete && simpleBg.naturalWidth) ctx.drawImage(simpleBg, 0, 0, W, H);
+      ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
+      var tk = k / 1.34;
+      ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
+      if (simpleTable.complete && simpleTable.naturalWidth) ctx.drawImage(simpleTable, 0, 0, W, H);
+      ctx.restore();
+    }
 
     cards.sort(function (a, b) { return a.z - b.z; }).forEach(function (cd) { cd.draw(); });
 
-    if (top.idle && !top.vidReady && clock > nextSmoke) {
+    if (room3d && S.zoom === 0 && top.idle && !top.vidReady && clock > nextSmoke) {
       smoke(CIGAR_TIP[0] + top.parts.cigar.dx, CIGAR_TIP[1] + top.parts.cigar.dy, 3);
       nextSmoke = clock + 1.2 + Math.random();
     }
@@ -738,7 +802,7 @@
   }
 
   // ---------- Boot: cut the sprites and paint the deck once the art has loaded ----------
-  var art = [img, room].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
+  var art = [img, room, simpleBg, simpleTable].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
   var booting = Promise.all(art.map(function (im) { return im.decode().catch(function () {}); })).then(function () {
     IDS.forEach(function (id) {
       var s = SEATS[id];
@@ -767,7 +831,7 @@
       booting.then(function () { if (active) play(); });
     } else if (active) {
       active = false; run++;
-      screen.classList.remove('tb-enter'); closePops(null);
+      screen.classList.remove('tb-enter', 'tb-zoom', 'tb-simple'); closePops(null);
       screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.remove('is-on'); });
       Object.keys(bubbles).forEach(function (k) { bubbles[k].textContent = ''; });
       if (window.BlotGame) window.BlotGame.stop();

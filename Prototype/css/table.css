@@ -607,3 +607,51 @@
 @keyframes shot-ribbon { 0% { opacity: 0; transform: translateY(-70px) scale(1.2); } 60% { opacity: 1; } }
 @keyframes shot-shine { 0% { opacity: 1; background-position: 100% 0; } 100% { opacity: 1; background-position: 0 0; } }
 @media (prefers-reduced-motion: reduce) { .tb-shots *, .tb-shots { animation: none !important; } }
+
+/* ---- the simplified table (Figma 2289:3981) the camera zooms into before the first deal (js/table.js simplify) */
+.tb-zoom .tb-plate { opacity: 0; transition: opacity .35s ease; }
+.tb-simple .tb-plate { display: none; }
+.tb-prof { position: absolute; width: 96px; height: 98px; pointer-events: none; opacity: 0; visibility: hidden; }
+.tb-prof--top { left: 378px; top: 32px; }
+.tb-prof--left { left: 72px; top: 147px; }
+.tb-prof--right { left: 684px; top: 147px; }
+.tb-prof_ring { position: absolute; left: 9.6px; top: 0; width: 76.8px; height: 76.8px; border-radius: 50%;
+  background: linear-gradient(180deg, #3a3f47, #0c0e11); box-shadow: 0 0 0 .6px rgba(91, 100, 112, .7), 0 2.4px 6px rgba(0, 0, 0, .6); transition: box-shadow .25s; }
+.tb-prof_ring img { position: absolute; left: 3px; top: 3px; width: 70.8px; height: 70.8px; border-radius: 50%; }
+.tb-prof_ring::after { content: ""; position: absolute; inset: 3px; border-radius: 50%; box-shadow: inset 0 1.2px 3.6px rgba(0, 0, 0, .55); }
+/* whose turn it is: the blue ring of the top player in the Figma frame */
+.tb-prof.is-turn .tb-prof_ring { box-shadow: 0 0 0 1px #4384ff, 0 2.4px 6px rgba(0, 0, 0, .6), 0 -2px 10px rgba(0, 41, 247, .6), 0 0 16px rgba(67, 132, 255, .45); }
+.tb-prof_plate { position: absolute; left: 0; top: 70.8px; width: 96px; height: 27.2px; box-sizing: border-box; display: grid; place-items: center; border-radius: 2px;
+  background: linear-gradient(180deg, rgba(42, 46, 53, .96), rgba(21, 24, 28, .96)); border: .6px solid rgba(255, 255, 255, .08); box-shadow: 0 1.8px 4.8px rgba(0, 0, 0, .55); }
+.tb-prof_plate b { font-weight: 600; font-size: 12px; line-height: 18px; color: #e9ecef; white-space: nowrap; }
+.tb-prof_lvl { position: absolute; left: 1.2px; top: 56.4px; width: 24px; height: 18px; box-sizing: border-box; display: grid; place-items: center; border-radius: 2px;
+  background: linear-gradient(180deg, #7a2a10, #2a0d06); border: .9px solid #ff9a3c; box-shadow: 0 0 6px .6px rgba(255, 107, 13, .9), inset 0 -1.2px 2.4px rgba(255, 153, 51, .6);
+  font-weight: 700; font-size: 10px; line-height: 1; color: #fff; text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
+.tb-prof--purple .tb-prof_lvl { background: linear-gradient(180deg, #5b2aa0, #1d0b3d); border-color: #b48cff; box-shadow: 0 0 6px .6px rgba(150, 90, 255, .85), inset 0 -1.2px 2.4px rgba(190, 150, 255, .55); }
+/* Armenia: red, blue, apricot */
+.tb-prof_flag { position: absolute; left: 69.6px; top: 57.4px; width: 24px; height: 16px; border-radius: 2px; overflow: hidden;
+  background: linear-gradient(180deg, #d90012 0 33.3%, #0033a0 33.3% 66.6%, #f2a800 66.6%); box-shadow: 0 2px 6px rgba(0, 0, 0, .5); }
+.tb-simple .tb-prof { visibility: visible; animation: tb-prof-in .5s cubic-bezier(.3, 1.5, .5, 1) both; }
+.tb-simple .tb-prof--left { animation-delay: .12s; }
+.tb-simple .tb-prof--top { animation-delay: .24s; }
+.tb-simple .tb-prof--right { animation-delay: .36s; }
+.tb-simple .tb-prof .tb-prof_plate { animation: tb-prof-plate .4s ease-out both; animation-delay: inherit; }
+.tb-simple .tb-prof .tb-prof_lvl, .tb-simple .tb-prof .tb-prof_flag { animation: tb-prof-badge .35s cubic-bezier(.3, 1.8, .5, 1) both; }
+.tb-simple .tb-prof--left .tb-prof_lvl, .tb-simple .tb-prof--left .tb-prof_flag { animation-delay: .4s; }
+.tb-simple .tb-prof--top .tb-prof_lvl, .tb-simple .tb-prof--top .tb-prof_flag { animation-delay: .52s; }
+.tb-simple .tb-prof--right .tb-prof_lvl, .tb-simple .tb-prof--right .tb-prof_flag { animation-delay: .64s; }
+@keyframes tb-prof-in { from { opacity: 0; transform: scale(.55); } to { opacity: 1; } }
+@keyframes tb-prof-plate { from { opacity: 0; transform: translateY(-10px); } }
+@keyframes tb-prof-badge { from { opacity: 0; transform: scale(0); } }
+/* a light runs once round the rim of the simplified table as it settles */
+@property --tb-rim { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.tb-rimfx { position: absolute; left: 125px; top: 72px; width: 602.6px; height: 248px; border-radius: 124px; padding: 5px; box-sizing: border-box; pointer-events: none; opacity: 0;
+  background: conic-gradient(from var(--tb-rim), transparent 0 62%, rgba(255, 236, 225, .15) 74%, rgba(255, 246, 238, .95) 86%, transparent 92%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); filter: drop-shadow(0 0 6px rgba(255, 190, 160, .8)); }
+.tb-simple .tb-rimfx { animation: tb-rim 1.3s cubic-bezier(.45, 0, .3, 1) forwards; }
+@keyframes tb-rim { 0% { opacity: 0; --tb-rim: 200deg; } 12% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; --tb-rim: 560deg; } }
+@media (prefers-reduced-motion: reduce) { .tb-simple .tb-prof, .tb-simple .tb-prof * { animation: none !important; } .tb-rimfx { display: none; } }
+/* the speech clouds follow the avatars */
+.tb-simple .tb-bubble--left { top: 104px; }
+.tb-simple .tb-bubble--right { top: 104px; }
