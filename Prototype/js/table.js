@@ -1173,7 +1173,7 @@
   // The Higgsfield clips (assets/table/throw/anim): transparent animated WebP + their own sound.
   // Each play gets a fresh object URL so the animation starts from its first frame; they are
   // fetched once when the table loads (a file:// page can't fetch, so it falls back to ?t=).
-  var CLIP_LEN = { punch: 2.93, freeze: 4.07, cart: 4.07, tomato: 3.67, cigar: 4.07, snowball: 3.07, chicken: 3.53, violin: 4.07, flag: 4.07 };
+  var CLIP_LEN = { punch: 2.92, freeze: 4.04, cart: 4.04, tomato: 3.46, cigar: 4.04, snowball: 3.04, chicken: 3.5, violin: 4.04, flag: 4.04 };
   var clipBlob = {}, clipSound = {};
   Object.keys(CLIP_LEN).forEach(preloadClip);
   function preloadClip(n) {
@@ -1356,7 +1356,7 @@
   // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
   var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken', cart: 'a cart of manure' };
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
-  CLIP_LEN.fs_tomato = 3.27; CLIP_LEN.fs_chicken = 3.4; CLIP_LEN.fs_glove = 3.33; CLIP_LEN.fs_cart = 4.08;
+  CLIP_LEN.fs_tomato = 3.29; CLIP_LEN.fs_chicken = 3.17; CLIP_LEN.fs_glove = 3.33; CLIP_LEN.fs_cart = 4.04;
   ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(preloadClip);
   var busyIn = false;
   async function hitMe(name, from) {
