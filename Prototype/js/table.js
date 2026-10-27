@@ -1354,10 +1354,10 @@
   // ---------- Incoming: when an opponent throws at you, the hit plays over the whole screen ----------
   // The item leaves the thrower's avatar and flies at the camera, then a 21:9 Higgsfield clip (fs_*)
   // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
-  var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken' };
+  var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken', cart: 'a cart of manure' };
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
-  CLIP_LEN.fs_tomato = 3.27; CLIP_LEN.fs_chicken = 3.4; CLIP_LEN.fs_glove = 3.33;
-  ['fs_tomato', 'fs_glove', 'fs_chicken'].forEach(preloadClip);
+  CLIP_LEN.fs_tomato = 3.27; CLIP_LEN.fs_chicken = 3.4; CLIP_LEN.fs_glove = 3.33; CLIP_LEN.fs_cart = 4.07;
+  ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(preloadClip);
   var busyIn = false;
   async function hitMe(name, from) {
     if (busyIn || !FS[name]) return; busyIn = true;
@@ -1365,9 +1365,11 @@
     var toast = add('tb-fx_toast', '', ui.offsetWidth / 2, 18); toast.textContent = NAMES[from] + ' threw ' + FS[name] + ' at you!';
     later(2.6).then(function () { gone(toast, .3); });
     var p = ringOf(from), mid = { x: ui.offsetWidth / 2, y: ui.offsetHeight / 2 };
-    var it = item(name, name === 'chicken' ? 62 : 52, p); SFX.whoosh(.5);
-    await fly(it, p, mid, .5, { lift: 30, spin: name === 'chicken' ? 720 : 200, s0: .9, s1: 3.6, ease: function (t) { return t * t; } });
-    it.remove();
+    if (name !== 'cart') {
+      var it = item(name === 'glove' ? 'fist' : name, name === 'chicken' ? 62 : 52, p); SFX.whoosh(.5);
+      await fly(it, p, mid, .5, { lift: 30, spin: name === 'chicken' ? 720 : name === 'glove' ? 0 : 200, s0: .9, s1: 3.6, ease: function (t) { return t * t; } });
+      it.remove();
+    }
     var src = clipBlob['fs_' + name] ? URL.createObjectURL(clipBlob['fs_' + name]) : 'assets/table/throw/anim/fs_' + name + '.webp?t=' + Date.now();
     var el = document.createElement('div'); el.className = 'tb-fx_full'; el.innerHTML = '<img src="' + src + '" alt="">'; fx.appendChild(el);
     try { var snd = clipSound['fs_' + name].cloneNode(); snd.volume = .9; var pr = snd.play(); if (pr) pr.catch(function () {}); } catch (e) {}
@@ -1387,7 +1389,7 @@
     if (!active || !screen.classList.contains('tb-simple')) { nextIn = 0; return; }
     var now = performance.now();
     if (!nextIn) { nextIn = now + 20000; return; }
-    if (now > nextIn) { nextIn = now + 30000 + Math.random() * 25000; hitMe(Object.keys(FS)[Math.floor(Math.random() * 3)]); }
+    if (now > nextIn) { nextIn = now + 30000 + Math.random() * 25000; hitMe(Object.keys(FS)[Math.floor(Math.random() * Object.keys(FS).length)]); }
   }, 1000);
   screen.querySelectorAll('[data-react-close]').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); });
