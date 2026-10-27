@@ -1356,7 +1356,8 @@
   // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
   var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken' };
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
-  ['fs_tomato', 'fs_glove', 'fs_chicken'].forEach(function (n) { CLIP_LEN[n] = 4.07; preloadClip(n); });
+  CLIP_LEN.fs_tomato = 3.33; CLIP_LEN.fs_chicken = 3.42; CLIP_LEN.fs_glove = 3.33;
+  ['fs_tomato', 'fs_glove', 'fs_chicken'].forEach(preloadClip);
   var busyIn = false;
   async function hitMe(name, from) {
     if (busyIn || !FS[name]) return; busyIn = true;
@@ -1365,7 +1366,7 @@
     later(2.6).then(function () { gone(toast, .3); });
     var p = ringOf(from), mid = { x: ui.offsetWidth / 2, y: ui.offsetHeight / 2 };
     var it = item(name, name === 'chicken' ? 62 : 52, p); SFX.whoosh(.5);
-    await fly(it, p, mid, .5, { lift: 30, spin: name === 'chicken' ? 720 : 200, s0: .9, s1: 3, ease: function (t) { return t * t; } });
+    await fly(it, p, mid, .5, { lift: 30, spin: name === 'chicken' ? 720 : 200, s0: .9, s1: 3.6, ease: function (t) { return t * t; } });
     it.remove();
     var src = clipBlob['fs_' + name] ? URL.createObjectURL(clipBlob['fs_' + name]) : 'assets/table/throw/anim/fs_' + name + '.webp?t=' + Date.now();
     var el = document.createElement('div'); el.className = 'tb-fx_full'; el.innerHTML = '<img src="' + src + '" alt="">'; fx.appendChild(el);
