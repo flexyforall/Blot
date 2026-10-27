@@ -323,7 +323,7 @@
   function stopFire() { if (fireGain) fireGain.gain.setTargetAtTime(0, ac.currentTime, .3); }
 
   // ---------- Scene state ----------
-  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, push: 0, blur: 0, simple: 0 };
+  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, blur: 0, simple: 0 };
   var MOVE_EVERY = 15;   // seconds between one character's gesture and the next one's
   var moves = { on: false, next: 0, last: null };
   var cards = [], particles = [], clock = 0, nextSmoke = 2;
@@ -356,7 +356,7 @@
       s.light = 0; s.idle = false; s.ring = 0; s.next = 0;
       resetPose(s);
     });
-    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0;
+    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.blur = 0; S.simple = 0; storm.next = Infinity;
     screen.classList.remove('tb-zoom', 'tb-simple');
     cards = []; particles = []; hover = null; humanWait = null; handHidden = false;
     screen.classList.remove('tb-has-hand', 'tb-hand-up');
@@ -469,7 +469,7 @@
     // everyone is seated: the lamps come up over the table
     moves.on = true; moves.next = clock + 6;
     tween(S, { amb: .14, lamps: 1 }, 1.4);
-    await wait(1.2); if (!ok()) return;
+    await wait(.7); if (!ok()) return;
 
     // then the camera moves in over the table and the room gives way to the simplified table
     await simplify(ok); if (!ok()) return;
@@ -485,15 +485,15 @@
   async function simplify(ok) {
     moves.on = false;
     screen.classList.add('tb-zoom');
-    if (reduced) { S.zoom = S.push = 1; S.simple = 1; screen.classList.add('tb-simple'); await wait(.3); return; }
-    // (scene time runs at SPEED 2: these are about 1.4s of zoom in real time)
-    tween(S, { zoom: 1 }, 2.8, { ease: ease.inOut });
-    tween(S, { push: 1 }, 1.9, { delay: .15, ease: ease.inOut });
-    tween(S, { blur: 1 }, 1.6, { delay: .5, ease: ease.inOut });
-    tween(S, { simple: 1 }, 1.6, { delay: 1.3, ease: ease.inOut });
-    await wait(2.7); if (!ok()) return;
+    if (reduced) { S.zoom = 1; S.simple = 1; screen.classList.add('tb-simple'); await wait(.3); return; }
+    // (scene time runs at SPEED 2: this is under a second of zoom in real time)
+    tween(S, { zoom: 1 }, 1.8, { ease: ease.inOut });
+    tween(S, { blur: 1 }, 1, { delay: .2, ease: ease.inOut });
+    tween(S, { simple: 1 }, 1, { delay: .7, ease: ease.inOut });
+    await wait(1.6); if (!ok()) return;
+    storm.next = clock + .4;
     screen.classList.add('tb-simple');
-    await wait(1.6);
+    await wait(1);
   }
 
   // ---------- View API for the game controller ----------
@@ -736,20 +736,9 @@
     ctx.translate(1009 - 9 * z, 528 - 68 * z); ctx.scale(k, k); ctx.translate(-1009, -528);
     if (S.blur > 0) ctx.filter = 'blur(' + (S.blur * 5 * cv.width / 1704).toFixed(2) + 'px)';
     if (room.complete && room.naturalWidth) ctx.drawImage(room, 0, 0, W, H);
+    // the players stay in their seats and blur away with the room
+    IDS.forEach(function (id) { if (SEATS[id].sprite) drawSeat(SEATS[id]); });
     ctx.filter = 'none';
-    IDS.forEach(function (id) {
-      var s = SEATS[id];
-      if (!s.sprite) return;
-      if (S.push <= 0) { drawSeat(s); return; }
-      // pushed back from the table, away from its centre, and fading out
-      var dx = s.pivot[0] - 1009, dy = s.pivot[1] - 528, d = Math.hypot(dx, dy) || 1, L = s.light;
-      ctx.save();
-      ctx.translate(dx / d * 150 * S.push, dy / d * 150 * S.push);
-      s.light = L * (1 - S.push);
-      drawSeat(s);
-      s.light = L;
-      ctx.restore();
-    });
 
     // Room light: a dark veil with warm pools cut out where players sit and over the table.
     sh.setTransform(1, 0, 0, 1, 0, 0);
@@ -793,6 +782,7 @@
       var bk = 1 + .08 * (1 - z);
       ctx.translate(1000, 460); ctx.scale(bk, bk); ctx.translate(-1000, -460);
       if (simpleBg.complete && simpleBg.naturalWidth) ctx.drawImage(simpleBg, 0, 0, W, H);
+      if (S.simple >= 1 && !reduced) drawStorm();
       ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
       var tk = k / 1.34;
       ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
@@ -827,6 +817,50 @@
     if (moves.on && clock > moves.next) { moveSomeone(); moves.next = clock + MOVE_EVERY; }
     if (S.black > 0) { ctx.fillStyle = 'rgba(0,0,0,' + S.black + ')'; ctx.fillRect(0, 0, W, H); }
     raf = requestAnimationFrame(frame);
+  }
+
+  // ---------- The storm behind the simplified table: lightning in the red clouds ----------
+  // Every few seconds a bolt forks down from the clouds at one side of the table (a double flash,
+  // the clouds lit up round it), and now and then only the clouds flicker, as with far-off lightning.
+  var storm = { next: Infinity, t: 0, bolt: null, x: 0, y: 0, power: 0 };
+  function makeBolt(x, y, len, w) {
+    var pts = [[x, y]], out = [{ pts: pts, w: w }];
+    for (var d = 0; d < len; d += 26 + Math.random() * 24) {
+      x += (Math.random() - .5) * 70; y += 26 + Math.random() * 24; pts.push([x, y]);
+      if (w > 1.2 && Math.random() < .2) out = out.concat(makeBolt(x, y, len * (.25 + Math.random() * .3), w * .5));
+    }
+    return out;
+  }
+  function drawStorm() {
+    if (clock > storm.next) {
+      var left = Math.random() < .5, far = Math.random() < .35;
+      storm.x = left ? 120 + Math.random() * 480 : 1330 + Math.random() * 250;
+      storm.y = 40 + Math.random() * 60;
+      storm.bolt = far ? null : makeBolt(storm.x, storm.y - 60, 220 + Math.random() * 200, 3.2);
+      storm.power = far ? .45 : 1; storm.t = clock;
+      storm.next = clock + 3.5 + Math.random() * 5;
+    }
+    var t = clock - storm.t;
+    if (t > .7) return;
+    // double flash, then a fade
+    var a = (t < .07 ? 1 : t < .14 ? .25 : t < .24 ? .85 : .85 * (1 - (t - .24) / .46)) * storm.power;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = .35 * a; ctx.drawImage(simpleBg, 0, 0, W, H);
+    ctx.globalAlpha = 1;
+    glow(storm.x, storm.y + 60, 520, 'rgba(255,80,70,' + .35 * a + ')');
+    glow(storm.x, storm.y + 40, 200, 'rgba(255,200,190,' + .25 * a + ')');
+    if (storm.bolt) {
+      ctx.lineJoin = ctx.lineCap = 'round';
+      storm.bolt.forEach(function (b) {
+        [[b.w * 6, 'rgba(255,60,60,' + .18 * a + ')'], [b.w * 2.2, 'rgba(255,150,150,' + .5 * a + ')'], [b.w * .8, 'rgba(255,245,240,' + a + ')']].forEach(function (l) {
+          ctx.lineWidth = l[0]; ctx.strokeStyle = l[1]; ctx.beginPath();
+          b.pts.forEach(function (p, i) { if (i) ctx.lineTo(p[0], p[1]); else ctx.moveTo(p[0], p[1]); });
+          ctx.stroke();
+        });
+      });
+    }
+    ctx.restore();
   }
 
   // ---------- Boot: cut the sprites and paint the deck once the art has loaded ----------

@@ -693,8 +693,8 @@
 .tb-simple .tb-bottom [data-table-exit] .tb-btn_glyph { display: none; }
 .tb-simple .tb-btn--glove { display: grid !important; }
 .table .tb-btn--glove { overflow: visible; background: none; transition: transform .15s ease; }
-/* the picture carries its own soft glow, so it is bigger than the button: the glove itself is about 46px tall, like the face */
-.tb-btn--glove img { width: 59px; height: 72px; margin: -12px -5.5px; max-width: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
+/* the picture carries its own soft glow, so it is bigger than the button: the glove itself is about 50px tall and centred on the face's middle */
+.tb-btn--glove img { width: 66px; height: 80px; margin: -14px -6.4px -18px -11.6px; max-width: none; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)); }
 .table .tb-btn--glove:active { transform: scale(.9) rotate(-8deg); }
 .tb-simple .tb-btn--face img { filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .5)) drop-shadow(0 -4px 6px rgba(155, 155, 155, .3)); }
 
