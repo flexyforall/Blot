@@ -1176,9 +1176,10 @@
   var CLIP_LEN = { punch: 2.92, freeze: 4.04, cart: 4.04, tomato: 3.46, cigar: 4.04, snowball: 3.04, chicken: 3.5, violin: 4.04, flag: 4.04 };
   var clipBlob = {}, clipSound = {};
   Object.keys(CLIP_LEN).forEach(preloadClip);
-  function preloadClip(n) {
+  function preloadClip(n, noPicture, noSound) {
     var url = 'assets/table/throw/anim/' + n;
-    if (location.protocol !== 'file:') fetch(url + '.webp').then(function (r) { return r.ok ? r.blob() : null; }).then(function (b) { if (b) clipBlob[n] = b; }).catch(function () {});
+    if (!noPicture && location.protocol !== 'file:') fetch(url + '.webp').then(function (r) { return r.ok ? r.blob() : null; }).then(function (b) { if (b) clipBlob[n] = b; }).catch(function () {});
+    if (noSound) return;
     var a = new Audio(url + '.mp3'); a.preload = 'auto'; clipSound[n] = a;
   }
   function clip(name, p, size, o) {
@@ -1356,8 +1357,11 @@
   // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
   var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken', cart: 'a cart of manure' };
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
-  CLIP_LEN.fs_tomato = 3.29; CLIP_LEN.fs_chicken = 3.17; CLIP_LEN.fs_glove = 3.33; CLIP_LEN.fs_cart = 4.04;
-  ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(preloadClip);
+  CLIP_LEN.fs_tomato = 3.29; CLIP_LEN.fs_chicken = 5.04; CLIP_LEN.fs_glove = 5.04; CLIP_LEN.fs_cart = 5.04;
+  // the glove combo is too big for one file at full quality, so it plays as parts back to back
+  var FS_PARTS = { glove: [['fs_glove_1', 2.5], ['fs_glove_2', .833], ['fs_glove_3', .833], ['fs_glove_4', .875]] };
+  ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(function (n) { preloadClip(n, !!FS_PARTS[n.slice(3)]); });
+  FS_PARTS.glove.forEach(function (p) { preloadClip(p[0], false, true); });
   var busyIn = false;
   async function hitMe(name, from) {
     if (busyIn || !FS[name]) return; busyIn = true;
@@ -1370,11 +1374,15 @@
       await fly(it, p, mid, .5, { lift: 30, spin: name === 'chicken' ? 720 : name === 'glove' ? 0 : 200, s0: .9, s1: 3.6, ease: function (t) { return t * t; } });
       it.remove();
     }
-    var src = clipBlob['fs_' + name] ? URL.createObjectURL(clipBlob['fs_' + name]) : 'assets/table/throw/anim/fs_' + name + '.webp?t=' + Date.now();
-    var el = document.createElement('div'); el.className = 'tb-fx_full'; el.innerHTML = '<img src="' + src + '" alt="">'; fx.appendChild(el);
+    var parts = FS_PARTS[name] || [['fs_' + name, CLIP_LEN['fs_' + name]]];
+    function srcOf(n) { return clipBlob[n] ? URL.createObjectURL(clipBlob[n]) : 'assets/table/throw/anim/' + n + '.webp?t=' + Date.now(); }
+    var el = document.createElement('div'); el.className = 'tb-fx_full'; el.innerHTML = '<img src="' + srcOf(parts[0][0]) + '" alt="">'; fx.appendChild(el);
     try { var snd = clipSound['fs_' + name].cloneNode(); snd.volume = .9; var pr = snd.play(); if (pr) pr.catch(function () {}); } catch (e) {}
     later(.15).then(function () { screen.animate([0, 1, -1, .6, -.6, .3, 0].map(function (k) { return { transform: 'translate(' + k * 7 + 'px,' + k * -4 + 'px)' }; }), { duration: 500 }); });
-    await later(CLIP_LEN['fs_' + name] - .4);
+    for (var i = 0; i < parts.length; i++) {
+      if (i) el.firstChild.src = srcOf(parts[i][0]);
+      await later(i === parts.length - 1 ? parts[i][1] - .4 : parts[i][1]);
+    }
     await gone(el, .4);
     busyIn = false;
   }
