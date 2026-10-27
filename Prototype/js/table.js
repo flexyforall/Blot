@@ -1175,11 +1175,12 @@
   // fetched once when the table loads (a file:// page can't fetch, so it falls back to ?t=).
   var CLIP_LEN = { punch: 2.93, freeze: 4.07, cart: 4.07, tomato: 3.67, cigar: 4.07, snowball: 3.07, chicken: 3.53, violin: 4.07, flag: 4.07 };
   var clipBlob = {}, clipSound = {};
-  Object.keys(CLIP_LEN).forEach(function (n) {
+  Object.keys(CLIP_LEN).forEach(preloadClip);
+  function preloadClip(n) {
     var url = 'assets/table/throw/anim/' + n;
     if (location.protocol !== 'file:') fetch(url + '.webp').then(function (r) { return r.ok ? r.blob() : null; }).then(function (b) { if (b) clipBlob[n] = b; }).catch(function () {});
     var a = new Audio(url + '.mp3'); a.preload = 'auto'; clipSound[n] = a;
-  });
+  }
   function clip(name, p, size, o) {
     o = o || {};
     var src = clipBlob[name] ? URL.createObjectURL(clipBlob[name]) : 'assets/table/throw/anim/' + name + '.webp?t=' + Date.now();
@@ -1349,6 +1350,40 @@
     return THROWS[name](seat, ringOf(seat), fxBox(glove), outcome);
   }
   window.BlotTable.throwAt = throwAt;
+
+  // ---------- Incoming: when an opponent throws at you, the hit plays over the whole screen ----------
+  // The item leaves the thrower's avatar and flies at the camera, then a 21:9 Higgsfield clip (fs_*)
+  // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
+  var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken' };
+  var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
+  ['fs_tomato', 'fs_glove', 'fs_chicken'].forEach(function (n) { CLIP_LEN[n] = 4.07; preloadClip(n); });
+  var busyIn = false;
+  async function hitMe(name, from) {
+    if (busyIn || !FS[name]) return; busyIn = true;
+    from = from || ['left', 'top', 'right'][Math.floor(Math.random() * 3)];
+    var toast = add('tb-fx_toast', '', ui.offsetWidth / 2, 18); toast.textContent = NAMES[from] + ' threw ' + FS[name] + ' at you!';
+    later(2.6).then(function () { gone(toast, .3); });
+    var p = ringOf(from), mid = { x: ui.offsetWidth / 2, y: ui.offsetHeight / 2 };
+    var it = item(name, name === 'chicken' ? 62 : 52, p); SFX.whoosh(.5);
+    await fly(it, p, mid, .5, { lift: 30, spin: name === 'chicken' ? 720 : 200, s0: .9, s1: 3, ease: function (t) { return t * t; } });
+    it.remove();
+    var src = clipBlob['fs_' + name] ? URL.createObjectURL(clipBlob['fs_' + name]) : 'assets/table/throw/anim/fs_' + name + '.webp?t=' + Date.now();
+    var el = document.createElement('div'); el.className = 'tb-fx_full'; el.innerHTML = '<img src="' + src + '" alt="">'; fx.appendChild(el);
+    try { var snd = clipSound['fs_' + name].cloneNode(); snd.volume = .9; var pr = snd.play(); if (pr) pr.catch(function () {}); } catch (e) {}
+    later(.15).then(function () { screen.animate([0, 1, -1, .6, -.6, .3, 0].map(function (k) { return { transform: 'translate(' + k * 7 + 'px,' + k * -4 + 'px)' }; }), { duration: 500 }); });
+    await later(CLIP_LEN['fs_' + name] - .4);
+    await gone(el, .4);
+    busyIn = false;
+  }
+  window.BlotTable.hitMe = hitMe;
+  // in the prototype the bots now and then throw something at you during the game
+  var nextIn = 0;
+  setInterval(function () {
+    if (!active || !screen.classList.contains('tb-simple')) { nextIn = 0; return; }
+    var now = performance.now();
+    if (!nextIn) { nextIn = now + 20000; return; }
+    if (now > nextIn) { nextIn = now + 30000 + Math.random() * 25000; hitMe(Object.keys(FS)[Math.floor(Math.random() * 3)]); }
+  }, 1000);
   screen.querySelectorAll('[data-react-close]').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); });
   });
