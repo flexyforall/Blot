@@ -506,8 +506,13 @@
   var TRICK_SIMPLE = { bottom: [1000, 575, -.04], top: [1000, 455, .04], left: [905, 515, -.12], right: [1095, 515, .12] };
   var byId = {}, humanWait = null, trickZ = 500;
 
+  // on the simplified table the other players' cards lie face down in a small fan in front of them
+  var PILE_SIMPLE = { top: [1000, 330, Math.PI], left: [480, 470, Math.PI / 2], right: [1520, 470, -Math.PI / 2] };
   function pileAt(id, i, n) {
-    if (simple() && id !== 'bottom') return { x: SIMPLE[id][0], y: SIMPLE[id][1], rot: SEATS[id].pileRot };
+    if (simple() && id !== 'bottom') {
+      var p = PILE_SIMPLE[id], k = i - (n - 1) / 2, o = k * 20, horiz = id === 'top';
+      return { x: p[0] + (horiz ? o : 0), y: p[1] + (horiz ? 0 : o), rot: p[2] + k * .05, sc: .62 };
+    }
     var s = SEATS[id], o = (i - (n - 1) / 2) * 15, horiz = id === 'top' || id === 'bottom';
     return { x: s.pile[0] + (horiz ? o : 0), y: s.pile[1] + (horiz ? 0 : o), rot: s.pileRot + (i - (n - 1) / 2) * .03 };
   }
@@ -575,8 +580,8 @@
         var st = sequence[q], c = byId[st.card.id], t = pileAt(st.seat, count[st.seat]++, 8);
         c.z = zTop++;
         flick();
-        // on the simplified table the other players' cards go into their avatars and vanish
-        tween(c, simple() && st.seat !== 'bottom' ? { x: t.x, y: t.y, rot: t.rot, alpha: 0, sc: .5 } : { x: t.x, y: t.y, rot: t.rot }, .34);
+        // on the simplified table the other players' cards land face down in front of them
+        tween(c, t.sc ? { x: t.x, y: t.y, rot: t.rot, sc: t.sc } : { x: t.x, y: t.y, rot: t.rot }, .34);
         await wait(.075); if (!view.alive(tok)) return;
         if (sequence[q + 1] && sequence[q + 1].seat !== st.seat) { await wait(.12); if (!view.alive(tok)) return; }
       }
@@ -595,7 +600,7 @@
     },
     // an opponent's face-down cards, re-spaced after a card leaves
     layoutPile: function (seat, ids) {
-      ids.forEach(function (id, i) { var t = pileAt(seat, i, ids.length); tween(byId[id], { x: t.x, y: t.y, rot: t.rot }, .25); });
+      ids.forEach(function (id, i) { var t = pileAt(seat, i, ids.length); tween(byId[id], t.sc ? { x: t.x, y: t.y, rot: t.rot, sc: t.sc } : { x: t.x, y: t.y, rot: t.rot }, .25); });
     },
     // wait for you to tap one of the legal cards; the others are darkened
     waitHuman: function (hand, legal, hint) {
@@ -617,9 +622,18 @@
       tween(c, { flip: 1 }, .3, { ease: ease.inOut });
       return tween(c, { x: t[0], y: t[1], rot: t[2], sc: simple() ? 1.65 : 1.15, alpha: 1 }, .4, { ease: ease.out });
     },
-    // the trick slides to the winner and is gone
+    // the trick slides to the winner and is gone; on the simplified table it folds up into the
+    // Last trick slots top left (32x44 minis from x 20, 6px apart: scene = screen x 2.347)
     collect: async function (seat, ids) {
-      var f = simple() ? SIMPLE[seat] : SEATS[seat].face;
+      if (simple()) {
+        await Promise.all(ids.map(function (id, i) {
+          var c = byId[id]; c.z = trickZ++;
+          return tween(c, { x: (36 + 38 * i) * 2.347, y: 42 * 2.347, rot: 0, sc: .96, alpha: 1 }, .5, { delay: i * .07, ease: ease.inOut });
+        }));
+        cards = cards.filter(function (c) { return ids.indexOf(c.id) < 0; });
+        return;
+      }
+      var f = SEATS[seat].face;
       await Promise.all(ids.map(function (id, i) {
         return tween(byId[id], { x: f[0], y: f[1], sc: .5, alpha: 0 }, .45, { delay: i * .03, ease: ease.inOut });
       }));
@@ -1175,7 +1189,7 @@
   // fetched once when the table loads (a file:// page can't fetch, so it falls back to ?t=).
   var CLIP_LEN = { punch: 2.92, freeze: 4.04, cart: 4.04, tomato: 3.46, cigar: 4.04, snowball: 3.04, chicken: 3.5, violin: 4.04, flag: 4.04 };
   var clipBlob = {}, clipSound = {};
-  Object.keys(CLIP_LEN).forEach(preloadClip);
+  Object.keys(CLIP_LEN).forEach(function (n) { preloadClip(n); });
   function preloadClip(n, noPicture, noSound) {
     var url = 'assets/table/throw/anim/' + n;
     if (!noPicture && location.protocol !== 'file:') fetch(url + '.webp').then(function (r) { return r.ok ? r.blob() : null; }).then(function (b) { if (b) clipBlob[n] = b; }).catch(function () {});

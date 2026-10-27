@@ -683,7 +683,11 @@
 .tb-simple .tb-score { display: none; }
 .tb-simple .tb-sc { visibility: visible; animation: tb-drop .45s cubic-bezier(.34, 1.4, .64, 1) .3s both; }
 .tb-simple .tb-trick { left: 20px; top: 20px; height: 44px; }
-.tb-simple .tb-trick_empty { display: none; }
+/* before the first trick: one dark slot with a "?", the size of a mini */
+.tb-simple .tb-trick_empty { width: 32px; height: 44px; border-radius: 3px; background: rgba(0, 0, 0, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), 0 2px 4px rgba(0, 0, 0, .6); }
+.tb-simple .tb-trick_empty span { top: calc(50% - 10px); font-size: 14px; color: rgba(255, 255, 255, .55); }
+/* the trick flies into the slots on the canvas, so the minis replace it without their own entrance */
+.tb-simple .tb-mini { animation: none; }
 .tb-simple .tb-trick_cards { gap: 6px; }
 .tb-simple .tb-mini { width: 32px; height: 44px; border-radius: 2px; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .9)); }
 /* bottom: the reactions face and the glove, side by side at x 152 (no settings gear here; Escape still leaves) */
