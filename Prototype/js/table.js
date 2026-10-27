@@ -1026,7 +1026,7 @@
   var glove = screen.querySelector('[data-glove]'), tray = screen.querySelector('[data-throws]');
   var ui = screen.querySelector('.tb-ui');
   var fx = document.createElement('div'); fx.className = 'tb-fx'; ui.appendChild(fx);
-  var hint = document.createElement('div'); hint.className = 'tb-aimhint'; hint.textContent = 'Выберите, в кого бросить'; ui.appendChild(hint);
+  var hint = document.createElement('div'); hint.className = 'tb-aimhint'; hint.textContent = 'Tap a player to throw at'; ui.appendChild(hint);
   var profs = {};
   ['top', 'left', 'right', 'bottom'].forEach(function (s) { profs[s] = screen.querySelector('.tb-prof--' + s); });
   var ITEM_SRC = { glove: 'assets/table/simple/glove.webp' };
@@ -1192,10 +1192,10 @@
     // glove: a hit (crack, burst, shake) or a block (he leans out of his ring and catches it)
     glove: async function (seat, to, from, outcome) {
       var block = outcome ? outcome === 'block' : Math.random() < .5;
-      var g = item('glove', 42, from); SFX.whoosh(.6);
+      var g = item('glove', 60, from); SFX.whoosh(.6);
       if (!block) {
         await fly(g, from, to, .6, { lift: 110, spin: 540, s0: .8, s1: 1.25 });
-        SFX.punch(); burst(to); shake(seat, 7); word('БАХ!', { x: to.x, y: to.y - 52 });
+        SFX.punch(); burst(to); shake(seat, 7); word('BAM!', { x: to.x, y: to.y - 52 });
         var cr = add('tb-fx_crack', CRACK, to.x, to.y, to.w - 6);
         later(1.4).then(function () { gone(cr, .5); });
         await fly(g, to, { x: to.x + 18, y: to.y + 70 }, .6, { lift: 26, r0: 540, spin: 120, s0: 1.25, s1: 1, fade: .3 });
@@ -1218,7 +1218,6 @@
       SFX.slap(); g.style.zIndex = 2;
       waAnim(g, [{ transform: C + 'scale(1.35,.85)' }, { transform: C + 'scale(1.05)' }], .18);
       waAnim(hand, [{ transform: C + 'translateY(0) scaleX(var(--flip))' }, { transform: C + 'translateY(5px) scaleX(var(--flip))' }, { transform: C + 'translateY(0) scaleX(var(--flip))' }], .25);
-      word('Мимо!', { x: face.x, y: face.y - 66 }, 'tb-fx_word--cool');
       bubble(seat, '😏', 'emoji');
       await later(.55);
       // the toss: a flick of the hand sends it away from the table
@@ -1233,14 +1232,14 @@
     },
     // tomato: a juicy red splat on the frame that slides down and fades
     tomato: async function (seat, to, from) {
-      var t = item('tomato', 34, from); SFX.whoosh(.6);
+      var t = item('tomato', 52, from); SFX.whoosh(.6);
       await fly(t, from, to, .6, { lift: 100, spin: 300, s0: .8, s1: 1.15 });
       t.remove(); shake(seat, 4); SFX.splat();
-      spray(to, 9, '#d71c1c', 46, 6);
+      spray(to, 12, '#d71c1c', 64, 8);
       var svg = '<svg viewBox="-50 -50 100 100"><path fill="#b8100f" d="' + blob(34, 11, .55) + '"/><path fill="#e2321f" d="' + blob(24, 9, .45) + '"/>' +
         '<ellipse cx="-9" cy="-10" rx="7" ry="4" fill="#fff" opacity=".45" transform="rotate(-25 -9 -10)"/>' +
         '<g fill="#f6d35c"><ellipse cx="6" cy="4" rx="2.4" ry="1.5"/><ellipse cx="-4" cy="10" rx="2.4" ry="1.5" transform="rotate(40 -4 10)"/><ellipse cx="12" cy="-6" rx="2.4" ry="1.5" transform="rotate(-30 12 -6)"/></g></svg>';
-      var sp = add('tb-fx_splat', svg, to.x, to.y, 92);
+      var sp = add('tb-fx_splat', svg, to.x, to.y, 128);
       await waAnim(sp, [{ transform: C + 'scale(.3)', opacity: .6 }, { transform: C + 'scale(1.12)', opacity: 1, offset: .6 }, { transform: C + 'scale(1)', opacity: 1 }], .2);
       await later(.6);
       await waAnim(sp, [{ transform: C + 'scale(1)', opacity: 1 }, { transform: C + 'translateY(30px) scale(.92, 1.3)', opacity: 0 }], 1.3, { easing: 'ease-in' });
@@ -1248,8 +1247,8 @@
     },
     // cigar: lit at your own corner, a smoke ring drifts over, wraps the target's frame and spreads out
     cigar: async function (seat, to, from) {
-      var at = { x: from.x + 6, y: from.y - 58 };
-      var c = item('cigar', 46, at); SFX.pop(); SFX.sizzle();
+      var at = { x: from.x + 10, y: from.y - 70 };
+      var c = item('cigar', 64, at); SFX.pop(); SFX.sizzle();
       await waAnim(c, [{ transform: C + 'scale(0) rotate(-30deg)' }, { transform: C + 'scale(1) rotate(-12deg)' }], .3, { easing: 'cubic-bezier(.3,1.6,.5,1)' });
       for (var k = 0; k < 2; k++) {
         var puff = add('tb-fx_smoke', '', at.x - 14, at.y + 14, 10);
@@ -1267,10 +1266,10 @@
     },
     // snowball: bursts on the frame, leaves a snow cap on top; the avatar shakes and the snow falls off
     snowball: async function (seat, to, from) {
-      var s = item('snowball', 32, from); SFX.whoosh(.55);
+      var s = item('snowball', 48, from); SFX.whoosh(.55);
       await fly(s, from, to, .55, { lift: 90, spin: 220, s0: .8, s1: 1.1 });
       s.remove(); shake(seat, 5); SFX.crunch(); SFX.sparkle();
-      spray(to, 14, '#fff', 50, 6);
+      spray(to, 18, '#fff', 70, 8);
       burst(to, '#dff3ff');
       var top = { x: to.x, y: to.y - to.h / 2 + 2 };
       var cap = add('tb-fx_cap', CAP, top.x, top.y);
@@ -1286,11 +1285,11 @@
     },
     // rubber chicken: tumbles across the table, a soft bonk and a squeak, hangs upside down off the ring
     chicken: async function (seat, to, from) {
-      var ch = item('chicken', 40, from); SFX.whoosh(.85);
+      var ch = item('chicken', 62, from); SFX.whoosh(.85);
       await fly(ch, from, to, .85, { lift: 70, spin: 1080, s0: .8, s1: 1.05 });
       SFX.bonk(); SFX.squeak();
       shake(seat, 3);
-      word('ПИ-И-И!', { x: to.x + (outward(seat) || 1) * 46, y: to.y - 50 }, 'tb-fx_word--squeak');
+      word('SQUEAK!', { x: to.x + (outward(seat) || 1) * 46, y: to.y - 50 }, 'tb-fx_word--squeak');
       await waAnim(ch, [{ transform: C + 'rotate(1080deg) scale(1.3, .7)' }, { transform: C + 'rotate(1080deg) scale(1.05)' }], .16);
       // hooked on the top of the ring by its feet, head down, swinging
       var hang = { x: to.x + 14, y: to.y - to.h / 2 + 12 };
@@ -1304,8 +1303,8 @@
     },
     // mini violin: pops up beside the target and plays; a few dramatic notes and one huge cartoon tear
     violin: async function (seat, to) {
-      var side = seat === 'right' ? -1 : 1, at = { x: to.x + side * (to.w / 2 + 16), y: to.y + 4 };
-      var v = item('violin', 40, at); SFX.pop();
+      var side = seat === 'right' ? -1 : 1, at = { x: to.x + side * (to.w / 2 + 24), y: to.y + 4 };
+      var v = item('violin', 60, at); SFX.pop();
       await waAnim(v, [{ transform: C + 'scale(0) rotate(' + side * -40 + 'deg)' }, { transform: C + 'scale(1) rotate(' + side * -10 + 'deg)' }], .3, { easing: 'cubic-bezier(.3,1.6,.5,1)' });
       SFX.violin();
       v.animate([0, 1, 0, 1, 0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'rotate(' + side * (-10 + k * 8) + 'deg)' }; }), { duration: 2200, easing: 'ease-in-out' });
@@ -1316,7 +1315,7 @@
         });
       });
       await later(.6);
-      var tear = add('tb-fx_tear', TEAR, to.x + 14, to.y - 2, 30);
+      var tear = add('tb-fx_tear', TEAR, to.x + 14, to.y - 2, 42);
       await waAnim(tear, [{ transform: C + 'scale(0)' }, { transform: C + 'scale(1.15)', offset: .7 }, { transform: C + 'scale(1)' }], .35, { easing: 'ease-out' });
       SFX.drip();
       await waAnim(tear, [{ transform: C + 'translateY(0)', opacity: 1 }, { transform: C + 'translateY(26px) scale(.9, 1.1)', opacity: 1, offset: .8 }, { transform: C + 'translateY(34px) scale(.8)', opacity: 0 }], 1.4, { easing: 'ease-in' });
@@ -1325,8 +1324,8 @@
     },
     // white flag: grows over your own seat and comically droops
     flag: async function (seat, to) {
-      var at = { x: to.x + 34, y: to.y - 70 };
-      var f = item('flag', 84, at); SFX.pop();
+      var at = { x: to.x + 40, y: to.y - 80 };
+      var f = item('flag', 100, at); SFX.pop();
       f.style.transformOrigin = '30% 95%';
       await waAnim(f, [{ transform: C + 'scale(.2, 0)' }, { transform: C + 'scale(1, 1.1)', offset: .7 }, { transform: C + 'scale(1)' }], .4, { easing: 'cubic-bezier(.3,1.5,.5,1)' });
       f.animate([0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'rotate(' + k * 4 + 'deg)' }; }), { duration: 700 });
