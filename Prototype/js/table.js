@@ -1377,6 +1377,10 @@
     busyIn = false;
   }
   window.BlotTable.hitMe = hitMe;
+  // prototype: the tray's "Test on me" row plays an incoming hit right away
+  tray.querySelectorAll('[data-hitme]').forEach(function (b) {
+    b.addEventListener('click', function (e) { e.stopPropagation(); setTray(false); hitMe(b.getAttribute('data-hitme')); });
+  });
   // in the prototype the bots now and then throw something at you during the game
   var nextIn = 0;
   setInterval(function () {
