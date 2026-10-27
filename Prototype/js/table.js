@@ -1102,6 +1102,23 @@
     profs[seat].animate([0, -1, .8, -.6, .4, -.2, 0].map(function (k, i) { return { transform: 'translate(' + k * amp + 'px,' + (i % 2 ? -1 : 1) * Math.abs(k) * amp * .4 + 'px)' }; }), { duration: 450 });
     profs[seat].querySelector('.tb-prof_ring').animate([{ transform: 'scale(1)' }, { transform: 'scale(.88)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 380, easing: 'ease-out' });
   }
+  var easeIn = function (t) { return t * t; };
+  function burst(p, color) {
+    var rays = '';
+    for (var i = 0; i < 8; i++) rays += '<i style="--a:' + (i * 45 + 22) + 'deg"></i>';
+    var el = add('tb-fx_burst', rays, p.x, p.y); if (color) el.style.setProperty('--c', color);
+    later(.6).then(function () { el.remove(); });
+  }
+  // a soft, see-through puff of smoke that swells, drifts and thins out
+  function puff(p, size, life, drift, alpha) {
+    var el = add('tb-fx_smoke', '', p.x, p.y, size);
+    el.style.setProperty('--a', alpha || .4);
+    return waAnim(el, [
+      { transform: C + 'scale(.4)', opacity: 0 },
+      { transform: C + 'translate(' + drift.x * .4 + 'px,' + drift.y * .4 + 'px) scale(1)', opacity: 1, offset: .3 },
+      { transform: C + 'translate(' + drift.x + 'px,' + drift.y + 'px) scale(1.5)', opacity: 0 }
+    ], life, { easing: 'ease-out' }).then(function () { el.remove(); });
+  }
   function word(text, p, cls) {
     var el = add('tb-fx_word' + (cls ? ' ' + cls : ''), '', p.x, p.y); el.textContent = text;
     waAnim(el, [{ transform: C + 'scale(.2) rotate(-12deg)', opacity: 0 }, { transform: C + 'scale(1.15) rotate(-6deg)', opacity: 1, offset: .25 }, { transform: C + 'scale(1) rotate(-6deg)', opacity: 1, offset: .7 }, { transform: C + 'translateY(-12px) scale(1) rotate(-6deg)', opacity: 0 }], 1.1).then(function () { el.remove(); });
@@ -1137,6 +1154,9 @@
   }
   var SFX = {
     whoosh: function (d) { noise([{ f: 300, f2: 1600, d: d || .5, at: 0, q: 1.2, v: .08, att: .2 }]); },
+    punch: function () { noise([{ f: 900, d: .08, at: 0, q: .7, v: .35, type: 'lowpass' }]); tones([{ f: 140, f2: 50, d: .22, at: 0, type: 'sine', v: .35 }]); },
+    cough: function () { noise([{ f: 700, d: .14, at: 0, q: 1.4, v: .28, att: .01 }, { f: 600, d: .18, at: .2, q: 1.4, v: .22, att: .01 }]); },
+    frost: function () { noise([{ f: 6000, f2: 3000, d: .8, at: 0, q: .4, v: .06, att: .05, type: 'highpass' }]); tones([{ f: 2093, d: .4, at: .05, v: .02 }, { f: 2794, d: .5, at: .15, v: .018 }]); },
     slap: function () { noise([{ f: 2200, d: .07, at: 0, q: .8, v: .3 }]); tones([{ f: 260, f2: 120, d: .1, at: 0, type: 'sine', v: .15 }]); }
   };
 
@@ -1153,7 +1173,7 @@
   // The Higgsfield clips (assets/table/throw/anim): transparent animated WebP + their own sound.
   // Each play gets a fresh object URL so the animation starts from its first frame; they are
   // fetched once when the table loads (a file:// page can't fetch, so it falls back to ?t=).
-  var CLIP_LEN = { glove: 2.47, tomato: 3.67, cigar: 4.07, snowball: 3.07, chicken: 4.07, violin: 4.07, flag: 4.07 };
+  var CLIP_LEN = { tomato: 3.67, cigar: 4.07, snowball: 3.07, chicken: 4.07, violin: 4.07, flag: 4.07 };
   var clipBlob = {}, clipSound = {};
   Object.keys(CLIP_LEN).forEach(function (n) {
     var url = 'assets/table/throw/anim/' + n;
@@ -1176,16 +1196,24 @@
       var block = outcome ? outcome === 'block' : Math.random() < .5;
       var g = item('glove', 60, from); SFX.whoosh(.6);
       if (!block) {
-        await fly(g, from, to, .6, { lift: 110, spin: 540, s0: .8, s1: 1.25 });
-        // the clip: the glove winds up and lands the punch with a comic flash
-        g.remove();
-        var punch = clip('glove', to, 170);
-        await later(.32);
-        shake(seat, 7); word('BAM!', { x: to.x, y: to.y - 70 });
+        // a real punch: the fist points at the face the whole way, winds back, then drives in
+        var dx = to.x - from.x, dy = to.y - from.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+        var ang = Math.atan2(dy, dx) * 180 / Math.PI + 90;   // the picture's fist points up
+        var back = { x: from.x - ux * 20, y: from.y - uy * 20 }, hitAt = { x: to.x - ux * 16, y: to.y - uy * 16 };
+        g.style.transform = C + 'rotate(' + ang + 'deg) scale(.9)';
+        await fly(g, from, back, .16, { lift: 0, r0: ang, s0: .9, s1: 1 });
+        await fly(g, back, hitAt, .34, { lift: 16, r0: ang, s0: 1, s1: 1.5, ease: easeIn });
+        // impact: the glove squashes on the face, the head snaps back along the punch
+        SFX.punch(); burst(to); shake(seat, 8); word('BAM!', { x: to.x, y: to.y - 60 });
         var cr = add('tb-fx_crack', CRACK, to.x, to.y, to.w - 6);
-        fx.insertBefore(cr, fx.firstChild);   // under the glove
+        fx.insertBefore(cr, fx.firstChild);
         later(1.4).then(function () { gone(cr, .5); });
-        await punch; return;
+        profs[seat].querySelector('.tb-prof_ring').animate([{ translate: '0 0' }, { translate: ux * 9 + 'px ' + uy * 9 + 'px' }, { translate: '0 0' }], { duration: 300, easing: 'ease-out' });
+        await waAnim(g, [{ transform: C + 'rotate(' + ang + 'deg) scale(1.5)' }, { transform: C + 'rotate(' + ang + 'deg) scale(1.75, 1.15)' }, { transform: C + 'rotate(' + ang + 'deg) scale(1.5)' }], .14);
+        await later(.1);
+        // recoil and drop away
+        await fly(g, hitAt, { x: hitAt.x - ux * 34, y: hitAt.y - uy * 34 + 50 }, .55, { lift: 22, r0: ang, spin: -50, s0: 1.5, s1: 1.15, fade: .3 });
+        g.remove(); return;
       }
       var ring = profs[seat].querySelector('.tb-prof_ring img'), side = outward(seat) || 1;
       var face = { x: to.x, y: to.y + 12 }, catchAt = { x: face.x - side * 26, y: face.y + 20 };
@@ -1227,22 +1255,56 @@
     // wraps the target's frame and spreads out
     cigar: async function (seat, to, from) {
       var at = { x: from.x + 20, y: from.y - 84 };
-      var smoke = clip('cigar', at, 130, { cut: 2.9 });
-      await later(2.6);
-      var start = { x: at.x - 20, y: at.y + 20 };
-      var ring = add('tb-fx_ring', '', start.x, start.y, 30);
-      await fly(ring, start, to, 1, { lift: 40, s0: 1, s1: (to.w + 16) / 30, ease: function (t) { return 1 - Math.pow(1 - t, 2); } });
-      noise([{ f: 700, f2: 300, d: .9, at: 0, q: .7, v: .06, att: .3, type: 'lowpass' }]);
-      await waAnim(ring, [{ transform: C + 'scale(' + (to.w + 16) / 30 + ') rotate(0)', opacity: 1 }, { transform: C + 'scale(' + (to.w + 30) / 30 + ') rotate(180deg)', opacity: .9, offset: .5 }, { transform: C + 'scale(' + (to.w + 60) / 30 + ') rotate(300deg)', opacity: 0 }], 1.1, { easing: 'ease-in-out' });
-      ring.remove(); await smoke;
+      var smoke = clip('cigar', at, 130, { cut: 2.2 });
+      await later(1.7);
+      // a long drag: thin smoke streams over the table toward the target...
+      var tip = { x: at.x - 26, y: at.y + 18 };
+      for (var i = 0; i < 14; i++) {
+        (function (k) {
+          later(k * .06).then(function () {
+            var f = (k + 1) / 14, p = { x: tip.x + (to.x - tip.x) * f, y: tip.y + (to.y - tip.y) * f - 40 * Math.sin(f * Math.PI) };
+            puff(p, 26 + 30 * f, 1.4, { x: (Math.random() - .5) * 20, y: -10 - Math.random() * 14 }, .3);
+          });
+        })(i);
+      }
+      await later(.8);
+      // ...and fills the target's frame in a thick, see-through cloud; the ring goes grey and they cough
+      profs[seat].classList.add('is-smoked');
+      for (var j = 0; j < 22; j++) {
+        (function (k) {
+          later(k * .1).then(function () {
+            var a = Math.random() * Math.PI * 2, d = Math.random() * to.w * .45;
+            puff({ x: to.x + Math.cos(a) * d, y: to.y + Math.sin(a) * d * .8 }, 50 + Math.random() * 50, 2 + Math.random() * .8, { x: (Math.random() - .5) * 30, y: -12 - Math.random() * 20 }, .3);
+          });
+        })(j);
+      }
+      for (var q = 0; q < 3; q++) {
+        later(.5 + q * .8).then(function () {
+          SFX.cough(); shake(seat, 4);
+          word('*cough*', { x: to.x + (Math.random() - .5) * 40, y: to.y - 52 }, 'tb-fx_word--cough');
+        });
+      }
+      await later(3.2);
+      profs[seat].classList.remove('is-smoked');
+      await smoke;
     },
     // snowball: the clip bursts it into powder snow on the frame; the avatar shakes as it hits
     snowball: async function (seat, to, from) {
       var s = item('snowball', 48, from); SFX.whoosh(.55);
       await fly(s, from, to, .55, { lift: 90, spin: 220, s0: .8, s1: 1.55 });
       s.remove();
-      var c = clip('snowball', to, 150);
-      later(.45).then(function () { shake(seat, 5); });
+      var c = clip('snowball', to, 230);
+      await later(.45); shake(seat, 5);
+      // frozen: an icy shell over the portrait, a cold tint and a little shiver, then it thaws
+      await later(.3);
+      var ice = add('tb-fx_ice', '<svg viewBox="-40 -40 80 80"><g fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.2" stroke-linecap="round"><path d="M-30 -14 L-16 -6 L-20 6 M-16 -6 L-4 -12 M24 -24 L14 -10 L22 2 M14 -10 L2 -6 M-8 30 L-2 16 L10 22 M-2 16 L-6 4"/></g><g fill="#fff"><circle cx="-22" cy="-22" r="1.6"/><circle cx="26" cy="12" r="1.3"/><circle cx="-26" cy="18" r="1.1"/><circle cx="8" cy="-30" r="1.2"/></g></svg>', to.x, to.y, to.w + 4);
+      profs[seat].classList.add('is-frozen'); SFX.frost();
+      waAnim(ice, [{ transform: C + 'scale(.6)', opacity: 0 }, { transform: C + 'scale(1.04)', opacity: 1, offset: .7 }, { transform: C + 'scale(1)', opacity: 1 }], .35);
+      var shiver = setInterval(function () { shake(seat, 1.6); }, 700);
+      await later(3.2);
+      clearInterval(shiver);
+      profs[seat].classList.remove('is-frozen');
+      await gone(ice, .6);
       await c;
     },
     // rubber chicken: tumbles across the table, then the clip: a squash, a squeak, and it ends up hanging upside down
@@ -1254,8 +1316,16 @@
     },
     // mini violin: pops up beside the target and plays its sad tune (clip, with its own sound)
     violin: async function (seat, to) {
-      var side = seat === 'right' ? -1 : 1;
-      await clip('violin', { x: to.x + side * (to.w / 2 + 40), y: to.y - 4 }, 120, { pop: true });
+      var side = seat === 'right' ? -1 : 1, at = { x: to.x + side * (to.w / 2 + 40), y: to.y - 4 };
+      var v = clip('violin', at, 120, { pop: true });
+      // they cry, we laugh: a small laughing face beside the violin, shaking with laughter
+      await later(.5);
+      var lol = add('tb-fx_item', '<img src="assets/table/ui/react-face.webp" alt="">', at.x + side * 62, at.y + 26, 40);
+      await waAnim(lol, [{ transform: C + 'scale(0) rotate(-20deg)' }, { transform: C + 'scale(1.15) rotate(6deg)', offset: .7 }, { transform: C + 'scale(1)' }], .3);
+      lol.animate([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'translateY(' + (k ? -3 : 0) + 'px) rotate(' + (k ? 8 : -8) + 'deg)' }; }), { duration: 2400, easing: 'ease-in-out' });
+      await later(2.6);
+      gone(lol, .3);
+      await v;
     },
     // white flag: grows over your own seat, waves, then droops (clip)
     flag: async function (seat, to) {
