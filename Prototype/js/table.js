@@ -1173,7 +1173,7 @@
   // The Higgsfield clips (assets/table/throw/anim): transparent animated WebP + their own sound.
   // Each play gets a fresh object URL so the animation starts from its first frame; they are
   // fetched once when the table loads (a file:// page can't fetch, so it falls back to ?t=).
-  var CLIP_LEN = { tomato: 3.67, cigar: 4.07, snowball: 3.07, chicken: 4.07, violin: 4.07, flag: 4.07 };
+  var CLIP_LEN = { punch: 2.93, freeze: 4.07, cart: 4.07, tomato: 3.67, cigar: 4.07, snowball: 3.07, chicken: 3.53, violin: 4.07, flag: 4.07 };
   var clipBlob = {}, clipSound = {};
   Object.keys(CLIP_LEN).forEach(function (n) {
     var url = 'assets/table/throw/anim/' + n;
@@ -1184,6 +1184,8 @@
     o = o || {};
     var src = clipBlob[name] ? URL.createObjectURL(clipBlob[name]) : 'assets/table/throw/anim/' + name + '.webp?t=' + Date.now();
     var el = add('tb-fx_clip', '<img src="' + src + '" alt="">', p.x, p.y, size);
+    if (o.flip) el.firstChild.style.transform = 'scaleX(-1)';
+    if (o.turn) el.firstChild.style.transform = o.turn;
     if (o.pop) waAnim(el, [{ transform: C + 'scale(.4)', opacity: 0 }, { transform: C + 'scale(1)', opacity: 1 }], .25, { easing: 'cubic-bezier(.3,1.5,.5,1)' });
     try { var snd = clipSound[name].cloneNode(); snd.volume = .8; var pr = snd.play(); if (pr) pr.catch(function () {}); } catch (e) {}
     var len = o.cut || CLIP_LEN[name];
@@ -1203,17 +1205,18 @@
         g.style.transform = C + 'rotate(' + ang + 'deg) scale(.9)';
         await fly(g, from, back, .16, { lift: 0, r0: ang, s0: .9, s1: 1 });
         await fly(g, back, hitAt, .34, { lift: 16, r0: ang, s0: 1, s1: 1.5, ease: easeIn });
-        // impact: the glove squashes on the face, the head snaps back along the punch
-        SFX.punch(); burst(to); shake(seat, 8); word('BAM!', { x: to.x, y: to.y - 60 });
+        // impact: the Higgsfield clip takes over (flash, squash, rebound), turned to the punch direction;
+        // in the clip the fist points left and hits about 15% left of centre
+        g.remove();
+        var D = 260, dir = Math.atan2(uy, ux) * 180 / Math.PI;
+        var turn = ux <= 0 ? 'rotate(' + (dir - 180) + 'deg)' : 'rotate(' + dir + 'deg) scaleX(-1)';
+        var punch = clip('punch', { x: to.x - ux * .15 * D, y: to.y - uy * .15 * D }, D, { turn: turn });
+        shake(seat, 8); word('BAM!', { x: to.x, y: to.y - 60 });
         var cr = add('tb-fx_crack', CRACK, to.x, to.y, to.w - 6);
         fx.insertBefore(cr, fx.firstChild);
         later(1.4).then(function () { gone(cr, .5); });
         profs[seat].querySelector('.tb-prof_ring').animate([{ translate: '0 0' }, { translate: ux * 9 + 'px ' + uy * 9 + 'px' }, { translate: '0 0' }], { duration: 300, easing: 'ease-out' });
-        await waAnim(g, [{ transform: C + 'rotate(' + ang + 'deg) scale(1.5)' }, { transform: C + 'rotate(' + ang + 'deg) scale(1.75, 1.15)' }, { transform: C + 'rotate(' + ang + 'deg) scale(1.5)' }], .14);
-        await later(.1);
-        // recoil and drop away
-        await fly(g, hitAt, { x: hitAt.x - ux * 34, y: hitAt.y - uy * 34 + 50 }, .55, { lift: 22, r0: ang, spin: -50, s0: 1.5, s1: 1.15, fade: .3 });
-        g.remove(); return;
+        await punch; return;
       }
       var ring = profs[seat].querySelector('.tb-prof_ring img'), side = outward(seat) || 1;
       var face = { x: to.x, y: to.y + 12 }, catchAt = { x: face.x - side * 26, y: face.y + 20 };
@@ -1295,24 +1298,25 @@
       s.remove();
       var c = clip('snowball', to, 230);
       await later(.45); shake(seat, 5);
-      // frozen: an icy shell over the portrait, a cold tint and a little shiver, then it thaws
+      // frozen: the freeze clip grows an ice shell over the portrait (cold tint, a shiver), then it cracks
       await later(.3);
-      var ice = add('tb-fx_ice', '<svg viewBox="-40 -40 80 80"><g fill="none" stroke="rgba(255,255,255,.85)" stroke-width="1.2" stroke-linecap="round"><path d="M-30 -14 L-16 -6 L-20 6 M-16 -6 L-4 -12 M24 -24 L14 -10 L22 2 M14 -10 L2 -6 M-8 30 L-2 16 L10 22 M-2 16 L-6 4"/></g><g fill="#fff"><circle cx="-22" cy="-22" r="1.6"/><circle cx="26" cy="12" r="1.3"/><circle cx="-26" cy="18" r="1.1"/><circle cx="8" cy="-30" r="1.2"/></g></svg>', to.x, to.y, to.w + 4);
-      profs[seat].classList.add('is-frozen'); SFX.frost();
-      waAnim(ice, [{ transform: C + 'scale(.6)', opacity: 0 }, { transform: C + 'scale(1.04)', opacity: 1, offset: .7 }, { transform: C + 'scale(1)', opacity: 1 }], .35);
+      var ice = clip('freeze', to, to.w * 1.35);
+      profs[seat].classList.add('is-frozen');
       var shiver = setInterval(function () { shake(seat, 1.6); }, 700);
-      await later(3.2);
-      clearInterval(shiver);
+      await later(2.9);
+      clearInterval(shiver); shake(seat, 4);
       profs[seat].classList.remove('is-frozen');
-      await gone(ice, .6);
-      await c;
+      await ice; await c;
     },
-    // rubber chicken: tumbles across the table, then the clip: a squash, a squeak, and it ends up hanging upside down
+    // rubber chicken: tumbles across the table, then the clip: it splats onto the avatar spread-eagle
+    // and stays stuck there, squeaking and kicking its legs
     chicken: async function (seat, to, from) {
       var ch = item('chicken', 62, from); SFX.whoosh(.85);
-      await fly(ch, from, to, .85, { lift: 70, spin: 1080, s0: .8, s1: 1.9 });
-      ch.remove(); shake(seat, 3);
-      await clip('chicken', to, 140);
+      await fly(ch, from, to, .85, { lift: 70, spin: 1080, s0: .8, s1: 1.25 });
+      ch.remove();
+      var c = clip('chicken', to, 150);
+      later(.25).then(function () { shake(seat, 4); });
+      await c;
     },
     // mini violin: pops up beside the target and plays its sad tune (clip, with its own sound)
     violin: async function (seat, to) {
@@ -1326,6 +1330,29 @@
       await later(2.6);
       gone(lol, .3);
       await v;
+    },
+    // manure cart: rolls across the table to the player, bumping along, then tips it all over them (clip)
+    cart: async function (seat, to, from) {
+      var flip = to.x > from.x + 20;   // the picture faces left
+      // it stops just above the player: in the clip the pile lands about 20% below the cart
+      var start = { x: from.x + 40, y: from.y - 40 }, stop = { x: to.x, y: to.y - 34 };
+      var c = item('cart', 72, start);
+      noise([{ f: 160, d: 1.5, at: 0, q: .8, v: .16, att: .1, type: 'lowpass' }]);
+      await new Promise(function (res) {
+        var t0 = performance.now(), dur = 1500;
+        (function step(now) {
+          var t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          var bump = Math.abs(Math.sin(t * 22)) * 4 * (1 - t * .5), wob = Math.sin(t * 22) * 4;
+          c.style.left = start.x + (stop.x - start.x) * e + 'px';
+          c.style.top = start.y + (stop.y - start.y) * e - bump + 'px';
+          c.style.transform = C + 'rotate(' + wob + 'deg) scale(' + (.85 + .4 * e) + ')' + (flip ? ' scaleX(-1)' : '');
+          if (t < 1) requestAnimationFrame(step); else res();
+        })(t0);
+      });
+      c.remove();
+      var dump = clip('cart', stop, 170, { flip: flip });
+      later(1.6).then(function () { shake(seat, 5); });
+      await dump;
     },
     // white flag: grows over your own seat, waves, then droops (clip)
     flag: async function (seat, to) {
