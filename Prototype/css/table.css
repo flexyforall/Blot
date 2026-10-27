@@ -746,3 +746,4 @@
 .tb-fx_burst i { position: absolute; left: -2.5px; top: -14px; width: 5px; height: 28px; border-radius: 3px; background: linear-gradient(#fff, var(--c)); animation: tb-ray .45s ease-out forwards; }
 @keyframes tb-flash { from { transform: scale(.3); opacity: 1; } to { transform: scale(1.4); opacity: 0; } }
 @keyframes tb-ray { from { transform: rotate(var(--a)) translateY(-20px) scaleY(1); opacity: 1; } to { transform: rotate(var(--a)) translateY(-64px) scaleY(.3); opacity: 0; } }
+.tb-fx_emoji { font-size: 34px; line-height: 1; filter: drop-shadow(0 3px 5px rgba(0, 0, 0, .5)); }

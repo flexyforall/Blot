@@ -1318,9 +1318,9 @@
     violin: async function (seat, to) {
       var side = seat === 'right' ? -1 : 1, at = { x: to.x + side * (to.w / 2 + 40), y: to.y - 4 };
       var v = clip('violin', at, 120, { pop: true });
-      // they cry, we laugh: a small laughing face beside the violin, shaking with laughter
+      // they cry, we laugh: a plain 😂 beside the violin, shaking with laughter
       await later(.5);
-      var lol = add('tb-fx_item', '<img src="assets/table/ui/react-face.webp" alt="">', at.x + side * 62, at.y + 26, 40);
+      var lol = add('tb-fx_emoji', '', at.x + side * 62, at.y + 26); lol.textContent = '😂';
       await waAnim(lol, [{ transform: C + 'scale(0) rotate(-20deg)' }, { transform: C + 'scale(1.15) rotate(6deg)', offset: .7 }, { transform: C + 'scale(1)' }], .3);
       lol.animate([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'translateY(' + (k ? -3 : 0) + 'px) rotate(' + (k ? 8 : -8) + 'deg)' }; }), { duration: 2400, easing: 'ease-in-out' });
       await later(2.6);
