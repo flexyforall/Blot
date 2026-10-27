@@ -507,7 +507,7 @@
   var byId = {}, humanWait = null, trickZ = 500;
 
   // on the simplified table the other players' cards lie face down in a small fan in front of them
-  var PILE_SIMPLE = { top: [1000, 330, Math.PI], left: [480, 470, Math.PI / 2], right: [1520, 470, -Math.PI / 2] };
+  var PILE_SIMPLE = { top: [1000, 40, Math.PI], left: [95, 434, Math.PI / 2], right: [1905, 434, -Math.PI / 2] };
   function pileAt(id, i, n) {
     if (simple() && id !== 'bottom') {
       var p = PILE_SIMPLE[id], k = i - (n - 1) / 2, o = k * 20, horiz = id === 'top';
@@ -1338,13 +1338,6 @@
     violin: async function (seat, to) {
       var side = seat === 'right' ? -1 : 1, at = { x: to.x + side * (to.w / 2 + 40), y: to.y - 4 };
       var v = clip('violin', at, 120, { pop: true });
-      // they cry, we laugh: a plain 😂 beside the violin, shaking with laughter
-      await later(.5);
-      var lol = add('tb-fx_emoji', '', at.x + side * 62, at.y + 26); lol.textContent = '😂';
-      await waAnim(lol, [{ transform: C + 'scale(0) rotate(-20deg)' }, { transform: C + 'scale(1.15) rotate(6deg)', offset: .7 }, { transform: C + 'scale(1)' }], .3);
-      lol.animate([0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'translateY(' + (k ? -3 : 0) + 'px) rotate(' + (k ? 8 : -8) + 'deg)' }; }), { duration: 2400, easing: 'ease-in-out' });
-      await later(2.6);
-      gone(lol, .3);
       await v;
     },
     // manure cart: pops up right over the player and tips it all onto them (clip)
@@ -1373,7 +1366,7 @@
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
   CLIP_LEN.fs_tomato = 3.29; CLIP_LEN.fs_chicken = 5.04; CLIP_LEN.fs_glove = 5.04; CLIP_LEN.fs_cart = 4.04;
   // the glove combo is too big for one file at full quality, so it plays as parts back to back
-  var FS_PARTS = { glove: [['fs_glove_1', 2.5], ['fs_glove_2', .833], ['fs_glove_3', .833], ['fs_glove_4', .875]] };
+  var FS_PARTS = { glove: [['fs_glove_1', 2.5], ['fs_glove_2', 2.542]] };
   ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(function (n) { preloadClip(n, !!FS_PARTS[n.slice(3)]); });
   FS_PARTS.glove.forEach(function (p) { preloadClip(p[0], false, true); });
   var busyIn = false;
