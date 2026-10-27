@@ -1331,26 +1331,11 @@
       gone(lol, .3);
       await v;
     },
-    // manure cart: rolls across the table to the player, bumping along, then tips it all over them (clip)
-    cart: async function (seat, to, from) {
-      var flip = to.x > from.x + 20;   // the picture faces left
-      // it stops just above the player: in the clip the pile lands about 20% below the cart
-      var start = { x: from.x + 40, y: from.y - 40 }, stop = { x: to.x, y: to.y - 34 };
-      var c = item('cart', 72, start);
-      noise([{ f: 160, d: 1.5, at: 0, q: .8, v: .16, att: .1, type: 'lowpass' }]);
-      await new Promise(function (res) {
-        var t0 = performance.now(), dur = 1500;
-        (function step(now) {
-          var t = Math.min(1, (now - t0) / dur), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-          var bump = Math.abs(Math.sin(t * 22)) * 4 * (1 - t * .5), wob = Math.sin(t * 22) * 4;
-          c.style.left = start.x + (stop.x - start.x) * e + 'px';
-          c.style.top = start.y + (stop.y - start.y) * e - bump + 'px';
-          c.style.transform = C + 'rotate(' + wob + 'deg) scale(' + (.85 + .4 * e) + ')' + (flip ? ' scaleX(-1)' : '');
-          if (t < 1) requestAnimationFrame(step); else res();
-        })(t0);
-      });
-      c.remove();
-      var dump = clip('cart', stop, 170, { flip: flip });
+    // manure cart: pops up right over the player and tips it all onto them (clip)
+    cart: async function (seat, to) {
+      var flip = seat === 'right';   // the picture faces left; over the right seat it faces the table
+      var at = { x: to.x, y: to.y - 34 };   // in the clip the pile lands about 20% below the cart
+      var dump = clip('cart', at, 170, { flip: flip, pop: true });
       later(1.6).then(function () { shake(seat, 5); });
       await dump;
     },
