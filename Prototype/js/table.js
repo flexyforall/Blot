@@ -1357,7 +1357,7 @@
   // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
   var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken', cart: 'a cart of manure' };
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
-  CLIP_LEN.fs_tomato = 3.29; CLIP_LEN.fs_chicken = 5.04; CLIP_LEN.fs_glove = 5.04; CLIP_LEN.fs_cart = 5.04;
+  CLIP_LEN.fs_tomato = 3.29; CLIP_LEN.fs_chicken = 5.04; CLIP_LEN.fs_glove = 5.04; CLIP_LEN.fs_cart = 4.04;
   // the glove combo is too big for one file at full quality, so it plays as parts back to back
   var FS_PARTS = { glove: [['fs_glove_1', 2.5], ['fs_glove_2', .833], ['fs_glove_3', .833], ['fs_glove_4', .875]] };
   ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(function (n) { preloadClip(n, !!FS_PARTS[n.slice(3)]); });
