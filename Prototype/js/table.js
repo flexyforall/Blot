@@ -1018,8 +1018,331 @@
   });
   var handBtn = screen.querySelector('[data-hand-toggle]');
   if (handBtn) handBtn.addEventListener('click', function (e) { e.stopPropagation(); closePops(null); setHandHidden(!handHidden); });
-  var glove = screen.querySelector('[data-glove]');
-  if (glove) glove.addEventListener('click', function (e) { e.stopPropagation(); closePops(null); bubble('bottom', '🥊', 'emoji'); });
+  // ---------- Throwables: the glove opens a tray; pick an item, then tap an opponent ----------
+  // Everything is drawn in code over the table (a .tb-fx layer above the HUD). The glove rolls hit or
+  // block at the throw; the others each play their own gag on the target's profile. The cigar and the
+  // violin start at a seat instead of flying, and the white flag goes up over your own seat.
+  // BlotTable.throwAt(item, seat, outcome) runs one directly (outcome: 'hit' | 'block' for the glove).
+  var glove = screen.querySelector('[data-glove]'), tray = screen.querySelector('[data-throws]');
+  var ui = screen.querySelector('.tb-ui');
+  var fx = document.createElement('div'); fx.className = 'tb-fx'; ui.appendChild(fx);
+  var hint = document.createElement('div'); hint.className = 'tb-aimhint'; hint.textContent = 'Выберите, в кого бросить'; ui.appendChild(hint);
+  var profs = {};
+  ['top', 'left', 'right', 'bottom'].forEach(function (s) { profs[s] = screen.querySelector('.tb-prof--' + s); });
+  var ITEM_SRC = { glove: 'assets/table/simple/glove.webp' };
+  var NO_TARGET = { flag: true };
+  var armed = null;
+
+  function setTray(open) { tray.hidden = !open; glove.setAttribute('aria-expanded', String(open)); }
+  function arm(name) { armed = name; screen.classList.toggle('tb-aiming', !!name); }
+  if (glove) glove.addEventListener('click', function (e) {
+    e.stopPropagation(); closePops(null);
+    if (armed) { arm(null); return; }
+    setTray(tray.hidden);
+  });
+  tray.querySelectorAll('[data-throw]').forEach(function (b) {
+    b.addEventListener('click', function (e) {
+      e.stopPropagation(); setTray(false);
+      var name = b.getAttribute('data-throw');
+      if (NO_TARGET[name]) throwAt(name, 'bottom'); else arm(name);
+    });
+  });
+  ['top', 'left', 'right'].forEach(function (seat) {
+    profs[seat].addEventListener('click', function (e) {
+      if (!armed) return;
+      e.stopPropagation(); var name = armed; arm(null); throwAt(name, seat);
+    });
+  });
+  screen.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-throws], [data-glove]')) setTray(false);
+    if (armed && !e.target.closest('.tb-prof')) arm(null);
+  });
+
+  // geometry, in the UI's own px (the device frame may be scaled)
+  function fxBox(el) {
+    var u = ui.getBoundingClientRect(), r = el.getBoundingClientRect(), k = u.width / ui.offsetWidth;
+    return { x: (r.left - u.left + r.width / 2) / k, y: (r.top - u.top + r.height / 2) / k, w: r.width / k, h: r.height / k };
+  }
+  function ringOf(seat) { return fxBox(profs[seat].querySelector('.tb-prof_ring')); }
+  // which way is "away from the table" for a seat
+  function outward(seat) { return seat === 'left' ? -1 : seat === 'right' ? 1 : 0; }
+
+  function add(cls, html, x, y, size) {
+    var el = document.createElement('div'); el.className = cls;
+    if (html) el.innerHTML = html;
+    el.style.left = x + 'px'; el.style.top = y + 'px';
+    if (size) { el.style.width = size + 'px'; el.style.height = size + 'px'; }
+    fx.appendChild(el); return el;
+  }
+  function item(name, size, p) { return add('tb-fx_item', '<img src="' + (ITEM_SRC[name] || 'assets/table/throw/' + name + '.webp') + '" alt="">', p.x, p.y, size); }
+  function later(s) { return new Promise(function (r) { setTimeout(r, s * 1000); }); }
+  function waAnim(el, frames, dur, opt) { return el.animate(frames, Object.assign({ duration: dur * 1000, fill: 'forwards', easing: 'ease-out' }, opt || {})).finished; }
+  function gone(el, dur) { return waAnim(el, [{ opacity: 1 }, { opacity: 0 }], dur || .3).then(function () { el.remove(); }); }
+  var C = 'translate(-50%, -50%) ';
+
+  // a flight along a parabola: lift is how high the arc rises above the straight line
+  function fly(el, a, b, dur, o) {
+    o = o || {};
+    return new Promise(function (res) {
+      var t0 = performance.now(), lift = o.lift == null ? 90 : o.lift, s0 = o.s0 || 1, s1 = o.s1 || s0;
+      (function step(now) {
+        var t = Math.min(1, (now - t0) / (dur * 1000)), e = o.ease ? o.ease(t) : t;
+        el.style.left = a.x + (b.x - a.x) * e + 'px';
+        el.style.top = a.y + (b.y - a.y) * e - lift * 4 * e * (1 - e) + 'px';
+        el.style.transform = C + 'rotate(' + ((o.r0 || 0) + (o.spin || 0) * e) + 'deg) scale(' + (s0 + (s1 - s0) * e) + ')';
+        if (o.fade) el.style.opacity = String(1 - Math.max(0, (t - o.fade) / (1 - o.fade)));
+        if (t < 1) requestAnimationFrame(step); else res();
+      })(t0);
+    });
+  }
+  var easeIn = function (t) { return t * t; };
+
+  // the target's profile: a jolt of the whole card and a punch of the ring
+  function shake(seat, amp) {
+    amp = amp || 6;
+    profs[seat].animate([0, -1, .8, -.6, .4, -.2, 0].map(function (k, i) { return { transform: 'translate(' + k * amp + 'px,' + (i % 2 ? -1 : 1) * Math.abs(k) * amp * .4 + 'px)' }; }), { duration: 450 });
+    profs[seat].querySelector('.tb-prof_ring').animate([{ transform: 'scale(1)' }, { transform: 'scale(.88)' }, { transform: 'scale(1.06)' }, { transform: 'scale(1)' }], { duration: 380, easing: 'ease-out' });
+  }
+  function burst(p, color) {
+    var rays = '';
+    for (var i = 0; i < 8; i++) rays += '<i style="--a:' + (i * 45 + 22) + 'deg"></i>';
+    var el = add('tb-fx_burst', rays, p.x, p.y); if (color) el.style.setProperty('--c', color);
+    later(.6).then(function () { el.remove(); });
+  }
+  function word(text, p, cls) {
+    var el = add('tb-fx_word' + (cls ? ' ' + cls : ''), '', p.x, p.y); el.textContent = text;
+    waAnim(el, [{ transform: C + 'scale(.2) rotate(-12deg)', opacity: 0 }, { transform: C + 'scale(1.15) rotate(-6deg)', opacity: 1, offset: .25 }, { transform: C + 'scale(1) rotate(-6deg)', opacity: 1, offset: .7 }, { transform: C + 'translateY(-12px) scale(1) rotate(-6deg)', opacity: 0 }], 1.1).then(function () { el.remove(); });
+  }
+  // droplets / flakes: little dots that fly out and fall
+  function spray(p, n, color, spread, size) {
+    for (var i = 0; i < n; i++) {
+      var d = add('tb-fx_dot', '', p.x, p.y, (size || 5) * (.6 + Math.random() * .8)); d.style.background = color;
+      var a = Math.random() * Math.PI * 2, r = spread * (.5 + Math.random() * .6);
+      fly(d, p, { x: p.x + Math.cos(a) * r, y: p.y + Math.sin(a) * r * .6 + 26 }, .55 + Math.random() * .3, { lift: 18 + Math.random() * 16, fade: .5 }).then(function (el) { return function () { el.remove(); }; }(d));
+    }
+  }
+  // a blob outline (for the tomato splat), radius wobbling around r
+  function blob(r, n, wob) {
+    var pts = [];
+    for (var i = 0; i < n; i++) { var a = i / n * Math.PI * 2, k = r * (1 - wob / 2 + Math.random() * wob); pts.push([Math.cos(a) * k, Math.sin(a) * k]); }
+    var d = '';
+    pts.forEach(function (p, i) { var q = pts[(i + 1) % n], m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2]; d += (i ? ' Q' : 'M' + ((p[0] + pts[n - 1][0]) / 2).toFixed(1) + ' ' + ((p[1] + pts[n - 1][1]) / 2).toFixed(1) + ' Q') + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ' ' + m[0].toFixed(1) + ' ' + m[1].toFixed(1); });
+    return d + 'Z';
+  }
+  // tiny synth sounds (no files): the chicken squeak and the sad violin
+  var actx = null;
+  function tones(seq) {
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+    var t = actx.currentTime + .02;
+    seq.forEach(function (n) {
+      var o = actx.createOscillator(), g = actx.createGain();
+      o.type = n.type || 'triangle'; o.frequency.setValueAtTime(n.f, t + n.at);
+      if (n.f2) o.frequency.exponentialRampToValueAtTime(n.f2, t + n.at + n.d);
+      if (n.vib) { var l = actx.createOscillator(), lg = actx.createGain(); l.frequency.value = 6; lg.gain.value = n.vib; l.connect(lg); lg.connect(o.frequency); l.start(t + n.at); l.stop(t + n.at + n.d + .05); }
+      g.gain.setValueAtTime(0, t + n.at); g.gain.linearRampToValueAtTime(n.v || .08, t + n.at + .03); g.gain.exponentialRampToValueAtTime(.001, t + n.at + n.d);
+      o.connect(g); g.connect(actx.destination); o.start(t + n.at); o.stop(t + n.at + n.d + .05);
+    });
+  }
+
+  // filtered noise bursts: whooshes, splats, crunches, thumps
+  function noise(seq) {
+    try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return; }
+    var t = actx.currentTime + .02;
+    seq.forEach(function (n) {
+      var len = Math.ceil(actx.sampleRate * n.d), buf = actx.createBuffer(1, len, actx.sampleRate), ch = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) ch[i] = Math.random() * 2 - 1;
+      var src = actx.createBufferSource(), f = actx.createBiquadFilter(), g = actx.createGain();
+      src.buffer = buf; f.type = n.type || 'bandpass'; f.Q.value = n.q || 1;
+      f.frequency.setValueAtTime(n.f, t + n.at); if (n.f2) f.frequency.exponentialRampToValueAtTime(n.f2, t + n.at + n.d);
+      g.gain.setValueAtTime(0, t + n.at); g.gain.linearRampToValueAtTime(n.v || .2, t + n.at + (n.att || .01)); g.gain.exponentialRampToValueAtTime(.001, t + n.at + n.d);
+      src.connect(f); f.connect(g); g.connect(actx.destination); src.start(t + n.at); src.stop(t + n.at + n.d + .02);
+    });
+  }
+  var SFX = {
+    whoosh: function (d) { noise([{ f: 300, f2: 1600, d: d || .5, at: 0, q: 1.2, v: .08, att: .2 }]); },
+    punch: function () { noise([{ f: 900, d: .08, at: 0, q: .7, v: .35, type: 'lowpass' }]); tones([{ f: 140, f2: 50, d: .22, at: 0, type: 'sine', v: .35 }]); },
+    slap: function () { noise([{ f: 2200, d: .07, at: 0, q: .8, v: .3 }]); tones([{ f: 260, f2: 120, d: .1, at: 0, type: 'sine', v: .15 }]); },
+    splat: function () { noise([{ f: 1200, f2: 200, d: .3, at: 0, q: 2, v: .35, type: 'lowpass' }, { f: 500, f2: 150, d: .45, at: .05, q: 4, v: .15 }]); },
+    crunch: function () { noise([{ f: 3000, f2: 1200, d: .18, at: 0, q: .6, v: .25, type: 'highpass' }, { f: 900, d: .25, at: .02, q: 1, v: .15 }]); },
+    sparkle: function () { tones([{ f: 1760, d: .25, at: .05, v: .03 }, { f: 2349, d: .3, at: .12, v: .025 }, { f: 2637, d: .35, at: .2, v: .02 }]); },
+    squeak: function () { tones([{ f: 900, f2: 2000, d: .1, at: 0, type: 'square', v: .05 }, { f: 1900, f2: 650, d: .28, at: .1, type: 'square', v: .05 }]); },
+    bonk: function () { tones([{ f: 420, f2: 260, d: .12, at: 0, type: 'sine', v: .2 }]); },
+    puff: function () { noise([{ f: 500, f2: 250, d: .5, at: 0, q: .8, v: .12, att: .08, type: 'lowpass' }]); },
+    sizzle: function () { noise([{ f: 5000, d: .5, at: 0, q: .5, v: .04, att: .1, type: 'highpass' }]); },
+    pop: function () { tones([{ f: 500, f2: 1100, d: .08, at: 0, type: 'sine', v: .15 }]); },
+    violin: function () { tones([{ f: 659, d: .42, at: 0, type: 'sawtooth', v: .035, vib: 6 }, { f: 622, d: .42, at: .42, type: 'sawtooth', v: .035, vib: 6 }, { f: 587, d: .42, at: .84, type: 'sawtooth', v: .035, vib: 6 }, { f: 554, d: 1, at: 1.26, type: 'sawtooth', v: .035, vib: 8 }]); },
+    drip: function () { tones([{ f: 1200, f2: 500, d: .12, at: 0, type: 'sine', v: .12 }]); },
+    // the sad trombone "wah wah wah wahhh"
+    trombone: function () { tones([{ f: 294, f2: 277, d: .32, at: 0, type: 'sawtooth', v: .04 }, { f: 277, f2: 262, d: .32, at: .34, type: 'sawtooth', v: .04 }, { f: 262, f2: 247, d: .32, at: .68, type: 'sawtooth', v: .04 }, { f: 247, f2: 233, d: .9, at: 1.02, type: 'sawtooth', v: .045, vib: 5 }]); }
+  };
+
+  var HAND = '<svg viewBox="0 0 40 48"><g fill="#e8b48c" stroke="#6b3f26" stroke-width="1.4" stroke-linejoin="round">' +
+    '<rect x="6" y="7" width="6.5" height="22" rx="3.2" transform="rotate(-9 9 29)"/><rect x="13" y="2" width="6.5" height="26" rx="3.2"/>' +
+    '<rect x="20.5" y="3" width="6.5" height="25" rx="3.2"/><rect x="28" y="8" width="6" height="21" rx="3" transform="rotate(9 31 29)"/>' +
+    '<path d="M5 30 Q4 22 10 22 L32 22 Q37 22 36 30 L35 38 Q33 46 22 46 L16 46 Q6 46 5 38 Z"/>' +
+    '<path d="M7 33 Q-1 28 1.5 22.5 Q4.5 19 8.5 25 L12 30"/></g></svg>';
+  var CRACK = '<svg viewBox="-40 -40 80 80"><g fill="none" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path stroke="rgba(0,0,0,.55)" stroke-width="3.4" d="M0 0 L-8 -14 L-6 -24 L-14 -38 M-8 -14 L-21 -12 M0 0 L14 -8 L22 -5 L36 -16 M14 -8 L18 5 M0 0 L6 16 L2 27 L10 40 M0 0 L-14 8 L-26 5 L-38 14 M-14 8 L-12 20"/>' +
+    '<path stroke="#fff" stroke-width="1.5" d="M0 0 L-8 -14 L-6 -24 L-14 -38 M-8 -14 L-21 -12 M0 0 L14 -8 L22 -5 L36 -16 M14 -8 L18 5 M0 0 L6 16 L2 27 L10 40 M0 0 L-14 8 L-26 5 L-38 14 M-14 8 L-12 20"/></g></svg>';
+  var CAP = '<svg viewBox="-44 -22 88 36"><path fill="#fff" stroke="#bfe0ff" stroke-width="1.5" d="M-40 8 C-42 -6 -26 -14 -12 -12 C-6 -21 12 -21 18 -11 C32 -14 44 -4 40 8 C33 3 26 12 16 6 C9 13 -2 11 -6 5 C-14 13 -28 11 -40 8Z"/><ellipse cx="-10" cy="-8" rx="10" ry="3" fill="#e6f4ff"/></svg>';
+  var TEAR = '<svg viewBox="-14 -22 28 36"><defs><linearGradient id="tbTear" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bff0ff"/><stop offset="1" stop-color="#3a9dff"/></linearGradient></defs>' +
+    '<path fill="url(#tbTear)" stroke="#1d6fd6" stroke-width="1.6" d="M0 -20 C6 -8 12 -1 12 7 A12 12 0 1 1 -12 7 C-12 -1 -6 -8 0 -20Z"/><ellipse cx="-4.5" cy="4" rx="3" ry="5" fill="#fff" opacity=".8"/></svg>';
+
+  var THROWS = {
+    // glove: a hit (crack, burst, shake) or a block (he leans out of his ring and catches it)
+    glove: async function (seat, to, from, outcome) {
+      var block = outcome ? outcome === 'block' : Math.random() < .5;
+      var g = item('glove', 42, from); SFX.whoosh(.6);
+      if (!block) {
+        await fly(g, from, to, .6, { lift: 110, spin: 540, s0: .8, s1: 1.25 });
+        SFX.punch(); burst(to); shake(seat, 7); word('БАХ!', { x: to.x, y: to.y - 52 });
+        var cr = add('tb-fx_crack', CRACK, to.x, to.y, to.w - 6);
+        later(1.4).then(function () { gone(cr, .5); });
+        await fly(g, to, { x: to.x + 18, y: to.y + 70 }, .6, { lift: 26, r0: 540, spin: 120, s0: 1.25, s1: 1, fade: .3 });
+        g.remove(); return;
+      }
+      var ring = profs[seat].querySelector('.tb-prof_ring img'), side = outward(seat) || 1;
+      var face = { x: to.x, y: to.y + 12 }, catchAt = { x: face.x - side * 26, y: face.y + 20 };
+      var flight = fly(g, from, catchAt, .62, { lift: 100, spin: 540, s0: .8, s1: 1.15 });
+      await later(.12);
+      // he leans out of the frame: a copy of the portrait comes forward, bigger, over the HUD
+      var out = add('tb-fx_catch', '<img src="' + ring.getAttribute('src') + '" alt="">', to.x, to.y, ring.getBoundingClientRect().width / (ui.getBoundingClientRect().width / ui.offsetWidth));
+      ring.style.opacity = '0';
+      waAnim(out, [{ transform: C + 'scale(1)', top: to.y + 'px' }, { transform: C + 'scale(1.45)', top: face.y + 'px' }], .3, { easing: 'cubic-bezier(.3,1.4,.5,1)' });
+      await later(.16);
+      var hand = add('tb-fx_hand', HAND, catchAt.x, catchAt.y);
+      hand.style.setProperty('--flip', -side);
+      waAnim(hand, [{ transform: C + 'translateY(36px) scaleX(var(--flip)) rotate(-10deg)', opacity: 0 }, { transform: C + 'translateY(0) scaleX(var(--flip)) rotate(0)', opacity: 1 }], .26, { easing: 'cubic-bezier(.3,1.5,.5,1)' });
+      await flight;
+      // caught: a squash, both wobble together, a smirk
+      SFX.slap(); g.style.zIndex = 2;
+      waAnim(g, [{ transform: C + 'scale(1.35,.85)' }, { transform: C + 'scale(1.05)' }], .18);
+      waAnim(hand, [{ transform: C + 'translateY(0) scaleX(var(--flip))' }, { transform: C + 'translateY(5px) scaleX(var(--flip))' }, { transform: C + 'translateY(0) scaleX(var(--flip))' }], .25);
+      word('Мимо!', { x: face.x, y: face.y - 66 }, 'tb-fx_word--cool');
+      bubble(seat, '😏', 'emoji');
+      await later(.55);
+      // the toss: a flick of the hand sends it away from the table
+      waAnim(hand, [{ transform: C + 'scaleX(var(--flip)) rotate(0)' }, { transform: C + 'scaleX(var(--flip)) rotate(' + (-side * 28) + 'deg) translateY(-6px)' }], .15);
+      SFX.whoosh(.45);
+      var away = fly(g, catchAt, { x: catchAt.x + side * 200, y: catchAt.y - 150 }, .55, { lift: 30, spin: side * 720, s0: 1.05, s1: .7, fade: .4 });
+      await later(.15);
+      gone(hand, .2);
+      await waAnim(out, [{ transform: C + 'scale(1.45)', top: face.y + 'px' }, { transform: C + 'scale(1)', top: to.y + 'px' }], .3, { easing: 'ease-in-out' });
+      ring.style.opacity = ''; out.remove();
+      await away; g.remove();
+    },
+    // tomato: a juicy red splat on the frame that slides down and fades
+    tomato: async function (seat, to, from) {
+      var t = item('tomato', 34, from); SFX.whoosh(.6);
+      await fly(t, from, to, .6, { lift: 100, spin: 300, s0: .8, s1: 1.15 });
+      t.remove(); shake(seat, 4); SFX.splat();
+      spray(to, 9, '#d71c1c', 46, 6);
+      var svg = '<svg viewBox="-50 -50 100 100"><path fill="#b8100f" d="' + blob(34, 11, .55) + '"/><path fill="#e2321f" d="' + blob(24, 9, .45) + '"/>' +
+        '<ellipse cx="-9" cy="-10" rx="7" ry="4" fill="#fff" opacity=".45" transform="rotate(-25 -9 -10)"/>' +
+        '<g fill="#f6d35c"><ellipse cx="6" cy="4" rx="2.4" ry="1.5"/><ellipse cx="-4" cy="10" rx="2.4" ry="1.5" transform="rotate(40 -4 10)"/><ellipse cx="12" cy="-6" rx="2.4" ry="1.5" transform="rotate(-30 12 -6)"/></g></svg>';
+      var sp = add('tb-fx_splat', svg, to.x, to.y, 92);
+      await waAnim(sp, [{ transform: C + 'scale(.3)', opacity: .6 }, { transform: C + 'scale(1.12)', opacity: 1, offset: .6 }, { transform: C + 'scale(1)', opacity: 1 }], .2);
+      await later(.6);
+      await waAnim(sp, [{ transform: C + 'scale(1)', opacity: 1 }, { transform: C + 'translateY(30px) scale(.92, 1.3)', opacity: 0 }], 1.3, { easing: 'ease-in' });
+      sp.remove();
+    },
+    // cigar: lit at your own corner, a smoke ring drifts over, wraps the target's frame and spreads out
+    cigar: async function (seat, to, from) {
+      var at = { x: from.x + 6, y: from.y - 58 };
+      var c = item('cigar', 46, at); SFX.pop(); SFX.sizzle();
+      await waAnim(c, [{ transform: C + 'scale(0) rotate(-30deg)' }, { transform: C + 'scale(1) rotate(-12deg)' }], .3, { easing: 'cubic-bezier(.3,1.6,.5,1)' });
+      for (var k = 0; k < 2; k++) {
+        var puff = add('tb-fx_smoke', '', at.x - 14, at.y + 14, 10);
+        fly(puff, { x: at.x - 14, y: at.y + 14 }, { x: at.x - 20, y: at.y - 14 }, .7, { lift: 0, s0: 1, s1: 2.5, fade: .2 }).then(function (el) { return function () { el.remove(); }; }(puff));
+        await later(.25);
+      }
+      SFX.puff();
+      var ring = add('tb-fx_ring', '', at.x - 10, at.y, 14);
+      await fly(ring, { x: at.x - 10, y: at.y }, to, 1.1, { lift: 40, s0: 1, s1: (to.w + 16) / 14, ease: function (t) { return 1 - Math.pow(1 - t, 2); } });
+      // round the frame, then it spreads and thins out
+      noise([{ f: 700, f2: 300, d: .9, at: 0, q: .7, v: .06, att: .3, type: 'lowpass' }]);
+      await waAnim(ring, [{ transform: C + 'scale(' + (to.w + 16) / 14 + ') rotate(0)', opacity: 1 }, { transform: C + 'scale(' + (to.w + 30) / 14 + ') rotate(180deg)', opacity: .9, offset: .5 }, { transform: C + 'scale(' + (to.w + 60) / 14 + ') rotate(300deg)', opacity: 0 }], 1.1, { easing: 'ease-in-out' });
+      ring.remove();
+      gone(c, .3);
+    },
+    // snowball: bursts on the frame, leaves a snow cap on top; the avatar shakes and the snow falls off
+    snowball: async function (seat, to, from) {
+      var s = item('snowball', 32, from); SFX.whoosh(.55);
+      await fly(s, from, to, .55, { lift: 90, spin: 220, s0: .8, s1: 1.1 });
+      s.remove(); shake(seat, 5); SFX.crunch(); SFX.sparkle();
+      spray(to, 14, '#fff', 50, 6);
+      burst(to, '#dff3ff');
+      var top = { x: to.x, y: to.y - to.h / 2 + 2 };
+      var cap = add('tb-fx_cap', CAP, top.x, top.y);
+      await waAnim(cap, [{ transform: C + 'scale(.4, .2)', opacity: 0 }, { transform: C + 'scale(1.08, 1)', opacity: 1 }, { transform: C + 'scale(1)', opacity: 1 }], .25);
+      await later(.7);
+      shake(seat, 3); noise([{ f: 4000, f2: 2000, d: .6, at: 0, q: .5, v: .05, att: .1, type: 'highpass' }]);
+      for (var i = 0; i < 12; i++) {
+        var f = add('tb-fx_dot', '', top.x + (Math.random() - .5) * 64, top.y + 4, 3 + Math.random() * 4); f.style.background = '#fff';
+        fly(f, { x: parseFloat(f.style.left), y: top.y + 4 }, { x: parseFloat(f.style.left) + (Math.random() - .5) * 20, y: top.y + 90 + Math.random() * 30 }, .7 + Math.random() * .4, { lift: -10, ease: easeIn, fade: .5 }).then(function (el) { return function () { el.remove(); }; }(f));
+      }
+      await waAnim(cap, [{ transform: C + 'translateY(0)', opacity: 1 }, { transform: C + 'translateY(30px) scale(.9)', opacity: 0 }], .7, { easing: 'ease-in' });
+      cap.remove();
+    },
+    // rubber chicken: tumbles across the table, a soft bonk and a squeak, hangs upside down off the ring
+    chicken: async function (seat, to, from) {
+      var ch = item('chicken', 40, from); SFX.whoosh(.85);
+      await fly(ch, from, to, .85, { lift: 70, spin: 1080, s0: .8, s1: 1.05 });
+      SFX.bonk(); SFX.squeak();
+      shake(seat, 3);
+      word('ПИ-И-И!', { x: to.x + (outward(seat) || 1) * 46, y: to.y - 50 }, 'tb-fx_word--squeak');
+      await waAnim(ch, [{ transform: C + 'rotate(1080deg) scale(1.3, .7)' }, { transform: C + 'rotate(1080deg) scale(1.05)' }], .16);
+      // hooked on the top of the ring by its feet, head down, swinging
+      var hang = { x: to.x + 14, y: to.y - to.h / 2 + 12 };
+      await fly(ch, to, hang, .25, { lift: 20, r0: 0, spin: 180, s0: 1.05, s1: 1 });
+      ch.style.transformOrigin = '50% 0';
+      await waAnim(ch, [-18, 14, -9, 6, -3, 0].map(function (a) { return { transform: C + 'rotate(' + (180 + a) + 'deg)' }; }), 1.3, { easing: 'ease-in-out' });
+      ch.style.transformOrigin = '';
+      SFX.squeak();
+      await fly(ch, hang, { x: hang.x + 8, y: hang.y + 110 }, .5, { lift: 0, r0: 180, spin: 40, ease: easeIn, fade: .5 });
+      ch.remove();
+    },
+    // mini violin: pops up beside the target and plays; a few dramatic notes and one huge cartoon tear
+    violin: async function (seat, to) {
+      var side = seat === 'right' ? -1 : 1, at = { x: to.x + side * (to.w / 2 + 16), y: to.y + 4 };
+      var v = item('violin', 40, at); SFX.pop();
+      await waAnim(v, [{ transform: C + 'scale(0) rotate(' + side * -40 + 'deg)' }, { transform: C + 'scale(1) rotate(' + side * -10 + 'deg)' }], .3, { easing: 'cubic-bezier(.3,1.6,.5,1)' });
+      SFX.violin();
+      v.animate([0, 1, 0, 1, 0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'rotate(' + side * (-10 + k * 8) + 'deg)' }; }), { duration: 2200, easing: 'ease-in-out' });
+      ['♪', '♫', '♪', '♫'].forEach(function (n, i) {
+        later(.1 + i * .42).then(function () {
+          var el = add('tb-fx_note', '', at.x, at.y - 14); el.textContent = n;
+          fly(el, { x: at.x, y: at.y - 14 }, { x: at.x + side * (10 + i * 6), y: at.y - 64 }, 1.1, { lift: 0, s0: .7, s1: 1.2, fade: .55 }).then(function () { el.remove(); });
+        });
+      });
+      await later(.6);
+      var tear = add('tb-fx_tear', TEAR, to.x + 14, to.y - 2, 30);
+      await waAnim(tear, [{ transform: C + 'scale(0)' }, { transform: C + 'scale(1.15)', offset: .7 }, { transform: C + 'scale(1)' }], .35, { easing: 'ease-out' });
+      SFX.drip();
+      await waAnim(tear, [{ transform: C + 'translateY(0)', opacity: 1 }, { transform: C + 'translateY(26px) scale(.9, 1.1)', opacity: 1, offset: .8 }, { transform: C + 'translateY(34px) scale(.8)', opacity: 0 }], 1.4, { easing: 'ease-in' });
+      tear.remove();
+      await gone(v, .3);
+    },
+    // white flag: grows over your own seat and comically droops
+    flag: async function (seat, to) {
+      var at = { x: to.x + 34, y: to.y - 70 };
+      var f = item('flag', 84, at); SFX.pop();
+      f.style.transformOrigin = '30% 95%';
+      await waAnim(f, [{ transform: C + 'scale(.2, 0)' }, { transform: C + 'scale(1, 1.1)', offset: .7 }, { transform: C + 'scale(1)' }], .4, { easing: 'cubic-bezier(.3,1.5,.5,1)' });
+      f.animate([0, 1, 0, 1, 0].map(function (k) { return { transform: C + 'rotate(' + k * 4 + 'deg)' }; }), { duration: 700 });
+      await later(.8);
+      // and it gives up: the stick flops over and the cloth hangs
+      SFX.trombone();
+      await waAnim(f, [{ transform: C + 'rotate(0)' }, { transform: C + 'rotate(38deg) scale(.95, .9)', offset: .6 }, { transform: C + 'rotate(30deg) scale(.95, .9)', offset: .8 }, { transform: C + 'rotate(34deg) scale(.95, .9)' }], .8, { easing: 'ease-in' });
+      await later(.9);
+      await gone(f, .4);
+    }
+  };
+  function throwAt(name, seat, outcome) {
+    if (!THROWS[name] || !profs[seat]) return Promise.resolve();
+    return THROWS[name](seat, ringOf(seat), fxBox(glove), outcome);
+  }
+  window.BlotTable.throwAt = throwAt;
   screen.querySelectorAll('[data-react-close]').forEach(function (b) {
     b.addEventListener('click', function () { closePops(null); });
   });

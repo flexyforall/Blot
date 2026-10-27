@@ -328,9 +328,11 @@
               <img src="assets/table/ui/react-face.webp" alt="">
             </button>
             <!-- the simplified table (Figma 2293:4821): a boxing glove beside the reactions -->
-            <button class="tb-btn tb-btn--lg tb-btn--glove" type="button" data-glove aria-label="Удар перчаткой">
+            <button class="tb-btn tb-btn--lg tb-btn--glove" type="button" data-glove aria-label="Бросить в игрока" aria-expanded="false">
               <img src="assets/table/simple/glove.webp" alt="">
             </button>
+            <!-- throwables: pick one, then tap an opponent (the flag needs no target) -->
+            <div class="tb-pop tb-throws" data-throws hidden><button type="button" data-throw="glove"><img src="assets/table/simple/glove.webp" alt=""><span>Бах!</span></button><button type="button" data-throw="tomato"><img src="assets/table/throw/tomato.webp" alt=""><span>Буу!</span></button><button type="button" data-throw="cigar"><img src="assets/table/throw/cigar.webp" alt=""><span>Всё под контролем</span></button><button type="button" data-throw="snowball"><img src="assets/table/throw/snowball.webp" alt=""><span>Остынь!</span></button><button type="button" data-throw="chicken"><img src="assets/table/throw/chicken.webp" alt=""><span>Ну ты дал!</span></button><button type="button" data-throw="violin"><img src="assets/table/throw/violin.webp" alt=""><span>Очень жаль…</span></button><button type="button" data-throw="flag"><img src="assets/table/throw/flag.webp" alt=""><span>Твоя взяла</span></button></div>
           </div>
 
           <!-- right of your hand, level with the icons on the left: hide / show your cards -->
