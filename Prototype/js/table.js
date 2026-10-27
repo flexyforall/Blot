@@ -1356,7 +1356,7 @@
   // covers the screen: the tomato smears over the glass, the glove cracks it, the chicken slaps on and slides off.
   var FS = { tomato: 'a tomato', glove: 'a punch', chicken: 'a rubber chicken', cart: 'a cart of manure' };
   var NAMES = { top: 'GarikAv', left: 'HasmikG', right: 'Vazgen1972' };
-  CLIP_LEN.fs_tomato = 3.27; CLIP_LEN.fs_chicken = 3.4; CLIP_LEN.fs_glove = 3.33; CLIP_LEN.fs_cart = 4.07;
+  CLIP_LEN.fs_tomato = 3.27; CLIP_LEN.fs_chicken = 3.4; CLIP_LEN.fs_glove = 3.33; CLIP_LEN.fs_cart = 4.08;
   ['fs_tomato', 'fs_glove', 'fs_chicken', 'fs_cart'].forEach(preloadClip);
   var busyIn = false;
   async function hitMe(name, from) {
