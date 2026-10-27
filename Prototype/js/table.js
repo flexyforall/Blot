@@ -79,27 +79,9 @@
   // the simplified in-play table (Figma 2289:3981) the camera zooms into once everyone is seated
   var simpleBg = new Image(); simpleBg.src = A + 'simple/bg.webp';
   var simpleTable = new Image(); simpleTable.src = A + 'simple/table.webp';
-  // the in-play table after the filmed zoom is the clip's own last frame (storm + gold oval, 2x), laid
-  // exactly where the clip ends, so the hand-over has no seam; a stretched copy fills the thin edges
-  var storm = new Image(); storm.src = A + 'simple/storm.webp';
-  function stormReady() { return storm.complete && storm.naturalWidth > 0; }
-  function drawStorm() {
-    ctx.drawImage(storm, 0, 0, W, H);
-    ctx.drawImage(storm, ZOOM_END.x, ZOOM_END.y, ZOOM_END.w, ZOOM_END.w * storm.naturalHeight / storm.naturalWidth);
-  }
   // where the avatars sit on the simplified table: cards are dealt to them and taken back to them
   var SIMPLE = { top: [1000, 164], left: [282, 434], right: [1718, 434], bottom: [1000, 1000] };
   function simple() { return S.simple > .5; }
-  // The zoom itself, filmed (Higgsfield, Seedance 2.5, made in a separate chat: the players glide back
-  // out of the frame in their chairs, the room dissolves, the table grows over a crimson storm):
-  // played over the room when everyone is seated; if it cannot play, the drawn zoom below is used.
-  var zoomVid = document.createElement('video'), zoomReady = false;
-  zoomVid.muted = true; zoomVid.playsInline = true; zoomVid.setAttribute('playsinline', ''); zoomVid.preload = 'auto';
-  zoomVid.src = A + (zoomVid.canPlayType('video/webm; codecs="vp9"') ? 'zoom.webm' : 'zoom.mp4');
-  zoomVid.addEventListener('canplaythrough', function () { zoomReady = true; });
-  // where the clip's first frame matches the seated room, and where its last frame's table matches the
-  // simplified one (scene units; measured on the clip's first and last frames)
-  var ZOOM_START = { w: 2040, x: -10, y: 10 }, ZOOM_END = { w: 2063, x: 6, y: 3 };
   // card pictures: see faceAt / backAt
 
   function feathered(r, core) {
@@ -341,7 +323,7 @@
   function stopFire() { if (fireGain) fireGain.gain.setTargetAtTime(0, ac.currentTime, .3); }
 
   // ---------- Scene state ----------
-  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, push: 0, blur: 0, simple: 0, vid: 0 };
+  var S = { black: 1, amb: .55, lamps: 0, table: .35, zoom: 0, push: 0, blur: 0, simple: 0 };
   var MOVE_EVERY = 15;   // seconds between one character's gesture and the next one's
   var moves = { on: false, next: 0, last: null };
   var cards = [], particles = [], clock = 0, nextSmoke = 2;
@@ -374,8 +356,7 @@
       s.light = 0; s.idle = false; s.ring = 0; s.next = 0;
       resetPose(s);
     });
-    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0; S.vid = 0;
-    try { zoomVid.pause(); zoomVid.currentTime = 0; } catch (e) {}
+    S.black = 1; S.amb = .55; S.lamps = 0; S.table = .35; S.zoom = 0; S.push = 0; S.blur = 0; S.simple = 0;
     screen.classList.remove('tb-zoom', 'tb-simple');
     cards = []; particles = []; hover = null; humanWait = null; handHidden = false;
     screen.classList.remove('tb-has-hand', 'tb-hand-up');
@@ -504,36 +485,15 @@
   async function simplify(ok) {
     moves.on = false;
     screen.classList.add('tb-zoom');
-    if (!reduced && zoomReady && await zoomFilm(ok)) return;
-    if (!ok()) return;
     if (reduced) { S.zoom = S.push = 1; S.simple = 1; screen.classList.add('tb-simple'); await wait(.3); return; }
-    // (scene time runs at SPEED 2: these are about 1.8s of zoom in real time)
-    tween(S, { zoom: 1 }, 3.6, { ease: ease.inOut });
-    tween(S, { push: 1 }, 2.4, { delay: .2, ease: ease.inOut });
-    tween(S, { blur: 1 }, 2, { delay: .7, ease: ease.inOut });
-    tween(S, { simple: 1 }, 2, { delay: 1.7, ease: ease.inOut });
-    await wait(3.4); if (!ok()) return;
-    screen.classList.add('tb-simple');
-    await wait(2.2);
-  }
-
-  // The filmed zoom: the clip fades in over the live room (its first frame is the same room), plays,
-  // and its last frame (the simplified table) hands over to the drawn simplified table.
-  async function zoomFilm(ok) {
-    try { zoomVid.currentTime = 0; zoomVid.playbackRate = 1.5; await zoomVid.play(); } catch (e) { return false; }
-    if (!ok()) return true;
-    tween(S, { vid: 1 }, .5, { ease: ease.inOut });
-    await new Promise(function (res) {
-      var done = function () { zoomVid.removeEventListener('ended', done); res(); };
-      zoomVid.addEventListener('ended', done);
-      setTimeout(done, 7000);
-    });
-    if (!ok()) return true;
-    // the in-play table is the clip's last frame in the same place: switch with no fade
-    S.zoom = 1; S.push = 1; S.simple = 1; S.vid = 0;
+    // (scene time runs at SPEED 2: these are about 1.4s of zoom in real time)
+    tween(S, { zoom: 1 }, 2.8, { ease: ease.inOut });
+    tween(S, { push: 1 }, 1.9, { delay: .15, ease: ease.inOut });
+    tween(S, { blur: 1 }, 1.6, { delay: .5, ease: ease.inOut });
+    tween(S, { simple: 1 }, 1.6, { delay: 1.3, ease: ease.inOut });
+    await wait(2.7); if (!ok()) return;
     screen.classList.add('tb-simple');
     await wait(1.6);
-    return true;
   }
 
   // ---------- View API for the game controller ----------
@@ -827,35 +787,16 @@
     ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
     }
-    // The filmed zoom over the room. The clip (Seedance, 21:9) is wider than the scene: it starts laid
-    // over the room (ZOOM_START) and eases into ZOOM_END, where the gold oval of its last frame lies on
-    // the simplified table; the stretched storm fills in round its edges.
-    if (S.vid > 0 && zoomVid.readyState >= 2) {
-      var vw = zoomVid.videoWidth, vh = zoomVid.videoHeight;
-      var p = Math.min(1, zoomVid.currentTime / (zoomVid.duration || 5)), e = p * p * (3 - 2 * p);
-      var c0 = ZOOM_START.w / vw, x0 = ZOOM_START.x, y0 = ZOOM_START.y, c1 = ZOOM_END.w / vw;
-      var vs = c0 + (c1 - c0) * e, vx = x0 + (ZOOM_END.x - x0) * e, vy = y0 + (ZOOM_END.y - y0) * e;
-      ctx.save();
-      if (e > 0 && stormReady()) { ctx.globalAlpha = S.vid * e; ctx.drawImage(storm, 0, 0, W, H); }
-      ctx.globalAlpha = S.vid; ctx.drawImage(zoomVid, vx, vy, vw * vs, vh * vs);
-      ctx.restore();
-    }
     // the simplified table fades in on the same zoom, so the two tables stay on top of each other
     if (S.simple > 0) {
       ctx.save(); ctx.globalAlpha = S.simple;
       var bk = 1 + .08 * (1 - z);
       ctx.translate(1000, 460); ctx.scale(bk, bk); ctx.translate(-1000, -460);
+      if (simpleBg.complete && simpleBg.naturalWidth) ctx.drawImage(simpleBg, 0, 0, W, H);
+      ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
       var tk = k / 1.34;
-      if (stormReady()) {
-        ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
-        ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
-        drawStorm();
-      } else {
-        if (simpleBg.complete && simpleBg.naturalWidth) ctx.drawImage(simpleBg, 0, 0, W, H);
-        ctx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); ctx.globalAlpha = S.simple;
-        ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
-        if (simpleTable.complete && simpleTable.naturalWidth) ctx.drawImage(simpleTable, 0, 0, W, H);
-      }
+      ctx.translate(1000, 460); ctx.scale(tk, tk); ctx.translate(-1000, -460);
+      if (simpleTable.complete && simpleTable.naturalWidth) ctx.drawImage(simpleTable, 0, 0, W, H);
       ctx.restore();
     }
 
@@ -889,7 +830,7 @@
   }
 
   // ---------- Boot: cut the sprites and paint the deck once the art has loaded ----------
-  var art = [img, room, simpleBg, simpleTable, storm, backArt].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
+  var art = [img, room, simpleBg, simpleTable, backArt].concat(Object.keys(faceArt).map(function (k) { return faceArt[k]; }));
   var booting = Promise.all(art.map(function (im) { return im.decode().catch(function () {}); })).then(function () {
     IDS.forEach(function (id) {
       var s = SEATS[id];
@@ -904,7 +845,6 @@
   playBtn.addEventListener('click', function () {
     audio();
     IDS.forEach(function (id) { SEATS[id].vid.load(); });
-    zoomVid.load();
     // let the "into battle" hit land, then cut to the table
     setTimeout(function () { window.BlotNav.show('table'); }, 700);
   });
@@ -925,7 +865,6 @@
       if (window.BlotGame) window.BlotGame.stop();
       cancelAnimationFrame(raf);
       IDS.forEach(function (id) { try { SEATS[id].vid.pause(); } catch (err) {} });
-      try { zoomVid.pause(); } catch (err) {}
       stopFire();
     }
   });
