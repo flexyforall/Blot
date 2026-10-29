@@ -610,6 +610,8 @@
         c.base = ok ? 18 : 0;
         tween(c, { dim: ok ? 0 : 1, lift: c.base }, .2);
       });
+      // your move has a time limit (js/states.js): when it runs out a legal card is played for you
+      if (window.BlotStates) window.BlotStates.myTurn(function () { if (humanWait) { autoPlayCard(); window.BlotStates.timedOut(); } });
       return new Promise(function (res) { humanWait = { legal: legal, res: res, hand: hand, hint: hint }; });
     },
     playCard: function (seat, id) {
@@ -646,6 +648,7 @@
     // whoever has to act gets their nameplate lit; null for nobody
     turn: function (seat) {
       screen.querySelectorAll('[data-plate]').forEach(function (el) { el.classList.toggle('is-turn', el.getAttribute('data-plate') === seat); });
+      if (window.BlotStates) window.BlotStates.turn(seat);
     },
     say: function (seat, text, kind) { bubble(seat, text, kind); },
     chime: function () { chime(); },
@@ -919,7 +922,7 @@
 
   // ---------- HUD ----------
   // The settings gear is gone from the design; Escape still goes back to the stage select (prototype shortcut).
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && active) window.BlotNav.show('play'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && active) window.BlotStates.confirmLeave(); });
 
   // Score and last trick. A new game starts at 0 : 0 with the "?" slot; the game logic
   // (js/blot-rules.js) will call these as tricks are taken.
@@ -1411,5 +1414,5 @@
   });
   screen.addEventListener('click', function (e) { if (!e.target.closest('.tb-bottom, .tb-react_panel')) closePops(null); });
   // the settings gear leaves the table (there is no settings screen in the prototype)
-  screen.querySelector('[data-table-exit]').addEventListener('click', function () { window.BlotNav.show('play'); });
+  screen.querySelector('[data-table-exit]').addEventListener('click', function () { window.BlotStates.confirmLeave(); });
 })();

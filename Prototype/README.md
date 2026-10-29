@@ -45,6 +45,17 @@ Plain HTML, CSS and JS, no build step. Open `index.html` in a browser.
    Fireplace crackle and card flicks are synthesised with Web Audio; the room music carries on.
    For testing, `BlotGame.autoplay = true` lets the bots play your seat too.
 
+## States (js/states.js, css/states.css)
+
+- End screens: ROUND WON / VICTORY ribbons (vector, rendered to WebP) next to the Figma ROUND LOST / GAME LOST;
+  the game end now shows the game screen with the real final score.
+- Leaving the table (gear or Escape) asks first.
+- Move timer: a ring runs down round the acting player's avatar; your own move has a bar above your hand,
+  red for the last 5 seconds, and a card is played for you when it runs out.
+- Connection lost (reconnecting overlay), an opponent leaving (greyed avatar, BOT badge).
+- Stage select: a tap on a locked room says when it opens; Play without enough chips offers Get chips.
+- The shortcut bar under the phone previews each state.
+
 ## Game rules
 
 `js/blot-rules.js` is the Blot rules engine from `Blot_Rules_EN.pdf`, as plain functions on

@@ -198,7 +198,8 @@
     game: { hots: [[663, 65, 40, 40, 'exit'], [169, 325, 145, 32, 'analysis'], [326, 317, 201, 40, 'again'], [539, 325, 145, 32, null]] },
     analysis: { hots: [[166, 89, 38, 38, 'game'], [369, 308, 301, 38, 'review']] }
   };
-  function showShots(start) {
+  // won: the ribbon says ROUND WON / VICTORY instead of ROUND LOST / GAME LOST
+  function showShots(start, won) {
     var box = screen.querySelector('[data-shots]'), layer = box.querySelector('[data-shot-layer]');
     var panel = box.querySelector('[data-shot-panel]'), ribbon = box.querySelector('[data-shot-ribbon]'), shine = box.querySelector('[data-shot-shine]');
     var hots = box.querySelector('[data-shot-hots]');
@@ -206,12 +207,13 @@
       function open(id) {
         var sh = SHOTS[id];
         panel.src = 'assets/table/shots/' + id + '-panel.webp';
-        ribbon.src = 'assets/table/shots/' + id + '-ribbon.webp';
-        shine.style.setProperty('--ribbon', 'url("' + new URL('assets/table/shots/' + id + '-ribbon.webp', location.href).href + '")');
+        var rib = 'assets/table/shots/' + id + (won && id !== 'analysis' ? '-won' : '') + '-ribbon.webp';
+        ribbon.src = rib;
+        shine.style.setProperty('--ribbon', 'url("' + new URL(rib, location.href).href + '")');
         hots.innerHTML = sh.hots.map(function (h) {
           return '<button class="tb-shot_hot" type="button" data-go="' + (h[4] || '') + '" style="left:' + h[0] / 8.52 + '%;top:' + h[1] / 3.93 + '%;width:' + h[2] / 8.52 + '%;height:' + h[3] / 3.93 + '%"></button>';
         }).join('');
-        countScore(id === 'game');
+        countScore(id === 'game', won);
         var first = box.hidden;
         box.hidden = false;
         if (first) { box.classList.remove('is-open'); void box.offsetWidth; box.classList.add('is-open'); }
@@ -236,11 +238,12 @@
   }
   // The final score on "Game lost": both totals run up from zero after the panel lands.
   var DESIGN_SCORE = { us: 89, them: 151 };
-  function countScore(on) {
+  function countScore(on, won) {
     var box = screen.querySelector('[data-shot-score]');
     box.hidden = !on;
     if (!on) return;
-    var fin = game && game.score.them > game.score.us ? game.score : DESIGN_SCORE;
+    var fin = game && game.score.us !== game.score.them ? game.score : DESIGN_SCORE;
+    if (fin === DESIGN_SCORE && won) fin = { us: DESIGN_SCORE.them, them: DESIGN_SCORE.us };
     box.querySelectorAll('[data-score]').forEach(function (el) {
       var to = fin[el.getAttribute('data-score')], t0 = null;
       el.textContent = '0'; el.classList.remove('is-done');
@@ -422,10 +425,10 @@
     if (fast) {
       // "Play round / game randomly": back to normal speed, then the end-of-round or end-of-game screens
       var kind = fast; fast = null; window.BlotGame.autoplay = false; window.BlotTable.setSpeed(2);
-      await showShots(kind === 'game' ? 'game' : 'round'); if (!alive()) return;
+      await showShots(kind === 'game' || over ? 'game' : 'round', over ? winner === 'us' : res.us > res.them); if (!alive()) return;
     }
     else if (window.BlotGame.autoplay) { log.push({ round: game.round, contract: contract, res: res, score: { us: game.score.us, them: game.score.them } }); await view.wait(.2); }
-    else { await showShots(); if (!alive()) return; }
+    else { await showShots(over ? 'game' : 'round', over ? winner === 'us' : res.us > res.them); if (!alive()) return; }
     await view.clear();
     if (over && winner) {
       game.score = { us: 0, them: 0 }; game.round = 0;
@@ -466,6 +469,12 @@
       fast = kind; window.BlotGame.autoplay = true; window.BlotTable.setSpeed(16);
       if (!bidEl.hidden) { var p = bidEl.querySelector('[data-bid-pass]'); if (p) p.click(); }
       window.BlotTable.autoPlayCard();
+    },
+    // shortcut bar (js/states.js): show an end screen as it looks when you win or lose
+    preview: function (k) {
+      if (k === 'won-round') showShots('round', true);
+      else if (k === 'won-game') showShots('game', true);
+      else if (k === 'lost-game') showShots('game', false);
     },
     // tests: autoplay = true lets the bots play your seat too; log has the round results
     autoplay: false,

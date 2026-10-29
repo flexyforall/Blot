@@ -1,0 +1,78 @@
+/* states.js: leave confirm, move timer, connection lost, opponent left, locked room / not enough chips.
+   Same surface as the table panels: #0d1828 -> #01152f, thin light border, Poppins. */
+
+/* ---- modal */
+.ss-modal { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; pointer-events: auto; animation: ss-fade .2s ease both; }
+.ss-modal.is-out { animation: ss-fade .2s ease reverse both; }
+.ss-modal_dim { position: absolute; inset: 0; background: rgba(0, 4, 12, .62); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+.ss-modal_box { position: relative; width: 300px; box-sizing: border-box; padding: 18px 18px 16px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 10px;
+  background: linear-gradient(180deg, #0d1828, #01152f 57.3%); box-shadow: 0 14px 36px rgba(0, 0, 0, .7); color: #fff; text-align: center;
+  animation: ss-pop .32s cubic-bezier(.34, 1.4, .64, 1) both; }
+.ss-modal_icon { width: 52px; height: 52px; margin: -4px auto 8px; border-radius: 50%; display: grid; place-items: center; color: #ffb4b4;
+  background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, .12), rgba(255, 255, 255, .02)); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .1); }
+.ss-modal_title { margin: 0; font-weight: 700; font-size: 16px; line-height: 22px; }
+.ss-modal_text { margin: 6px 0 0; font-weight: 400; font-size: 12px; line-height: 17px; color: rgba(255, 255, 255, .72); }
+.ss-modal_text b { color: #fff; font-weight: 600; }
+.ss-modal_btns { display: flex; gap: 8px; margin-top: 14px; }
+.ss-modal .ss-btn { flex: 1; height: 34px; border-radius: 5px; border: 1px solid rgba(168, 204, 255, .4); background: #000c1c; color: #fff; font: 600 12px/32px Poppins, system-ui, sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 3, 8, .4); cursor: pointer; transition: transform .12s ease, filter .15s ease; }
+.ss-modal .ss-btn:hover { filter: brightness(1.15); }
+.ss-modal .ss-btn:active { transform: scale(.95); }
+.ss-modal .ss-btn--blue { border-color: #5ca0ff; box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 2px 8px #074baa; }
+.ss-modal .ss-btn--red { border-color: rgba(255, 138, 138, .7); background: #1a0610; color: #ffd2d2; box-shadow: 0 2px 4px rgba(0, 3, 8, .4), inset 0 2px 8px rgba(170, 7, 30, .6); }
+.ss-modal .ss-btn--ghost { background: rgba(255, 255, 255, .04); }
+@keyframes ss-fade { from { opacity: 0; } }
+@keyframes ss-pop { from { opacity: 0; transform: scale(.88) translateY(8px); } }
+
+/* ---- toast, top centre */
+.ss-toast { position: absolute; left: 50%; top: 66px; z-index: 31; transform: translateX(-50%); max-width: 360px; padding: 8px 14px; border-radius: 999px;
+  background: rgba(1, 12, 30, .92); border: 1px solid rgba(92, 160, 255, .45); color: #fff; font: 500 12px/16px Poppins, system-ui, sans-serif; text-align: center;
+  white-space: nowrap; box-shadow: 0 6px 18px rgba(0, 0, 0, .55); pointer-events: none; animation: ss-toast .35s cubic-bezier(.34, 1.5, .64, 1) both; }
+.ss-toast b { font-weight: 700; color: #ffd84a; }
+.ss-toast--warn { border-color: rgba(255, 180, 60, .6); }
+.ss-toast--ok { border-color: rgba(90, 220, 120, .65); color: #c9ffd5; }
+.ss-toast--lock { border-color: rgba(255, 255, 255, .25); }
+.ss-toast.is-out { opacity: 0; transform: translate(-50%, -6px); transition: opacity .3s ease, transform .3s ease; }
+@keyframes ss-toast { from { opacity: 0; transform: translate(-50%, -10px) scale(.92); } }
+
+/* ---- move timer: a ring that empties round the avatar of whoever acts */
+.tb-prof.ss-timing .tb-prof_ring::before { content: ""; position: absolute; inset: -4px; border-radius: 50%; z-index: 2; pointer-events: none;
+  background: conic-gradient(from 0deg, #4ea0ff calc(var(--ss-left, 1) * 360deg), transparent 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px));
+  animation: ss-run var(--ss-turn, 15s) linear both; }
+.tb-prof.ss-hurry .tb-prof_ring::before { background: conic-gradient(from 0deg, #ff4d4d calc(var(--ss-left, 1) * 360deg), transparent 0); }
+.tb-prof.ss-hurry .tb-prof_ring { animation: ss-hurry .5s ease-in-out infinite alternate; }
+@property --ss-left { syntax: "<number>"; inherits: false; initial-value: 1; }
+@keyframes ss-run { from { --ss-left: 1; } to { --ss-left: 0; } }
+@keyframes ss-hurry { to { box-shadow: 0 0 0 2px #ff4d4d, 0 0 18px rgba(255, 60, 60, .8); } }
+/* your own timer: your avatar is hidden while your hand is up, so the last seconds show as a red glow along the bottom */
+.ss-my-hurry .tb-ui::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; pointer-events: none; z-index: 1;
+  background: linear-gradient(0deg, rgba(255, 40, 40, .32), transparent); animation: ss-glow .5s ease-in-out infinite alternate; }
+@keyframes ss-glow { from { opacity: .45; } }
+
+/* ---- connection lost */
+.ss-net { position: absolute; inset: 0; z-index: 32; display: grid; place-items: center; background: rgba(0, 4, 12, .7); -webkit-backdrop-filter: blur(4px) grayscale(.6); backdrop-filter: blur(4px) grayscale(.6);
+  pointer-events: auto; animation: ss-fade .25s ease both; }
+.ss-net.is-out { animation: ss-fade .25s ease reverse both; }
+.ss-net_box { text-align: center; color: #fff; }
+.ss-net_sub { margin: 4px 0 0; font-size: 11px; color: rgba(255, 255, 255, .5); }
+.ss-spin { display: block; width: 34px; height: 34px; margin: 0 auto 10px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .15); border-top-color: #4ea0ff; animation: ss-spin .8s linear infinite; }
+@keyframes ss-spin { to { transform: rotate(360deg); } }
+
+/* ---- an opponent left: greyed avatar with a BOT badge */
+.tb-prof.ss-bot .tb-prof_ring img { filter: grayscale(1) brightness(.7); }
+.ss-botbadge { position: absolute; left: 50%; top: 30px; transform: translateX(-50%); z-index: 3; padding: 1px 6px; border-radius: 4px; background: #1d2633;
+  border: 1px solid rgba(255, 255, 255, .35); color: #cfe3ff; font: 700 10px/14px Poppins, system-ui, sans-serif; letter-spacing: .06em; animation: ss-pop .3s ease both; }
+
+/* the shortcut bar now holds the state previews too */
+.dev-bar { flex-wrap: wrap; justify-content: center; width: min(960px, 96vw); }
+.dev-bar_sep { width: 1px; height: 26px; align-self: center; background: rgba(255, 255, 255, .2); }
+
+/* your own move: your avatar is hidden behind your hand, so a bar above the hand runs down instead */
+.ss-mybar { position: absolute; left: 50%; top: 300px; z-index: 4; width: 220px; height: 22px; transform: translateX(-50%); pointer-events: none; animation: ss-fade .2s ease both; }
+.ss-mybar_label { position: absolute; left: 0; right: 0; top: -17px; text-align: center; font: 600 11px/14px Poppins, system-ui, sans-serif; color: #cfe3ff; text-shadow: 0 1px 3px #000; }
+.ss-mybar_track { position: absolute; left: 0; right: 0; top: 4px; height: 6px; border-radius: 3px; background: rgba(0, 0, 0, .55); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12); overflow: hidden; }
+.ss-mybar_fill { position: absolute; inset: 0; border-radius: 3px; background: linear-gradient(90deg, #2f7dff, #6fb4ff); transform-origin: 0 50%; animation: ss-bar var(--ss-turn, 15s) linear both; }
+.ss-mybar.is-hurry .ss-mybar_fill { background: linear-gradient(90deg, #ff3b3b, #ff8a5c); }
+.ss-mybar.is-hurry .ss-mybar_label { color: #ffb4b4; }
+@keyframes ss-bar { to { transform: scaleX(0); } }
