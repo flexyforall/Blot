@@ -8,7 +8,10 @@ MEDUSA = the geisha (red kimono, oni mask, clawed gloves, fan). Red felt as in M
 
 Usage
 -----
-  Build the scene (recommended):
+  Inside Blender: Scripting tab -> Open this file -> Run Script. The open file is
+      emptied and the scene is built in it, then saved as blot_splash_v3.blend next to
+      this script (or in ~/build2_blot_splash if that folder is not writable).
+  Build the scene from a terminal:
       blender -b -P blot_splash_v3.py
       -> saves blot_splash_v3.blend next to this script; open it in Blender.
   Build + render:
@@ -39,12 +42,28 @@ argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 DO_RENDER = "--render" in argv
 DO_STILLS = DO_RENDER or "--stills" in argv
 RES_SCALE = int(argv[argv.index("--scale") + 1]) if "--scale" in argv else 100
-try:
-    _here = os.path.dirname(os.path.abspath(__file__))
-except NameError:
-    _here = ""
-if not _here or not os.path.isdir(_here) or _here.endswith(".blend"):
-    _here = os.path.join(os.path.expanduser("~"), "build2_blot_splash")
+IN_UI = not bpy.app.background     # run from Blender's Text Editor (Run Script), not blender -b -P
+
+
+def _script_dir():
+    """Folder of this script on disk, or "" if unknown or not writable."""
+    cands = []
+    try:
+        cands.append(os.path.dirname(os.path.abspath(__file__)))
+    except NameError:
+        pass
+    # In the Text Editor __file__ is the text's name, so also look at the texts loaded from disk.
+    for t in bpy.data.texts:
+        if t.filepath and os.path.basename(t.filepath).startswith("blot_splash"):
+            cands.append(os.path.dirname(bpy.path.abspath(t.filepath)))
+    for d in cands:
+        if d and os.path.isdir(d) and not d.endswith(".blend") and os.access(d, os.W_OK) \
+                and os.path.abspath(d) != os.path.abspath(os.sep):
+            return d
+    return ""
+
+
+_here = _script_dir() or os.path.join(os.path.expanduser("~"), "build2_blot_splash")
 OUT_DIR = argv[argv.index("--out") + 1] if "--out" in argv else _here
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -65,7 +84,35 @@ CARD_W, CARD_H, CARD_T = 0.09, 0.126, 0.002
 SEAT_DIST = 1.35
 
 # ---------------------------------------------------------------- reset
-bpy.ops.wm.read_factory_settings(use_empty=True)
+def wipe_current_file():
+    """Empty the open file without reloading it.
+
+    Inside the Blender UI, read_factory_settings would free this very script while it runs
+    (Blender errors out or crashes), so the data is removed by hand instead. Text blocks stay.
+    """
+    if bpy.context.object is not None and bpy.context.object.mode != "OBJECT":
+        bpy.ops.object.mode_set(mode="OBJECT")
+    sc = bpy.context.scene
+    for other in [x for x in bpy.data.scenes if x != sc]:
+        bpy.data.scenes.remove(other)
+    for c in list(sc.collection.children):
+        bpy.data.collections.remove(c)
+    for coll in (bpy.data.objects, bpy.data.meshes, bpy.data.curves, bpy.data.materials,
+                 bpy.data.lights, bpy.data.cameras, bpy.data.worlds, bpy.data.actions,
+                 bpy.data.node_groups, bpy.data.textures, bpy.data.collections):
+        bpy.data.batch_remove(list(coll))
+    bpy.data.batch_remove([im for im in bpy.data.images if im.type == "IMAGE"])
+    sc.animation_data_clear()
+    if getattr(sc, "compositing_node_group", None) is not None:   # Blender 5.x
+        sc.compositing_node_group = None
+    elif getattr(sc, "use_nodes", False):                          # Blender 4.x
+        sc.use_nodes = False
+
+
+if IN_UI or os.environ.get("BLOT_TEST_UI_RESET"):
+    wipe_current_file()
+else:
+    bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
 scene.frame_start = 1
 scene.frame_end = FRAME_END
