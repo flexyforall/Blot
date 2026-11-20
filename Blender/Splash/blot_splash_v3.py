@@ -18,6 +18,7 @@ Usage
       --render     render test frames + preview video
       --stills     render only the test frames
       --scale N    resolution percentage (default 100 = 1920x1080)
+      --samples N  EEVEE render samples (default 64; 8 is enough for a quick preview)
       --out DIR    output folder (default: folder of this script)
 
 Tested with Blender 5.1 (bpy module); written to also run on Blender 4.2+.
@@ -379,6 +380,8 @@ for attr, val in (("use_volumetric_shadows", True), ("volumetric_tile_size", "4"
         setattr(ee, attr, val)
     except (AttributeError, TypeError):
         pass
+if "--samples" in argv:                     # fewer samples for quick previews
+    ee.taa_render_samples = int(argv[argv.index("--samples") + 1])
 _vt = [i.identifier for i in scene.view_settings.bl_rna.properties["view_transform"].enum_items]
 scene.view_settings.view_transform = "AgX" if "AgX" in _vt else "Filmic"
 try:
@@ -689,7 +692,7 @@ for side in (-1, 1):
          material=M["don_suit"], parent=boss)
 boss_head = prim("sphere", "Boss_Head", loc=(0, 0.04, 1.6), scale=(0.21, 0.2, 0.22),
                  material=M["skin"], parent=boss)
-prim("sphere", "Boss_Hair", loc=(0, -0.12, 0.2), scale=(1.03, 0.92, 0.66), material=M["hair_dark"],
+prim("sphere", "Boss_Hair", loc=(0, -0.02, 0.3), scale=(1.04, 0.98, 0.62), material=M["hair_dark"],
      parent=boss_head)
 for side in (-1, 1):
     prim("cone", "Boss_Stache%d" % side, loc=(side * 0.22, 0.9, -0.3), rot=(0, side * 1.9, 0),
