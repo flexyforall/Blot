@@ -9,8 +9,8 @@ fill the frame: the video is scaled to cover and cropped at the centre, and
 the logo is centred on its letters. Width and height must be even.
 
 --shift moves the whole swirl/logo timeline later (or earlier, if negative) for a source
-whose card lands at another moment. v3 uses --shift 0.10: its frame freezes at 4.00 s with the Ace
-still in the air, before it touches the felt at 4.08 s, and the logo comes in at 4.10 s.
+whose card lands at another moment. v3 uses --shift 0.14: its frame freezes at 4.04 s with the Ace just
+above the felt, before it touches it at 4.08 s, and the logo comes in at 4.14 s.
 
 The logo is expected on a black background (black becomes transparent).
 Audio is copied from the input video and faded out at the end.
