@@ -2,11 +2,14 @@
 Blot Bazar splash: whirlpool-dissolve of the video into black + animated logo
 with a light sweep, colour shimmer and sparkles.
 
-    python3 splash_fx.py <video.mp4> <logo.png> <out.mp4> [WIDTHxHEIGHT]
+    python3 splash_fx.py <video.mp4> <logo.png> <out.mp4> [WIDTHxHEIGHT] [--shift SECONDS]
 
 Default size is 1920x1080. Other sizes (e.g. 2556x1180 for iPhone landscape)
 fill the frame: the video is scaled to cover and cropped at the centre, and
 the logo is centred on its letters. Width and height must be even.
+
+--shift moves the whole swirl/logo timeline later (or earlier, if negative) for a source
+whose card lands at another moment: v2's Ace lands at 3.75 s, v3's at 4.1 s (--shift 0.35).
 
 The logo is expected on a black background (black becomes transparent).
 Audio is copied from the input video and faded out at the end.
@@ -19,17 +22,23 @@ import sys
 import cv2
 import numpy as np
 
-SRC, LOGO, OUT = sys.argv[1:4]
-W, H = map(int, sys.argv[4].lower().split("x")) if len(sys.argv) > 4 else (1920, 1080)
+args = sys.argv[1:]
+SHIFT = 0.0
+if "--shift" in args:
+    i = args.index("--shift")
+    SHIFT = float(args[i + 1])
+    del args[i:i + 2]
+SRC, LOGO, OUT = args[:3]
+W, H = map(int, args[3].lower().split("x")) if len(args) > 3 else (1920, 1080)
 FPS = 24
 assert W % 2 == 0 and H % 2 == 0, "H.264 4:2:0 needs even width and height"
 
 # Timeline (seconds)
-SWIRL_START = 3.7     # video starts twisting as the card comes down
-FADE_START = 3.85     # video starts going dark
-FREEZE_AT = 3.9       # hold this frame (the source cuts to Medusa at 3.95)
-VIDEO_END = 4.35      # video fully gone
-LOGO_START = 4.0      # logo appears out of the whirlpool
+SWIRL_START = 3.7 + SHIFT     # video starts twisting as the card comes down
+FADE_START = 3.85 + SHIFT     # video starts going dark
+FREEZE_AT = 3.9 + SHIFT       # hold this frame (in v2 the source cuts to Medusa at 3.95)
+VIDEO_END = 4.35 + SHIFT      # video fully gone
+LOGO_START = 4.0 + SHIFT      # logo appears out of the whirlpool
 START_SCALE = 1.15    # logo appears 15% bigger and shrinks to 1.0 exactly as the swirl closes
 LOGO_FADE = 0.12      # logo fade-in, short so the shrink is visible
 SHRINK = 0.04         # then drifts down another 4% towards the end
