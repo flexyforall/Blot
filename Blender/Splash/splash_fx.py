@@ -45,6 +45,11 @@ SHRINK = 0.04         # then drifts down another 4% towards the end
 LOGO_H = int(0.62 * H)  # height of the letters at scale 1.0
 SWEEPS = (0.7, 1.9, 3.0)   # light sweeps, seconds after LOGO_START
 SWEEP_LEN = 0.55
+# Logo light. Kept low so the letters keep their own orange: the first version
+# (shimmer 0.92..1.08, inner glow 0.22, sweep 0.9) pushed the bright new logo to clipped yellow.
+SHIMMER = 0.05          # +-5% brightness wave across the letters
+INNER_GLOW = 0.04       # soft blurred glow added inside the letters
+SWEEP_GAIN = 0.6        # strength of the light sweeps
 
 rng = np.random.default_rng(3)
 
@@ -89,15 +94,14 @@ def logo_frame(T):
     rgb = logo.copy()
     # colour shimmer: slow travelling warm/bright wave across the letters
     wave = 0.5 + 0.5 * np.sin(diag / 90.0 - T * 3.2)
-    rgb = rgb * (0.92 + 0.16 * wave[..., None])
-    rgb[..., 2] += 0.05 * wave            # a touch more red/orange in the wave (BGR)
+    rgb = rgb * (1 - SHIMMER + 2 * SHIMMER * wave[..., None])
     # light sweep
     for s in SWEEPS:
         p = (T - s) / SWEEP_LEN
         if 0 <= p <= 1:
             pos = -200 + p * (lw * 0.8 + lh * 0.6 + 400)
             band = np.exp(-((diag - pos) / 55.0) ** 2) * math.sin(math.pi * p)
-            rgb += band[..., None] * np.array([0.55, 0.85, 1.0], np.float32) * 0.9
+            rgb += band[..., None] * np.array([0.55, 0.85, 1.0], np.float32) * SWEEP_GAIN
     # sparkles: little four-point stars twinkling on the letters
     for (sx, sy, t0, size) in sparkles:
         ph = ((T - t0) % 1.6) / 0.35
@@ -108,7 +112,7 @@ def logo_frame(T):
                     np.exp(-(dy / size) ** 2 - (dx / 2.2) ** 2) +
                     np.exp(-((dx ** 2 + dy ** 2) / 30.0)))
             rgb += (star * k)[..., None] * np.array([0.8, 0.95, 1.0], np.float32)
-    rgb = np.clip(rgb + inner * 0.22, 0, 1.6)
+    rgb = np.clip(rgb + inner * INNER_GLOW, 0, 1.6)
     return rgb, alpha
 
 
